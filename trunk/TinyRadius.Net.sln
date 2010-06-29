@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Net.Core", "ClassLibrary1\TinyRadius.Net.Core.csproj", "{E3577C9B-AA09-4448-9601-F3E240110F52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Console", "TinyRadius.Console\TinyRadius.Console.csproj", "{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3577C9B-AA09-4448-9601-F3E240110F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3577C9B-AA09-4448-9601-F3E240110F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3577C9B-AA09-4448-9601-F3E240110F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3577C9B-AA09-4448-9601-F3E240110F52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
