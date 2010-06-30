@@ -4,12 +4,14 @@
  * @author glanz, Matthias Wuttke
  * @version $Revision: 1.1 $
  */
-namespace TinyRadius.Util
+namespace TinyRadius.Net.Util
 {
 
-    using java.net.InetSocketAddress;
-    using ClassLibrary1.JavaHelper;
+
+
     using System;
+    using TinyRadius.Net.JavaHelper;
+    using TinyRadius.Net.Net.JavaHelper;
 
     /**
      * This class stores information about a Radius endpoint.

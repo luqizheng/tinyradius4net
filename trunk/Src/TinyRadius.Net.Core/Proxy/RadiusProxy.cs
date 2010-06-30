@@ -4,7 +4,7 @@
  * @author glanz, Matthias Wuttke
  * @version $Revision: 1.1 $
  */
-namespace TinyRadius.Proxy
+namespace TinyRadius.Net.Proxy
 {
 
     /*using java.io.ByteArrayOutputStream;
@@ -15,15 +15,20 @@ namespace TinyRadius.Proxy
     using java.net.InetSocketAddress;
     using java.net.SocketException;
     using java.util.HashMap;
-    using java.util.List;
+    using System.Collections;
     using java.util.Map;
 
     using org.apache.commons.logging.Log;
     using org.apache.commons.logging.LogFactory;*/
-    using TinyRadius.Attribute;
-    using TinyRadius.Packet;
-    using TinyRadius.Util;
+    using TinyRadius.Net.Attribute;
+    using TinyRadius.Net.Packet;
+    using TinyRadius.Net.Util;
     using System.Threading;
+    using TinyRadius.Net.JavaHelper;
+    using TinyRadius.Net.Net.JavaHelper;
+    using System;
+    using System.Collections;
+    using log4net;
 
     /**
      * This class implements a Radius Proxy that receives Radius packets
@@ -120,7 +125,7 @@ namespace TinyRadius.Proxy
          */
         public void setSocketTimeout(int socketTimeout)
         {
-            super.setSocketTimeout(socketTimeout);
+            base.setSocketTimeout(socketTimeout);
             if (proxySocket != null)
                 proxySocket.setSoTimeout(socketTimeout);
         }
@@ -183,7 +188,7 @@ namespace TinyRadius.Proxy
         protected void proxyPacketReceived(RadiusPacket packet, InetSocketAddress remote)
         {
             // retrieve my Proxy-State attribute (the last)
-            List proxyStates = packet.getAttributes(33);
+            ArrayList proxyStates = packet.getAttributes(33);
             if (proxyStates == null || proxyStates.size() == 0)
                 throw new RadiusException("Proxy packet without Proxy-State attribute");
             RadiusAttribute proxyState = (RadiusAttribute)proxyStates.get(proxyStates.size() - 1);
@@ -274,11 +279,11 @@ namespace TinyRadius.Proxy
          * without a received response.
          * Key: Proxy Index (String), Value: RadiusProxyConnection
          */
-        private Map proxyConnections = new HashMap();
+        private Hashtable proxyConnections = new Hashtable();
 
         private int proxyPort = 1814;
         private DatagramSocket proxySocket = null;
-        private static Log logger = LogFactory.getLog(typeof(RadiusProxy));
+        private static ILog logger = log4net.LogManager.GetLogger(typeof(RadiusProxy));
 
     }
 }

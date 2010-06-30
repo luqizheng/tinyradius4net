@@ -4,10 +4,12 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.2 $
  */
-namespace TinyRadius.Util
+namespace TinyRadius.Net.Util
 {
 
-    using java.io.UnsupportedEncodingException;
+    
+    using System;
+    using System.Text;
 
     /**
      * This class contains miscellaneous static utility functions.
@@ -25,11 +27,13 @@ namespace TinyRadius.Util
         {
             try
             {
-                return str.getBytes("UTF-8");
+                return Encoding.UTF8.GetBytes(str);
+
             }
-            catch (UnsupportedEncodingException uee)
+            catch (EncoderFallbackException uee)
             {
-                return str.getBytes();
+                //return str.getBytes();
+                return Encoding.Default.GetBytes(str);
             }
         }
 
@@ -43,7 +47,8 @@ namespace TinyRadius.Util
         {
             try
             {
-                return new String(utf8, "UTF-8");
+                return Encoding.UTF8.GetString(utf8);
+                //return new String(utf8, "UTF-8");
             }
             catch (UnsupportedEncodingException uee)
             {
@@ -59,15 +64,19 @@ namespace TinyRadius.Util
          */
         public static String getHexString(byte[] data)
         {
-            StringBuffer hex = new StringBuffer("0x");
+            StringBuilder hex = new StringBuilder("0x");
             if (data != null)
+            {
                 for (int i = 0; i < data.length; i++)
                 {
-                    String digit = Integer.toString(data[i] & 0x0ff, 16);
+
+                    //String digit = Integer.toString(data[i] & 0x0ff, 16);
+                    var digit = Convert.ToString(data[i], 16);
                     if (digit.length() < 2)
                         hex.append('0');
                     hex.append(digit);
                 }
+            }
             return hex.toString();
         }
 

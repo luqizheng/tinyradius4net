@@ -7,7 +7,7 @@
 namespace TinyRadius.Test
 {
 
-    using java.io.IOException;
+    using System.IO;
     using java.net.InetSocketAddress;
 
     using TinyRadius.packet.AccessRequest;

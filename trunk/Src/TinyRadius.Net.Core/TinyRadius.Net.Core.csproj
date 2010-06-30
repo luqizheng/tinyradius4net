@@ -8,8 +8,8 @@
     <ProjectGuid>{E3577C9B-AA09-4448-9601-F3E240110F52}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ClassLibrary1</RootNamespace>
-    <AssemblyName>ClassLibrary1</AssemblyName>
+    <RootNamespace>TinyRadius.Net.Net</RootNamespace>
+    <AssemblyName>TinyRadius.Net.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -48,20 +52,24 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attribute\IntegerAttribute.cs" />
-    <Compile Include="Attribute\IpAttribute.cs" />
-    <Content Include="Attribute\package.html" />
-    <Compile Include="Attribute\RadiusAttribute.cs" />
-    <Compile Include="Attribute\StringAttribute.cs" />
-    <Compile Include="Attribute\VendorSpecificAttribute.cs" />
-    <Compile Include="Dictionary\AttributeType.cs" />
-    <Compile Include="Dictionary\DefaultDictionary.cs" />
-    <Compile Include="Dictionary\Dictionary.cs" />
-    <Compile Include="Dictionary\DictionaryParser.cs" />
-    <Compile Include="Dictionary\MemoryDictionary.cs" />
-    <Content Include="Dictionary\package.html" />
-    <Compile Include="Dictionary\WritableDictionary.cs" />
+    <Compile Include="Attributes\IntegerAttribute.cs" />
+    <Compile Include="Attributes\IpAttribute.cs" />
+    <Content Include="Attributes\package.html" />
+    <Compile Include="Attributes\RadiusAttribute.cs" />
+    <Compile Include="Attributes\StringAttribute.cs" />
+    <Compile Include="Attributes\VendorSpecificAttribute.cs" />
+    <Compile Include="Dictionaries\AttributeType.cs" />
+    <Compile Include="Dictionaries\DefaultDictionary.cs" />
+    <Compile Include="Dictionaries\Dictionary.cs" />
+    <Compile Include="Dictionaries\DictionaryParser.cs" />
+    <Compile Include="Dictionaries\MemoryDictionary.cs" />
+    <Content Include="Dictionaries\package.html" />
+    <Compile Include="Dictionaries\WritableDictionary.cs" />
+    <Compile Include="JavaHelper\DatagramPacket.cs" />
+    <Compile Include="JavaHelper\DatagramSocket.cs" />
+    <Compile Include="JavaHelper\InetAddress.cs" />
     <Compile Include="JavaHelper\InetSocketAddress.cs" />
+    <Compile Include="JavaHelper\SecureRandom.cs" />
     <Compile Include="Packet\AccessRequest.cs" />
     <Compile Include="Packet\AccountingRequest.cs" />
     <Compile Include="Packet\CoaRequest.cs" />
@@ -78,7 +86,7 @@
     <Compile Include="Util\RadiusUtil.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dictionary\default_dictionary" />
+    <EmbeddedResource Include="Dictionaries\default_dictionary" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

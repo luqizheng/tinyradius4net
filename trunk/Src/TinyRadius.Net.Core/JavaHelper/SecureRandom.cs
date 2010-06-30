@@ -5,11 +5,7 @@ using System.Text;
 
 namespace TinyRadius.Net.Net.JavaHelper
 {
-    public class InetSocketAddress
+    public class SecureRandom
     {
-        public object getAddress()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

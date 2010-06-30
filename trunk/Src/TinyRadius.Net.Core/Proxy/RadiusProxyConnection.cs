@@ -4,9 +4,9 @@
  * @author glanz, Matthias Wuttke
  * @version $Revision: 1.2 $
  */
-using TinyRadius.Packet.RadiusPacket;
-using TinyRadius.Util.RadiusEndpoint;
-namespace TinyRadius.Proxy
+using TinyRadius.Net.Packet;
+using TinyRadius.Net.Util;
+namespace TinyRadius.Net.Proxy
 {
 
 

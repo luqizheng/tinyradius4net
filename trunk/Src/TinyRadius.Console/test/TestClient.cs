@@ -7,10 +7,10 @@
 namespace TinyRadius.test
 {
 
-    using TinyRadius.packet.AccessRequest;
-    using TinyRadius.packet.AccountingRequest;
-    using TinyRadius.packet.RadiusPacket;
-    using TinyRadius.util.RadiusClient;
+    using TinyRadius.Packet;
+    
+    using TinyRadius.Util;
+    using System;
 
     /**
      * Simple Radius command-line client.

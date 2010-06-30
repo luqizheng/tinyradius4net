@@ -4,11 +4,11 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.4 $
  */
-using TinyRadius.Dictionary.AttributeType;
-using TinyRadius.Util.RadiusException;
+using TinyRadius.Net.Directories;
+using TinyRadius.Net.Util;
 using System;
 
-namespace TinyRadius.Attribute
+namespace TinyRadius.Net.Attribute
 {
 
 
@@ -89,7 +89,7 @@ public class IntegerAttribute : RadiusAttribute {
 			}
 		}
 		
-		setAttributeValue(Integer.parseInt(value));
+		setAttributeValue(Convert.ToInt32(value));
 	}
 	
 	/**
