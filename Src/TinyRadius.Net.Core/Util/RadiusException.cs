@@ -5,7 +5,7 @@
  * @version $Revision: 1.2 $
  */
 using System;
-namespace TinyRadius.Util
+namespace TinyRadius.Net.Util
 {
 
     /**

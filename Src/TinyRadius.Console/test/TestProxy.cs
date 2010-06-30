@@ -7,14 +7,13 @@
 namespace TinyRadius.test
 {
 
-    using java.net.InetAddress;
+    /*using java.net.InetAddress;
     using java.net.InetSocketAddress;
-    using java.net.UnknownHostException;
+    using java.net.UnknownHostException;*/
 
-    using TinyRadius.packet.AccountingRequest;
-    using TinyRadius.packet.RadiusPacket;
-    using TinyRadius.proxy.RadiusProxy;
-    using TinyRadius.util.RadiusEndpoint;
+
+    using TinyRadius.Proxy;
+    using TinyRadius.Util;
 
     /**
      * Test proxy server.
@@ -30,19 +29,23 @@ namespace TinyRadius.test
     {
 
         public RadiusEndpoint getProxyServer(RadiusPacket packet,
-                RadiusEndpoint client) {
-		// always proxy
-		try {
-			InetAddress address = InetAddress.getByAddress(new byte[]{127,0,0,1});
-			int port = 10000;
-			if (packet instanceof AccountingRequest)
-				port = 10001;
-			return new RadiusEndpoint(new InetSocketAddress(address, port), "testing123");
-		} catch (UnknownHostException uhe) {
-			uhe.printStackTrace();
-			return null;
-		}
-	}
+                RadiusEndpoint client)
+        {
+            // always proxy
+            try
+            {
+                InetAddress address = InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 });
+                int port = 10000;
+                if (typeof(AccountingRequest).IsInstanceOfType(packet))
+                    port = 10001;
+                return new RadiusEndpoint(new InetSocketAddress(address, port), "testing123");
+            }
+            catch (UnknownHostException uhe)
+            {
+                uhe.printStackTrace();
+                return null;
+            }
+        }
 
         public String getSharedSecret(InetSocketAddress client)
         {

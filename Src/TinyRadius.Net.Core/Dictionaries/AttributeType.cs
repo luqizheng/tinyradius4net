@@ -8,15 +8,17 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.3 $
  */
-namespace TinyRadius.Dictionary
+using TinyRadius.Net.Attribute;
+using System;
+using System.Collections;
+namespace TinyRadius.Net.Directories
 {
 
     /*using java.util.HashMap;
     using java.util.Iterator;
     using java.util.Map;
     */
-    using TinyRadius.Attribute.RadiusAttribute;
-    using System;
+
 
     /**
      * Represents a Radius attribute type.
@@ -69,7 +71,7 @@ namespace TinyRadius.Dictionary
         public void setTypeCode(int code)
         {
             if (code < 1 || code > 255)
-                throw new IllegalArgumentException("code out of bounds");
+                throw new ArgumentException("code out of bounds");
             this.typeCode = code;
         }
 
@@ -89,7 +91,7 @@ namespace TinyRadius.Dictionary
         public void setName(String name)
         {
             if (name == null || name.length() == 0)
-                throw new IllegalArgumentException("name is empty");
+                throw new ArgumentException("name is empty");
             this.name = name;
         }
 
@@ -110,9 +112,9 @@ namespace TinyRadius.Dictionary
         public void setAttributeClass(Type type)
         {
             if (type == null)
-                throw new NullPointerException("type is null");
+                throw new ArgumentNullException("type is null");
             if (typeof(RadiusAttribute) != type)
-                throw new IllegalArgumentException("type is not a RadiusAttribute descendant");
+                throw new ArgumentException("type is not a RadiusAttribute descendant");
             this.attributeClass = type;
         }
 
@@ -155,10 +157,10 @@ namespace TinyRadius.Dictionary
          * @param value string value
          * @return Integer or null
          */
-        public Integer getEnumeration(String value)
+        public int getEnumeration(String value)
         {
             if (value == null || value.length() == 0)
-                throw new IllegalArgumentException("value is empty");
+                throw new ArgumentException("value is empty");
             if (enumeration == null)
                 return null;
             for (Iterator i = enumeration.entrySet().iterator(); i.hasNext(); )
@@ -178,7 +180,7 @@ namespace TinyRadius.Dictionary
         public void addEnumerationValue(int num, String name)
         {
             if (name == null || name.length() == 0)
-                throw new IllegalArgumentException("name is empty");
+                throw new ArgumentException("name is empty");
             if (enumeration == null)
                 enumeration = new HashMap();
             enumeration.put(new Integer(num), name);
@@ -204,7 +206,7 @@ namespace TinyRadius.Dictionary
         private int typeCode;
         private String name;
         private Type attributeClass;
-        private Map enumeration = null;
+        private Hashtable enumeration = null;
 
     }
 }

@@ -5,11 +5,7 @@ using System.Text;
 
 namespace TinyRadius.Net.Net.JavaHelper
 {
-    public class InetSocketAddress
+    public class DatagramPacket
     {
-        public object getAddress()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

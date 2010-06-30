@@ -5,7 +5,9 @@
  * @version $Revision: 1.1 $
  */
 using System.IO;
-namespace TinyRadius.dictionary
+using TinyRadius.Net.Directories;
+using System;
+namespace TinyRadius.Net.Directories
 {
 /**
  * The default dictionary is a singleton object containing
@@ -21,7 +23,8 @@ public class DefaultDictionary: MemoryDictionary
 	 * Returns the singleton instance of this object.
 	 * @return DefaultDictionary instance
 	 */
-	public static Dictionary getDefaultDictionary() {
+    public static IWritableDictionary getDefaultDictionary()
+    {
 		return instance;
 	}
 	
@@ -31,14 +34,14 @@ public class DefaultDictionary: MemoryDictionary
 	 */
 	private DefaultDictionary() 
     {
-        try 
+        /*try 
         {
     		InputStream source = DefaultDictionary.class.getClassLoader().getResourceAsStream(DICTIONARY_RESOURCE);
 
 			DictionaryParser .parseDictionary(source, instance);
 		} catch (IOException e) {
 			throw new RuntimeException("default dictionary unavailable", e);
-		}
+		}*/
 	}
 	
 	private const String DICTIONARY_RESOURCE = "tinyradius/dictionary/default_dictionary";
@@ -47,7 +50,7 @@ public class DefaultDictionary: MemoryDictionary
 	 * Creates the singleton instance of this object
 	 * and parses the classpath ressource.
 	 */
-    public static readonly DefaultDictionary Instance=new DefaultDictionary()
+    public static readonly DefaultDictionary Instance = new DefaultDictionary();
     
 }
 

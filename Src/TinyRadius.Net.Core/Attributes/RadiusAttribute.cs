@@ -5,14 +5,11 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.4 $
  */
-using TinyRadius.Dictionary.AttributeType;
-using TinyRadius.Dictionary.DefaultDictionary;
-using TinyRadius.Dictionary.Dictionary;
-using TinyRadius.Util.RadiusException;
-using TinyRadius.Util.RadiusUtil;
+
+using TinyRadius.Net.Util;
 using System;
-using TinyRadius.Dictionary;
-namespace TinyRadius.Attribute
+using TinyRadius.Net.Directories;
+namespace TinyRadius.Net.Attribute
 {
 
 
@@ -59,7 +56,7 @@ namespace TinyRadius.Attribute
         public void setAttributeData(byte[] attributeData)
         {
             if (attributeData == null)
-                throw new NullPointerException("attribute data is null");
+                throw new ArgumentNullException("attribute data is null");
             this.attributeData = attributeData;
         }
 
@@ -79,7 +76,7 @@ namespace TinyRadius.Attribute
         public void setAttributeType(int attributeType)
         {
             if (attributeType < 0 || attributeType > 255)
-                throw new IllegalArgumentException("attribute type invalid: " + attributeType);
+                throw new ArgumentException("attribute type invalid: " + attributeType);
             this.attributeType = attributeType;
         }
 
@@ -126,9 +123,9 @@ namespace TinyRadius.Attribute
 
         /**
          * Returns the dictionary this Radius attribute uses.
-         * @return Dictionary instance
+         * @return Hashtable instance
          */
-        public Dictionary getDictionary()
+        public IWritableDictionary getDictionary()
         {
             return dictionary;
         }
@@ -136,10 +133,10 @@ namespace TinyRadius.Attribute
         /**
          * Sets a custom dictionary to use. If no dictionary is set,
          * the default dictionary is used.
-         * @param dictionary Dictionary class to use
+         * @param dictionary Hashtable class to use
          * @see DefaultDictionary
          */
-        public void setDictionary(Dictionary dictionary)
+        public void setDictionary(IWritableDictionary dictionary)
         {
             this.dictionary = dictionary;
         }
@@ -151,9 +148,9 @@ namespace TinyRadius.Attribute
         public byte[] writeAttribute()
         {
             if (getAttributeType() == -1)
-                throw new IllegalArgumentException("attribute type not set");
+                throw new ArgumentException("attribute type not set");
             if (attributeData == null)
-                throw new NullPointerException("attribute data not set");
+                throw new ArgumentNullException("attribute data not set");
 
             byte[] attr = new byte[2 + attributeData.length];
             attr[0] = (byte)getAttributeType();
@@ -216,12 +213,12 @@ namespace TinyRadius.Attribute
 
         /**
          * Creates a RadiusAttribute object of the appropriate type.
-         * @param dictionary Dictionary to use
+         * @param dictionary Hashtable to use
          * @param vendorId vendor ID or -1
          * @param attributeType attribute type
          * @return RadiusAttribute object
          */
-        public static RadiusAttribute createRadiusAttribute(Dictionary dictionary, int vendorId, int attributeType)
+        public static RadiusAttribute createRadiusAttribute(IWritableDictionary dictionary, int vendorId, int attributeType)
         {
             RadiusAttribute attribute = new RadiusAttribute();
 
@@ -253,7 +250,7 @@ namespace TinyRadius.Attribute
          */
         public static RadiusAttribute createRadiusAttribute(int vendorId, int attributeType)
         {
-            Dictionary dictionary = DefaultDictionary.getDefaultDictionary();
+            MemoryDictionary dictionary = DefaultDictionary.getDefaultDictionary();
             return createRadiusAttribute(dictionary, vendorId, attributeType);
         }
 
@@ -265,14 +262,14 @@ namespace TinyRadius.Attribute
          */
         public static RadiusAttribute createRadiusAttribute(int attributeType)
         {
-            Dictionary dictionary = DefaultDictionary.getDefaultDictionary();
+            Hashtable dictionary = DefaultDictionary.getDefaultDictionary();
             return createRadiusAttribute(dictionary, -1, attributeType);
         }
 
         /**
-         * Dictionary to look up attribute names.
+         * Hashtable to look up attribute names.
          */
-        private Dictionary dictionary = DefaultDictionary.getDefaultDictionary();
+        private IWritableDictionary dictionary = DefaultDictionary.getDefaultDictionary();
 
         /**
          * Attribute type

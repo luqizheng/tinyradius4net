@@ -4,13 +4,18 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.11 $
  */
-using TinyRadius.Attribute;
-using TinyRadius.Packet;
+using TinyRadius.Net.Attribute;
+using TinyRadius.Net.Packet;
 using System;
-using TinyRadius.packet;
+using TinyRadius.Net.packet;
 using System.Threading;
+using TinyRadius.Net.Net.JavaHelper;
+using TinyRadius.Net.JavaHelper;
+using log4net;
+using System.Collections;
 
-namespace TinyRadius.Util
+
+namespace TinyRadius.Net.Util
 {
 
     /*using java.io.ByteArrayInputStream;
@@ -25,7 +30,7 @@ namespace TinyRadius.Util
     using java.Util.Arrays;
     using java.Util.Iterator;
     using java.Util.LinkedList;
-    using java.Util.List;
+    using java.Util.ArrayList;
 
     using org.apache.commons.logging.Log;
     using org.apache.commons.logging.LogFactory;*/
@@ -210,7 +215,7 @@ namespace TinyRadius.Util
         public void setAuthPort(int authPort)
         {
             if (authPort < 1 || authPort > 65535)
-                throw new IllegalArgumentException("bad port number");
+                throw new ArgumentException("bad port number");
             this.authPort = authPort;
             this.authSocket = null;
         }
@@ -232,7 +237,7 @@ namespace TinyRadius.Util
         public void setSocketTimeout(int socketTimeout)
         {
             if (socketTimeout < 1)
-                throw new IllegalArgumentException("socket tiemout must be positive");
+                throw new ArgumentException("socket tiemout must be positive");
             this.socketTimeout = socketTimeout;
             if (authSocket != null)
                 authSocket.setSoTimeout(socketTimeout);
@@ -247,7 +252,7 @@ namespace TinyRadius.Util
         public void setAcctPort(int acctPort)
         {
             if (acctPort < 1 || acctPort > 65535)
-                throw new IllegalArgumentException("bad port number");
+                throw new ArgumentException("bad port number");
             this.acctPort = acctPort;
             this.acctSocket = null;
         }
@@ -283,7 +288,7 @@ namespace TinyRadius.Util
         public void setDuplicateInterval(long duplicateInterval)
         {
             if (duplicateInterval <= 0)
-                throw new IllegalArgumentException("duplicate interval must be positive");
+                throw new ArgumentException("duplicate interval must be positive");
             this.duplicateInterval = duplicateInterval;
         }
 
@@ -317,7 +322,7 @@ namespace TinyRadius.Util
          */
         protected void copyProxyState(RadiusPacket request, RadiusPacket answer)
         {
-            List proxyStateAttrs = request.getAttributes(33);
+            ArrayList proxyStateAttrs = request.getAttributes(33);
             for (Iterator i = proxyStateAttrs.iterator(); i.hasNext(); )
             {
                 RadiusAttribute proxyStateAttr = (RadiusAttribute)i.next();
@@ -354,7 +359,8 @@ namespace TinyRadius.Util
          */
         protected void listen(DatagramSocket s)
         {
-            DatagramPacket packetIn = new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
+            DatagramPacket packetIn = new DatagramPacket
+                (new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
             while (true)
             {
                 try
@@ -608,10 +614,10 @@ namespace TinyRadius.Util
         private DatagramSocket authSocket = null;
         private DatagramSocket acctSocket = null;
         private int socketTimeout = 3000;
-        private List receivedPackets = new LinkedList();
+        private ArrayList receivedPackets = new ArrayList();
         private long duplicateInterval = 30000; // 30 s
         private bool closing = false;
-        private static Log logger = LogFactory.getLog(typeof(RadiusServer));
+        private static ILog logger = LogManager.GetLog(typeof(RadiusServer));
 
     }
 
