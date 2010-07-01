@@ -1,26 +1,7 @@
-/**
- * $Id: RadiusProxy.java,v 1.1 2005/09/07 22:19:01 wuttke Exp $
- * Created on 07.09.2005
- * @author glanz, Matthias Wuttke
- * @version $Revision: 1.1 $
- */
+using TinyRadius.Net.Attributes;
+
 namespace TinyRadius.Net.Proxy
 {
-
-    /*using java.io.ByteArrayOutputStream;
-    using java.io.IOException;
-    using java.net.DatagramPacket;
-    using java.net.DatagramSocket;
-    using java.net.InetAddress;
-    using java.net.InetSocketAddress;
-    using java.net.SocketException;
-    using java.util.HashMap;
-    using System.Collections;
-    using java.util.Map;
-
-    using org.apache.commons.logging.Log;
-    using org.apache.commons.logging.LogFactory;*/
-    using TinyRadius.Net.Attribute;
     using TinyRadius.Net.Packet;
     using TinyRadius.Net.Util;
     using System.Threading;
@@ -188,13 +169,13 @@ namespace TinyRadius.Net.Proxy
         protected void proxyPacketReceived(RadiusPacket packet, InetSocketAddress remote)
         {
             // retrieve my Proxy-State attribute (the last)
-            ArrayList proxyStates = packet.getAttributes(33);
+            ArrayList proxyStates = packet.GetAttributes(33);
             if (proxyStates == null || proxyStates.size() == 0)
                 throw new RadiusException("Proxy packet without Proxy-State attribute");
             RadiusAttribute proxyState = (RadiusAttribute)proxyStates.get(proxyStates.size() - 1);
 
             // retrieve Proxy connection from cache 
-            String state = new String(proxyState.getAttributeData());
+            String state = new String(proxyState.Data);
             RadiusProxyConnection proxyConnection = (RadiusProxyConnection)proxyConnections.remove(state);
             if (proxyConnection == null)
             {
@@ -211,10 +192,10 @@ namespace TinyRadius.Net.Proxy
             }
 
             // remove only own Proxy-State (last attribute)
-            packet.removeLastAttribute(33);
+            packet.RemoveLastAttribute(33);
 
             // re-encode answer packet with authenticator of the original packet
-            RadiusPacket answer = new RadiusPacket(packet.getPacketType(), packet.getPacketIdentifier(), packet.getAttributes());
+            RadiusPacket answer = new RadiusPacket(packet.Type, packet.Identifier, packet.GetAttributes());
             DatagramPacket datagram = makeDatagramPacket(answer, client.getSharedSecret(), client.getEndpointAddress().getAddress(), client.getEndpointAddress().getPort(), proxyConnection.getPacket());
 
             // send back using correct socket
@@ -241,7 +222,7 @@ namespace TinyRadius.Net.Proxy
                 // add Proxy-State attribute
                 proxyIndex++;
                 String proxyIndexStr = Integer.toString(proxyIndex);
-                packet.addAttribute(new RadiusAttribute(33, proxyIndexStr.getBytes()));
+                packet.AddAttribute(new RadiusAttribute(33, proxyIndexStr.getBytes()));
 
                 // store RadiusProxyConnection object
                 proxyConnections.put(proxyIndexStr, proxyConnection);
@@ -257,9 +238,9 @@ namespace TinyRadius.Net.Proxy
 
             // encode new packet (with new authenticator)
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            packet.encodeRequestPacket(bos, serverSecret);
+            packet.EncodeRequestPacket(bos, serverSecret);
             byte[] data = bos.toByteArray();
-            DatagramPacket datagram = new DatagramPacket(data, data.length, serverAddress, serverPort);
+            DatagramPacket datagram = new DatagramPacket(data, data.Length, serverAddress, serverPort);
 
             // restore original authenticator
             packet.setAuthenticator(auth);

@@ -1,19 +1,9 @@
-/**
- * $Id: IpAttribute.java,v 1.3 2005/09/06 16:38:41 wuttke Exp $
- * Created on 10.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.3 $
- */
-//using java.util.StringTokenizer;
+using System.Text;
 using TinyRadius.Net.Util;
-using TinyRadius.Net.Attribute;
 using System;
 
-namespace TinyRadius.Net.Attribute
+namespace TinyRadius.Net.Attributes
 {
-
-
-
     /**
      * This class represents a Radius attribute for an IP number.
      */
@@ -25,7 +15,7 @@ namespace TinyRadius.Net.Attribute
          */
         public IpAttribute()
         {
-            super();
+
         }
 
         /**
@@ -35,7 +25,7 @@ namespace TinyRadius.Net.Attribute
          */
         public IpAttribute(int type, String value)
         {
-            setAttributeType(type);
+            Type = type;
             setAttributeValue(value);
         }
 
@@ -46,99 +36,93 @@ namespace TinyRadius.Net.Attribute
          */
         public IpAttribute(int type, long ipNum)
         {
-            setAttributeType(type);
-            setIpAsLong(ipNum);
+            Type = type;
+            IpAsLong = ipNum;
         }
-
         /**
-         * Returns the attribute value (IP number) as a string of the
-         * format "xx.xx.xx.xx".
-         * @see TinyRadius.attribute.RadiusAttribute#getAttributeValue()
-         */
-        public String getAttributeValue()
+       * Returns the attribute value (IP number) as a string of the
+       * format "xx.xx.xx.xx".
+       * @see TinyRadius.attribute.RadiusAttribute#getAttributeValue()
+       */
+        public override string Value
         {
-            StringBuffer ip = new StringBuffer();
-            byte[] data = getAttributeData();
-            if (data == null || data.length != 4)
-                throw new RuntimeException("ip attribute: expected 4 bytes attribute data");
-
-            ip.append(data[0] & 0x0ff);
-            ip.append(".");
-            ip.append(data[1] & 0x0ff);
-            ip.append(".");
-            ip.append(data[2] & 0x0ff);
-            ip.append(".");
-            ip.append(data[3] & 0x0ff);
-
-            return ip.toString();
-        }
-
-        /**
-         * Sets the attribute value (IP number). String format:
-         * "xx.xx.xx.xx".
-         * @throws ArgumentException
-         * @throws NumberFormatException
-         * @see TinyRadius.attribute.RadiusAttribute#setAttributeValue(java.lang.String)
-         */
-        public void setAttributeValue(String value)
-        {
-            if (value == null || value.length() < 7 || value.length() > 15)
-                throw new ArgumentException("bad IP number");
-
-            StringTokenizer tok = new StringTokenizer(value, ".");
-            if (tok.countTokens() != 4)
-                throw new ArgumentException("bad IP number: 4 numbers required");
-
-            byte[] data = new byte[4];
-            for (int i = 0; i < 4; i++)
+            get
             {
-                int num = Convert.ToInt32(tok.nextToken());
-                if (num < 0 || num > 255)
-                    throw new ArgumentException("bad IP number: num out of bounds");
-                data[i] = (byte)num;
-            }
+                var ip = new StringBuilder();
+                byte[] data = Data;
+                if (data == null || data.Length != 4)
+                    throw new NotImplementedException("ip attribute: expected 4 bytes attribute data");
 
-            setAttributeData(data);
+                ip.Append(data[0] & 0x0ff)
+                    .Append(".")
+                    .Append(data[1] & 0x0ff)
+                    .Append(".")
+                    .Append(data[2] & 0x0ff)
+                    .Append(".")
+                    .Append(data[3] & 0x0ff);
+
+                return ip.ToString();
+            }
+            set
+            {
+                if (value == null || value.Length < 7 || value.Length > 15)
+                    throw new ArgumentException("bad IP number");
+
+                string[] ips = value.Split('.');
+                if (ips.Length != 4)
+                    throw new ArgumentException("bad IP number: 4 numbers required");
+
+                byte[] data = new byte[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    int num = Convert.ToInt32(ips[0]);
+                    if (num < 0 || num > 255)
+                        throw new ArgumentException("bad IP number: num out of bounds");
+                    data[i] = (byte)num;
+                }
+                Data = data;
+            }
         }
 
+
+
         /**
-         * Returns the IP number as a 32 bit unsigned number. The number is
+         * Gets or sets the IP number as a 32 bit unsigned number. The number is
          * returned in a long because Java does not support unsigned ints.
          * @return IP number
          */
-        public long getIpAsLong()
+        public long IpAsLong
         {
-            byte[] data = getAttributeData();
-            if (data == null || data.length != 4)
-                throw new RuntimeException("expected 4 bytes attribute data");
-            return ((long)(data[0] & 0x0ff)) << 24 | (data[1] & 0x0ff) << 16 |
-                   (data[2] & 0x0ff) << 8 | (data[3] & 0x0ff);
+            get
+            {
+                var data = Data;
+                if (data == null || data.Length != 4)
+                    throw new NotImplementedException("expected 4 bytes attribute data");
+                return ((long)(data[0] & 0x0ff)) << 24 | (data[1] & 0x0ff) << 16 |
+                       (data[2] & 0x0ff) << 8 | (data[3] & 0x0ff);
+            }
+            set
+            {
+                var data = new byte[4];
+                data[0] = (byte)((value >> 24) & 0x0ff);
+                data[1] = (byte)((value >> 16) & 0x0ff);
+                data[2] = (byte)((value >> 8) & 0x0ff);
+                data[3] = (byte)(value & 0x0ff);
+                Data = data;
+            }
         }
 
-        /**
-         * Sets the IP number represented by this IpAttribute
-         * as a 32 bit unsigned number.
-         * @param ip
-         */
-        public void setIpAsLong(long ip)
-        {
-            byte[] data = new byte[4];
-            data[0] = (byte)((ip >> 24) & 0x0ff);
-            data[1] = (byte)((ip >> 16) & 0x0ff);
-            data[2] = (byte)((ip >> 8) & 0x0ff);
-            data[3] = (byte)(ip & 0x0ff);
-            setAttributeData(data);
-        }
+
 
         /**
-         * Check attribute length.
+         * Check attribute Length.
          * @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
          */
-        public void readAttribute(byte[] data, int offset, int length)
+        public override void ReadAttribute(byte[] data, int offset, int length)
         {
             if (length != 6)
-                throw new RadiusException("IP attribute: expected 4 bytes data");
-            base.readAttribute(data, offset, length);
+                throw new RadiusException("IP attribute: expected 6 bytes data");
+            base.ReadAttribute(data, offset, length);
         }
 
     }

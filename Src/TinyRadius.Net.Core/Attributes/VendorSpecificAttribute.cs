@@ -1,291 +1,264 @@
-/**
- * $Id: VendorSpecificAttribute.java,v 1.7 2005/11/22 10:18:38 wuttke Exp $
- * Created on 10.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.7 $
- */
-namespace TinyRadius.Net.Attribute
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using TinyRadius.Net.Dictionaries;
+using TinyRadius.Net.Util;
+
+namespace TinyRadius.Net.Attributes
 {
-
-    /*using java.io.ByteArrayOutputStream;
-    using java.io.IOException;
-    using java.util.ArrayList;
-    using java.util.Iterator;
-    using java.util.LinkedList;
-    using System.Collections;*/
-
-    using TinyRadius.Net.Directories;
-
-    using TinyRadius.Net.Util;
-    using System;
-    using System.Collections;
-    using System.Text;
-
-    /**
-     * This class represents a "Vendor-Specific" attribute.
-     */
+    /// <summary>
+    /// This class represents a "Vendor-Specific" attribute.
+    /// </summary>
     public class VendorSpecificAttribute : RadiusAttribute
     {
-
-        /**
-         * Radius attribute type code for Vendor-Specific
-         */
-
-
+        /// <summary>
+        /// Radius attribute type code for Vendor-Specific
+        /// </summary>
         public static readonly int VENDOR_SPECIFIC = 26;
 
-        /**
-         * Constructs an empty Vendor-Specific attribute that can be read from a
-         * Radius packet.
-         */
+        /// <summary>
+        /// Sub attributes. Only set if isRawData == false.
+        /// </summary>
+        private List<RadiusAttribute> subAttributes = new List<RadiusAttribute>();
+
+        /// <summary>
+        /// Constructs an empty Vendor-Specific attribute that can be read from a
+        /// Radius packet.
+        /// </summary>
         public VendorSpecificAttribute()
         {
         }
 
-        /**
-         * Constructs a new Vendor-Specific attribute to be sent.
-         * @param vendorId vendor ID of the sub-attributes
-         */
+        /// <summary>
+        /// Constructs a new Vendor-Specific attribute to be sent.
+        /// @param vendorId vendor ID of the sub-attributes
+        /// </summary>
         public VendorSpecificAttribute(int vendorId)
         {
-            setAttributeType(VENDOR_SPECIFIC);
-            setChildVendorId(vendorId);
+            Type = VENDOR_SPECIFIC;
+            ChildVendorId = vendorId;
         }
 
-        /**
-         * Sets the vendor ID of the child attributes.
-         * @param childVendorId
-         */
-        public void setChildVendorId(int childVendorId)
-        {
-            this.childVendorId = childVendorId;
-        }
+        /// <summary>
+        /// Gets or sets  the vendor ID of the child attributes.
+        /// @param childVendorId
+        /// </summary>
+        public int ChildVendorId { get; set; }
 
-        /**
-         * Returns the vendor ID of the sub-attributes.
-         * @return vendor ID of sub attributes
-         */
-        public int getChildVendorId()
+        public override IWritableDictionary Dictionary
         {
-            return childVendorId;
-        }
-
-        /**
-         * Also copies the new dictionary to sub-attributes.
-         * @param dictionary dictionary to set
-         * @see TinyRadius.attribute.RadiusAttribute#setDictionary(TinyRadius.dictionary.Hashtable)
-         */
-        public void setDictionary(System.Collections.Hashtable dictionary)
-        {
-            super.setDictionary(dictionary);
-            for (Iterator i = subAttributes.iterator(); i.hasNext(); )
+            get { return base.Dictionary; }
+            set
             {
-                RadiusAttribute attr = (RadiusAttribute)i.next();
-                attr.setDictionary(dictionary);
+                base.Dictionary = value;
+                foreach (RadiusAttribute a in subAttributes)
+                {
+                    a.Dictionary = value;
+                }
             }
         }
 
-        /**
-         * Adds a sub-attribute to this attribute.
-         * @param attribute sub-attribute to add
-         */
-        public void addSubAttribute(RadiusAttribute attribute)
+        /// <summary>
+        /// Returns the list of sub-attributes.
+        /// @return ArrayList of RadiusAttribute objects
+        /// </summary>
+        public List<RadiusAttribute> SubAttributes
         {
-            if (attribute.getVendorId() != getChildVendorId())
-                throw new ArgumentException(
-                        "sub attribut has incorrect vendor ID");
-
-            subAttributes.add(attribute);
+            get { return subAttributes; }
         }
 
-        /**
-         * Adds a sub-attribute with the specified name to this attribute.
-         * @param name name of the sub-attribute
-         * @param value value of the sub-attribute
-         * @exception ArgumentException invalid sub-attribute name or value
-         */
-        public void addSubAttribute(String name, String value)
+        /// <summary>
+        /// Adds a sub-attribute to this attribute.
+        /// @param attribute sub-attribute to add
+        /// </summary>
+        public void AddSubAttribute(RadiusAttribute attribute)
         {
-            if (name == null || name.length() == 0)
+            if (attribute.VendorId != ChildVendorId)
+                throw new ArgumentException(
+                    "sub attribut has incorrect vendor ID");
+
+            subAttributes.Add(attribute);
+        }
+
+        /// <summary>
+        /// Adds a sub-attribute with the specified name to this attribute.
+        /// @param name name of the sub-attribute
+        /// @param value value of the sub-attribute
+        /// @exception ArgumentException invalid sub-attribute name or value
+        /// </summary>
+        public void AddSubAttribute(String name, String value)
+        {
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("type name is empty");
-            if (value == null || value.length() == 0)
+            if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            AttributeType type = getDictionary().getAttributeTypeByName(name);
+            AttributeType type = this.Dictionary.GetAttributeTypeByName(name);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '"
-                        + name + "'");
-            if (type.getVendorId() == -1)
+                                            + name + "'");
+            if (type.VendorId == -1)
                 throw new ArgumentException("attribute type '" + name
-                        + "' is not a Vendor-Specific sub-attribute");
-            if (type.getVendorId() != getChildVendorId())
+                                            + "' is not a Vendor-Specific sub-attribute");
+            if (type.VendorId != ChildVendorId)
                 throw new ArgumentException("attribute type '" + name
-                        + "' does not belong to vendor ID " + getChildVendorId());
+                                            + "' does not belong to vendor ID " + ChildVendorId);
 
-            RadiusAttribute attribute = createRadiusAttribute(getDictionary(),
-                    getChildVendorId(), type.getTypeCode());
-            attribute.setAttributeValue(value);
-            addSubAttribute(attribute);
+            RadiusAttribute attribute = CreateRadiusAttribute(Dictionary,
+                                                              ChildVendorId, type.TypeCode);
+            attribute.Value = value;
+            AddSubAttribute(attribute);
         }
 
-        /**
-         * Removes the specified sub-attribute from this attribute.
-         * @param attribute RadiusAttribute to remove
-         */
-        public void removeSubAttribute(RadiusAttribute attribute)
+        /// <summary>
+        /// Removes the specified sub-attribute from this attribute.
+        /// @param attribute RadiusAttribute to remove
+        /// </summary>
+        public void RemoveSubAttribute(RadiusAttribute attribute)
         {
-            if (!subAttributes.remove(attribute))
+            if (!subAttributes.Remove(attribute))
                 throw new ArgumentException("no such attribute");
         }
 
-        /**
-         * Returns the list of sub-attributes.
-         * @return ArrayList of RadiusAttribute objects
-         */
-        public ArrayList getSubAttributes()
-        {
-            return subAttributes;
-        }
-
-        /**
-         * Returns all sub-attributes of this attribut which have the given type.
-         * @param attributeType type of sub-attributes to get
-         * @return list of RadiusAttribute objects, does not return null
-         */
-        public ArrayList getSubAttributes(int attributeType)
+        /// <summary>
+        /// Returns all sub-attributes of this attribut which have the given type.
+        /// @param attributeType type of sub-attributes to get
+        /// @return list of RadiusAttribute objects, does not return null
+        /// </summary>
+        public List<RadiusAttribute> GetSubAttributes(int attributeType)
         {
             if (attributeType < 1 || attributeType > 255)
                 throw new ArgumentException(
-                        "sub-attribute type out of bounds");
+                    "sub-attribute type out of bounds");
 
-            var result = new ArrayList();
-            for (Iterator i = subAttributes.iterator(); i.hasNext(); )
+            var result = new List<RadiusAttribute>();
+            foreach (RadiusAttribute a in subAttributes)
             {
-                RadiusAttribute a = (RadiusAttribute)i.next();
-                if (attributeType == a.getAttributeType())
-                    result.add(a);
+                if (attributeType == a.Type)
+                    result.Add(a);
             }
             return result;
         }
 
-        /**
-         * Returns a sub-attribute of the given type which may only occur once in
-         * this attribute.
-         * @param type sub-attribute type
-         * @return RadiusAttribute object or null if there is no such sub-attribute
-         * @throws RuntimeException if there are multiple occurences of the
-         * requested sub-attribute type
-         */
-        public RadiusAttribute getSubAttribute(int type)
+        /// <summary>
+        /// Returns a sub-attribute of the given type which may only occur once in
+        /// this attribute.
+        /// @param type sub-attribute type
+        /// @return RadiusAttribute object or null if there is no such sub-attribute
+        /// @throws NotImplementedException if there are multiple occurences of the
+        /// requested sub-attribute type
+        /// </summary>
+        public RadiusAttribute GetSubAttribute(int type)
         {
-            ArrayList attrs = getSubAttributes(type);
-            if (attrs.size() > 1)
-                throw new RuntimeException(
-                        "multiple sub-attributes of requested type " + type);
-            else if (attrs.size() == 0)
+            List<RadiusAttribute> attrs = GetSubAttributes(type);
+            if (attrs.Count > 1)
+                throw new NotImplementedException(
+                    "multiple sub-attributes of requested type " + type);
+            else if (attrs.Count == 0)
                 return null;
             else
-                return (RadiusAttribute)attrs.get(0);
+                return attrs[0];
         }
 
-        /**
-         * Returns a single sub-attribute of the given type name.
-         * @param type attribute type name
-         * @return RadiusAttribute object or null if there is no such attribute
-         * @throws RuntimeException if the attribute occurs multiple times
-         */
-        public RadiusAttribute getSubAttribute(String type)
+        /// <summary>
+        /// Returns a single sub-attribute of the given type name.
+        /// @param type attribute type name
+        /// @return RadiusAttribute object or null if there is no such attribute
+        /// @throws NotImplementedException if the attribute occurs multiple times
+        /// </summary>
+        public RadiusAttribute GetSubAttribute(String type)
         {
-            if (type == null || type.length() == 0)
+            if (string.IsNullOrEmpty(type))
                 throw new ArgumentException("type name is empty");
 
 
-            AttributeType t = getDictionary().getAttributeTypeByName(type);
+            AttributeType t = Dictionary.GetAttributeTypeByName(type);
             if (t == null)
                 throw new ArgumentException("unknown attribute type name '"
-                        + type + "'");
-            if (t.getVendorId() != getChildVendorId())
+                                            + type + "'");
+            if (t.VendorId != ChildVendorId)
                 throw new ArgumentException("vendor ID mismatch");
 
-            return getSubAttribute(t.getTypeCode());
+            return GetSubAttribute(t.TypeCode);
         }
 
-        /**
-         * Returns the value of the Radius attribute of the given type or null if
-         * there is no such attribute.
-         * @param type attribute type name
-         * @return value of the attribute as a string or null if there is no such
-         * attribute
-         * @throws ArgumentException if the type name is unknown
-         * @throws RuntimeException attribute occurs multiple times
-         */
-        public String getSubAttributeValue(String type)
+        /// <summary>
+        /// Returns the value of the Radius attribute of the given type or null if
+        /// there is no such attribute.
+        /// @param type attribute type name
+        /// @return value of the attribute as a string or null if there is no such
+        /// attribute
+        /// @throws ArgumentException if the type name is unknown
+        /// @throws NotImplementedException attribute occurs multiple times
+        /// </summary>
+        public String GetSubAttributeValue(String type)
         {
-            RadiusAttribute attr = getSubAttribute(type);
+            RadiusAttribute attr = GetSubAttribute(type);
             if (attr == null)
                 return null;
             else
-                return attr.getAttributeValue();
+                return attr.Value;
         }
 
-        /**
-         * Renders this attribute as a byte array.
-         * @see TinyRadius.attribute.RadiusAttribute#writeAttribute()
-         */
-        public byte[] writeAttribute()
+        /// <summary>
+        /// Renders this attribute as a byte array.
+        /// @see TinyRadius.attribute.RadiusAttribute#writeAttribute()
+        /// </summary>
+        public override byte[] WriteAttribute()
         {
             // write vendor ID
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(255);
-            bos.write(getChildVendorId() >> 24 & 0x0ff);
-            bos.write(getChildVendorId() >> 16 & 0x0ff);
-            bos.write(getChildVendorId() >> 8 & 0x0ff);
-            bos.write(getChildVendorId() & 0x0ff);
+            var bos = new MemoryStream(255);
+            bos.WriteByte(Convert.ToByte(ChildVendorId >> 24 & 0x0ff));
+            bos.WriteByte(Convert.ToByte(ChildVendorId >> 16 & 0x0ff));
+            bos.WriteByte(Convert.ToByte(ChildVendorId >> 8 & 0x0ff));
+            bos.WriteByte(Convert.ToByte(ChildVendorId & 0x0ff));
 
             // write sub-attributes
             try
             {
-                for (Iterator i = subAttributes.iterator(); i.hasNext(); )
+                foreach (RadiusAttribute a in subAttributes)
                 {
-                    RadiusAttribute a = (RadiusAttribute)i.next();
-                    bos.write(a.writeAttribute());
+                    byte[] c = a.WriteAttribute();
+                    bos.Write(c, 0, c.Length);
                 }
             }
             catch (IOException ioe)
             {
                 // occurs never
-                throw new RuntimeException("error writing data", ioe);
+                throw new NotImplementedException("error writing data", ioe);
             }
 
-            // check data length
-            byte[] attrData = bos.toByteArray();
-            int len = attrData.length;
+            // check data Length
+            byte[] attrData = bos.ToArray();
+            int len = attrData.Length;
             if (len > 253)
-                throw new RuntimeException("Vendor-Specific attribute too long: "
-                        + bos.size());
+                throw new NotImplementedException("Vendor-Specific attribute too long: "
+                                                  + len);
 
             // compose attribute
-            byte[] attr = new byte[len + 2];
-            attr[0] = VENDOR_SPECIFIC; // code
-            attr[1] = (byte)(len + 2); // length
-            System.arraycopy(attrData, 0, attr, 2, len);
+            var attr = new byte[len + 2];
+            attr[0] = Convert.ToByte(VENDOR_SPECIFIC); // code
+            attr[1] = (byte) (len + 2); // Length
+            Array.Copy(attrData, 0, attr, 2, len);
             return attr;
         }
 
-        /**
-         * Reads a Vendor-Specific attribute and decodes the internal sub-attribute
-         * structure.
-         * @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int,
-         * int)
-         */
-        public void readAttribute(byte[] data, int offset, int length)
+        /// <summary>
+        /// Reads a Vendor-Specific attribute and decodes the internal sub-attribute
+        /// structure.
+        /// @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int,
+        /// int)
+        /// </summary>
+        public override void ReadAttribute(byte[] data, int offset, int length)
         {
-            // check length
+            // check Length
             if (length < 6)
                 throw new RadiusException("Vendor-Specific attribute too short: "
-                        + length);
+                                          + length);
 
             int vsaCode = data[offset];
-            int vsaLen = ((int)data[offset + 1] & 0x000000ff) - 6;
+            int vsaLen = (data[offset + 1] & 0x000000ff) - 6;
 
             if (vsaCode != VENDOR_SPECIFIC)
                 throw new RadiusException("not a Vendor-Specific attribute");
@@ -295,10 +268,10 @@ namespace TinyRadius.Net.Attribute
              * int vendorId = (data[offset + 2] << 24 | data[offset + 3] << 16 |
              * data[offset + 4] << 8 | ((int)data[offset + 5] & 0x000000ff));
              */
-            int vendorId = (unsignedByteToInt(data[offset + 2]) << 24
-                    | unsignedByteToInt(data[offset + 3]) << 16
-                    | unsignedByteToInt(data[offset + 4]) << 8 | unsignedByteToInt(data[offset + 5]));
-            setChildVendorId(vendorId);
+            int vendorId = (UnsignedByteToInt(data[offset + 2]) << 24
+                            | UnsignedByteToInt(data[offset + 3]) << 16
+                            | UnsignedByteToInt(data[offset + 4]) << 8 | UnsignedByteToInt(data[offset + 5]));
+            ChildVendorId = vendorId;
 
             // validate sub-attribute structure
             int pos = 0;
@@ -315,65 +288,53 @@ namespace TinyRadius.Net.Attribute
             if (pos != vsaLen)
                 throw new RadiusException("Vendor-Specific attribute malformed");
 
-            subAttributes = new ArrayList(count);
+            subAttributes = new List<RadiusAttribute>(count);
             pos = 0;
             while (pos < vsaLen)
             {
                 int subtype = data[(offset + 6) + pos] & 0x0ff;
                 int sublength = data[(offset + 6) + pos + 1] & 0x0ff;
-                RadiusAttribute a = createRadiusAttribute(getDictionary(),
-                        vendorId, subtype);
-                a.readAttribute(data, (offset + 6) + pos, sublength);
-                subAttributes.add(a);
+                RadiusAttribute a = CreateRadiusAttribute(Dictionary,
+                                                          vendorId, subtype);
+                a.ReadAttribute(data, (offset + 6) + pos, sublength);
+                subAttributes.Add(a);
                 pos += sublength;
             }
         }
 
-        private static int unsignedByteToInt(byte b)
+        private static int UnsignedByteToInt(byte b)
         {
-            return (int)b & 0xFF;
+            return b & 0xFF;
         }
 
-        /**
-         * Returns a string representation for debugging.
-         * @see TinyRadius.attribute.RadiusAttribute#toString()
-         */
-        public String toString()
+        /// <summary>
+        /// Returns a string representation for debugging.
+        /// @see TinyRadius.attribute.RadiusAttribute#toString()
+        /// </summary>
+        public override String ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.Append("Vendor-Specific: ");
-            int vendorId = getChildVendorId();
-            String vendorName = getDictionary().getVendorName(vendorId);
+            int vendorId = ChildVendorId;
+            String vendorName = Dictionary.GetVendorName(vendorId);
             if (vendorName != null)
             {
-                sb.Append(vendorName);
-                sb.Append(" (");
-                sb.Append(vendorId);
-                sb.Append(")");
+                sb.Append(vendorName)
+                    .Append(" (")
+                    .Append(vendorId)
+                    .Append(")");
             }
             else
             {
                 sb.Append("vendor ID ");
                 sb.Append(vendorId);
             }
-            for (Iterator i = getSubAttributes().iterator(); i.hasNext(); )
+            foreach (RadiusAttribute attr in SubAttributes)
             {
-                RadiusAttribute attr = (RadiusAttribute)i.next();
-                sb.append("\n");
-                sb.append(attr.toString());
+                sb.Append("\n");
+                sb.Append(attr.ToString());
             }
-            return sb.toString();
+            return sb.ToString();
         }
-
-        /**
-         * Sub attributes. Only set if isRawData == false.
-         */
-        private ArrayList subAttributes = new ArrayList();
-
-        /**
-         * Vendor ID of sub-attributes.
-         */
-        private int childVendorId;
     }
-
 }

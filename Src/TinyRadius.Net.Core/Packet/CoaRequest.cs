@@ -16,8 +16,8 @@ namespace TinyRadius.Net.packet
     {
 
         public CoaRequest()
+            : base(COA_REQUEST, GetNextPacketIdentifier())
         {
-            super(COA_REQUEST, getNextPacketIdentifier());
         }
 
         /**
@@ -30,7 +30,7 @@ namespace TinyRadius.Net.packet
             /*for (int i = 0; i < 16; i++)
                 authenticator[i] = 0;*/
 
-            MD5 md5 = getMd5Digest();
+            MD5 md5 = GetMd5Digest();
             md5.Initialize();
 
 
@@ -41,8 +41,8 @@ namespace TinyRadius.Net.packet
             md5.update((byte)getPacketIdentifier());
             md5.update((byte)(packetLength >> 8));
             md5.update((byte)(packetLength & 0xff));
-            md5.update(authenticator, 0, authenticator.length);
-            md5.update(attributes, 0, attributes.length);
+            md5.update(authenticator, 0, authenticator.Length);
+            md5.update(attributes, 0, attributes.Length);
             md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
             return md5.digest();*/
         }

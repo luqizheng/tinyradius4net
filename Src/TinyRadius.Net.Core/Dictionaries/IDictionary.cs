@@ -1,19 +1,13 @@
-/**
- * $Id: Hashtable.java,v 1.1 2005/09/04 22:11:00 wuttke Exp $
- * Created on 28.08.2005
- * @author mw
- * @version $Revision: 1.1 $
- */
 using System;
 
-namespace TinyRadius.Net.Directories
+namespace TinyRadius.Net.Dictionaries
 {
 
     /**
      * A dictionary retrieves AttributeType objects by name or
      * type code. 
      */
-    public interface Hashtable
+    public interface IDictionary
     {
 
         /**
@@ -23,7 +17,7 @@ namespace TinyRadius.Net.Directories
          * @param typeName name of the attribute type 
          * @return AttributeType object or null
          */
-        AttributeType getAttributeTypeByName(String typeName);
+        AttributeType GetAttributeTypeByName(String typeName);
 
         /**
          * Retrieves an attribute type by type code. This method
@@ -31,7 +25,7 @@ namespace TinyRadius.Net.Directories
          * @param typeCode type code, 1-255
          * @return AttributeType object or null
          */
-        AttributeType getAttributeTypeByCode(int typeCode);
+        AttributeType GetAttributeTypeByCode(int typeCode);
 
         /**
          * Retrieves an attribute type for a vendor-specific
@@ -40,7 +34,7 @@ namespace TinyRadius.Net.Directories
          * @param typeCode type code, 1-255
          * @return AttributeType object or null
          */
-        AttributeType getAttributeTypeByCode(int vendorId, int typeCode);
+        AttributeType GetAttributeTypeByCode(int vendorId, int typeCode);
 
         /**
          * Retrieves the name of the vendor with the given
@@ -48,7 +42,7 @@ namespace TinyRadius.Net.Directories
          * @param vendorId vendor number
          * @return vendor name or null
          */
-        String getVendorName(int vendorId);
+        String GetVendorName(int vendorId);
 
         /**
          * Retrieves the ID of the vendor with the given
@@ -56,7 +50,7 @@ namespace TinyRadius.Net.Directories
          * @param vendorName name of the vendor
          * @return vendor ID or -1
          */
-        int getVendorId(String vendorName);
+        int GetVendorId(String vendorName);
 
     }
 }

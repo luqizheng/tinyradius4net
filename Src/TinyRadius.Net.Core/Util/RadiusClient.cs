@@ -1,29 +1,13 @@
-/**
- * $Id: RadiusClient.java,v 1.7 2005/11/10 10:20:21 wuttke Exp $
- * Created on 09.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.7 $
- */
 using System;
-using System.Net;
-using TinyRadius.Net.Packet;
-using TinyRadius.Net.packet;
+using log4net;
 using TinyRadius.Net.JavaHelper;
 using TinyRadius.Net.Net.JavaHelper;
-using log4net;
+using TinyRadius.Net.packet;
+using TinyRadius.Net.Packet;
+
 namespace TinyRadius.Net.Util
 {
-    /*using java.io.ByteArrayInputStream;
-    using java.io.ByteArrayOutputStream;
-    using java.io.IOException;
-    using java.net.DatagramPacket;
-    using java.net.DatagramSocket;
-    using java.net.InetAddress;
-    using java.net.SocketException;
-    using java.net.SocketTimeoutException;
-
-    using org.apache.commons.logging.Log;
-    using org.apache.commons.logging.LogFactory;*/
+   
 
     /**
      * This object represents a simple Radius client which communicates with
@@ -34,14 +18,24 @@ namespace TinyRadius.Net.Util
      * socket are synchronized to avoid confusion with the mapping of request
      * and result packets.
      */
+
     public class RadiusClient
     {
-
         /**
          * Creates a new Radius client object for a special Radius server.
          * @param hostName host name of the Radius server
          * @param sharedSecret shared secret used to secure the communication
          */
+
+        private static readonly ILog logger = LogManager.GetLog(typeof (RadiusClient));
+        private int acctPort = 1813;
+        private int authPort = 1812;
+        private String hostName;
+        private int retryCount = 3;
+        private String sharedSecret;
+        private DatagramSocket socket;
+        private int socketTimeout = 3000;
+
         public RadiusClient(String hostName, String sharedSecret)
         {
             setHostName(hostName);
@@ -52,10 +46,10 @@ namespace TinyRadius.Net.Util
          * Constructs a Radius client for the given Radius endpoint.
          * @param client Radius endpoint
          */
+
         public RadiusClient(RadiusEndpoint client)
         {
             this(client.getEndpointAddress().getAddress().getHostAddress(), client.getSharedSecret());
-
         }
 
         /**
@@ -67,13 +61,14 @@ namespace TinyRadius.Net.Util
          * @exception IOException communication error (after getRetryCount()
          * retries)
          */
+
         public bool authenticate(String userName, String password)
         {
             lock (this)
             {
-                AccessRequest request = new AccessRequest(userName, password);
+                var request = new AccessRequest(userName, password);
                 RadiusPacket response = authenticate(request);
-                return response.getPacketType() == RadiusPacket.ACCESS_ACCEPT;
+                return response.Type == RadiusPacket.ACCESS_ACCEPT;
             }
         }
 
@@ -86,6 +81,7 @@ namespace TinyRadius.Net.Util
          * @exception IOException communication error (after getRetryCount()
          * retries)
          */
+
         public RadiusPacket authenticate(AccessRequest request)
         {
             lock (this)
@@ -110,6 +106,7 @@ namespace TinyRadius.Net.Util
          * @exception IOException communication error (after getRetryCount()
          * retries)
          */
+
         public RadiusPacket account(AccountingRequest request)
         {
             lock (this)
@@ -128,6 +125,7 @@ namespace TinyRadius.Net.Util
         /**
          * Closes the socket of this client.
          */
+
         public void close()
         {
             if (socket != null)
@@ -138,6 +136,7 @@ namespace TinyRadius.Net.Util
          * Returns the Radius server auth port.
          * @return auth port
          */
+
         public int getAuthPort()
         {
             return authPort;
@@ -147,6 +146,7 @@ namespace TinyRadius.Net.Util
          * Sets the auth port of the Radius server.
          * @param authPort auth port, 1-65535
          */
+
         public void setAuthPort(int authPort)
         {
             if (authPort < 1 || authPort > 65535)
@@ -158,6 +158,7 @@ namespace TinyRadius.Net.Util
          * Returns the host name of the Radius server.
          * @return host name
          */
+
         public String getHostName()
         {
             return hostName;
@@ -167,9 +168,10 @@ namespace TinyRadius.Net.Util
          * Sets the host name of the Radius server.
          * @param hostName host name
          */
+
         public void setHostName(String hostName)
         {
-            if (hostName == null || hostName.length() == 0)
+            if (hostName == null || hostName.Length == 0)
                 throw new ArgumentException("host name must not be empty");
             this.hostName = hostName;
         }
@@ -178,6 +180,7 @@ namespace TinyRadius.Net.Util
          * Returns the retry count for failed transmissions.
          * @return retry count
          */
+
         public int getRetryCount()
         {
             return retryCount;
@@ -187,6 +190,7 @@ namespace TinyRadius.Net.Util
          * Sets the retry count for failed transmissions.
          * @param retryCount retry count, >0
          */
+
         public void setRetryCount(int retryCount)
         {
             if (retryCount < 1)
@@ -198,6 +202,7 @@ namespace TinyRadius.Net.Util
          * Returns the secret shared between server and client.
          * @return shared secret
          */
+
         public String getSharedSecret()
         {
             return sharedSecret;
@@ -207,9 +212,10 @@ namespace TinyRadius.Net.Util
          * Sets the secret shared between server and client.
          * @param sharedSecret shared secret
          */
+
         public void setSharedSecret(String sharedSecret)
         {
-            if (sharedSecret == null || sharedSecret.length() == 0)
+            if (sharedSecret == null || sharedSecret.Length == 0)
                 throw new ArgumentException("shared secret must not be empty");
             this.sharedSecret = sharedSecret;
         }
@@ -218,6 +224,7 @@ namespace TinyRadius.Net.Util
          * Returns the socket timeout.
          * @return socket timeout, ms
          */
+
         public int getSocketTimeout()
         {
             return socketTimeout;
@@ -228,6 +235,7 @@ namespace TinyRadius.Net.Util
          * @param socketTimeout timeout, ms, >0
          * @throws SocketException
          */
+
         public void setSocketTimeout(int socketTimeout)
         {
             if (socketTimeout < 1)
@@ -241,6 +249,7 @@ namespace TinyRadius.Net.Util
          * Sets the Radius server accounting port.
          * @param acctPort acct port, 1-65535
          */
+
         public void setAcctPort(int acctPort)
         {
             if (acctPort < 1 || acctPort > 65535)
@@ -252,6 +261,7 @@ namespace TinyRadius.Net.Util
          * Returns the Radius server accounting port.
          * @return acct port
          */
+
         public int getAcctPort()
         {
             return acctPort;
@@ -266,37 +276,44 @@ namespace TinyRadius.Net.Util
          * @exception IOException communication error (after getRetryCount()
          * retries)
          */
-        public RadiusPacket communicate(RadiusPacket request, int port) 
-	{
-		DatagramPacket packetIn = new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
-		DatagramPacket packetOut = makeDatagramPacket(request, port);
-		
-		DatagramSocket socket = getSocket();
-		for (int i = 1; i <= getRetryCount(); i++) {
-			try {
-				socket.send(packetOut);
-				socket.receive(packetIn);
-				return makeRadiusPacket(packetIn, request);
-			} catch (IOException ioex) {
-				if (i == getRetryCount()) {
-					if (logger.isErrorEnabled()) {
-						if (typeof(SocketTimeoutException).IsInstanceOfType(ioex))
-							logger.error("communication failure (timeout), no more retries");
-						else
-							logger.error("communication failure, no more retries", ioex);
-					}
-					throw ioex;
-				}
-				if (logger.isInfoEnabled())
-					logger.info("communication failure, retry " + i);
-				// TODO increase Acct-Delay-Time by getSocketTimeout()/1000
-				// this changes the packet authenticator and requires packetOut to be
-				// calculated again (call makeDatagramPacket)
+
+        public RadiusPacket communicate(RadiusPacket request, int port)
+        {
+            var packetIn = new DatagramPacket(new byte[RadiusPacket.MaxPacketLength], RadiusPacket.MaxPacketLength);
+            DatagramPacket packetOut = makeDatagramPacket(request, port);
+
+            DatagramSocket socket = getSocket();
+            for (int i = 1; i <= getRetryCount(); i++)
+            {
+                try
+                {
+                    socket.send(packetOut);
+                    socket.receive(packetIn);
+                    return makeRadiusPacket(packetIn, request);
+                }
+                catch (IOException ioex)
+                {
+                    if (i == getRetryCount())
+                    {
+                        if (logger.isErrorEnabled())
+                        {
+                            if (typeof (SocketTimeoutException).IsInstanceOfType(ioex))
+                                logger.error("communication failure (timeout), no more retries");
+                            else
+                                logger.error("communication failure, no more retries", ioex);
+                        }
+                        throw ioex;
+                    }
+                    if (logger.isInfoEnabled())
+                        logger.info("communication failure, retry " + i);
+                    // TODO increase Acct-Delay-Time by getSocketTimeout()/1000
+                    // this changes the packet authenticator and requires packetOut to be
+                    // calculated again (call makeDatagramPacket)
+                }
             }
+
+            return null;
         }
-		
-		return null;
-	}
 
         /**
          * Sends the specified packet to the specified Radius server endpoint.
@@ -307,9 +324,10 @@ namespace TinyRadius.Net.Util
          * @throws RadiusException malformed packet
          * @throws IOException error while communication
          */
+
         public static RadiusPacket communicate(RadiusEndpoint remoteServer, RadiusPacket request)
         {
-            RadiusClient rc = new RadiusClient(remoteServer);
+            var rc = new RadiusClient(remoteServer);
             return rc.communicate(request, remoteServer.getEndpointAddress().getPort());
         }
 
@@ -319,6 +337,7 @@ namespace TinyRadius.Net.Util
          * @return local socket
          * @throws SocketException
          */
+
         protected DatagramSocket getSocket()
         {
             if (socket == null)
@@ -336,14 +355,15 @@ namespace TinyRadius.Net.Util
          * @return new datagram packet
          * @throws IOException
          */
+
         protected DatagramPacket makeDatagramPacket(RadiusPacket packet, int port)
         {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            packet.encodeRequestPacket(bos, getSharedSecret());
+            var bos = new ByteArrayOutputStream();
+            packet.EncodeRequestPacket(bos, getSharedSecret());
             byte[] data = bos.toByteArray();
 
             InetAddress address = InetAddress.getByName(getHostName());
-            DatagramPacket datagram = new DatagramPacket(data, data.length, address, port);
+            var datagram = new DatagramPacket(data, data.Length, address, port);
             return datagram;
         }
 
@@ -353,20 +373,11 @@ namespace TinyRadius.Net.Util
          * @param request Radius request packet
          * @return RadiusPacket object
          */
-        protected RadiusPacket makeRadiusPacket(DatagramPacket packet, RadiusPacket request) 
-	{
-		ByteArrayInputStream @in = new ByteArrayInputStream(packet.getData());
-		return RadiusPacket.decodeResponsePacket(@in, getSharedSecret(), request);
-	}
 
-        private int authPort = 1812;
-        private int acctPort = 1813;
-        private String hostName = null;
-        private String sharedSecret = null;
-        private DatagramSocket socket = null;
-        private int retryCount = 3;
-        private int socketTimeout = 3000;
-        private static ILog logger = LogManager.GetLog(typeof(RadiusClient));
-
+        protected RadiusPacket makeRadiusPacket(DatagramPacket packet, RadiusPacket request)
+        {
+            var @in = new ByteArrayInputStream(packet.getData());
+            return RadiusPacket.decodeResponsePacket(@in, getSharedSecret(), request);
+        }
     }
 }
