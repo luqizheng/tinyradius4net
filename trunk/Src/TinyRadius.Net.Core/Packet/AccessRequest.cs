@@ -1,9 +1,8 @@
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using log4net;
 using TinyRadius.Net.Attributes;
-using TinyRadius.Net.Net.JavaHelper;
 using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Packet
@@ -11,9 +10,28 @@ namespace TinyRadius.Net.Packet
     /// <summary>
     ///This class represents an Access-Request Radius packet.
     /// </summary>
-
     public class AccessRequest : RadiusPacket
     {
+        /// <summary>
+        ///Radius type code for Radius attribute User-Name
+        /// </summary>
+        private const int USER_NAME = 1;
+
+        /// <summary>
+        ///Radius attribute type for User-Password attribute.
+        /// </summary>
+        private const int USER_PASSWORD = 2;
+
+        /// <summary>
+        ///Radius attribute type for CHAP-Password attribute.
+        /// </summary>
+        private const int CHAP_PASSWORD = 3;
+
+        /// <summary>
+        ///Radius attribute type for CHAP-Challenge attribute.
+        /// </summary>
+        private const int CHAP_CHALLENGE = 60;
+
         /// <summary>
         ///Passphrase Authentication Protocol
         /// </summary>
@@ -23,32 +41,14 @@ namespace TinyRadius.Net.Packet
         ///Challenged Handshake Authentication Protocol
         /// </summary>
         public static readonly String AUTH_CHAP = "chap";
+
         private static readonly Random random = new Random();
-
-        /// <summary>
-        ///Radius type code for Radius attribute User-Name
-        /// </summary>
-        private static readonly int USER_NAME = 1;
-
-        /// <summary>
-        ///Radius attribute type for User-Password attribute.
-        /// </summary>
-        private static readonly int USER_PASSWORD = 2;
-
-        /// <summary>
-        ///Radius attribute type for CHAP-Password attribute.
-        /// </summary>
-        private static readonly int CHAP_PASSWORD = 3;
-
-        /// <summary>
-        ///Radius attribute type for CHAP-Challenge attribute.
-        /// </summary>
-        private static readonly int CHAP_CHALLENGE = 60;
 
         /// <summary>
         ///Logger for logging information about malformed packets
         /// </summary>
-        private static readonly ILog logger = LogManager.GetLogger(typeof(AccessRequest));
+        private static readonly ILog logger = LogManager.GetLogger(typeof (AccessRequest));
+
         private String authProtocol = AUTH_PAP;
         private byte[] chapChallenge;
         private byte[] chapPassword;
@@ -57,10 +57,8 @@ namespace TinyRadius.Net.Packet
         /// <summary>
         ///Constructs an empty Access-Request packet.
         /// </summary>
-
         public AccessRequest()
         {
-
         }
 
         /// <summary>
@@ -70,40 +68,68 @@ namespace TinyRadius.Net.Packet
         ///@param userName user name
         ///@param userPassword user password
         /// </summary>
-
         public AccessRequest(String userName, String userPassword)
-            : base(ACCESS_REQUEST, GetNextPacketIdentifier())
+            : base(AccessRequest, GetNextPacketIdentifier())
         {
-            setUserName(userName);
-            setUserPassword(userPassword);
+            UserName = userName;
+            Password = userPassword;
         }
 
         /// <summary>
         ///Sets the User-Name attribute of this Access-Request.
         ///@param userName user name to set
         /// </summary>
-
-        public void setUserName(String userName)
+        public string UserName
         {
-            if (userName == null)
-                throw new ArgumentNullException("userName", "user name not set");
-            if (userName.Length == 0)
-                throw new ArgumentException("empty user name not allowed");
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value", "user name not set");
+                if (value.Length == 0)
+                    throw new ArgumentException("empty user name not allowed");
 
-            RemoveAttributes(USER_NAME);
-            AddAttribute(new StringAttribute(USER_NAME, userName));
+                RemoveAttributes(USER_NAME);
+                AddAttribute(new StringAttribute(USER_NAME, value));
+            }
+            get
+            {
+                IList<RadiusAttribute> attrs = GetAttributes(USER_NAME);
+                if (attrs.Count < 1 || attrs.Count > 1)
+                    throw new NotImplementedException("exactly one User-Name attribute required");
+
+                RadiusAttribute ra = attrs[0];
+                return (ra).Value;
+            }
         }
 
         /// <summary>
         ///Sets the plain-text user password.
         ///@param userPassword user password to set
         /// </summary>
-
-        public void setUserPassword(String userPassword)
+        public string Password
         {
-            if (userPassword == null || userPassword.Length == 0)
-                throw new ArgumentException("password is empty");
-            password = userPassword;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException("password is empty");
+                password = value;
+            }
+        }
+
+        /// <summary>
+        ///Returns the protocol used for encrypting the passphrase.
+        ///@return AUTH_PAP or AUTH_CHAP
+        /// </summary>
+        public string AuthProtocol
+        {
+            get { return authProtocol; }
+            set
+            {
+                if (value != null && (value.Equals(AUTH_PAP) || value.Equals(AUTH_CHAP)))
+                    authProtocol = value;
+                else
+                    throw new ArgumentException("protocol must be pap or chap");
+            }
         }
 
         /// <summary>
@@ -112,49 +138,9 @@ namespace TinyRadius.Net.Packet
         ///@see #verifyPassword(String)
         ///@return user password
         /// </summary>
-
         public String getUserPassword()
         {
             return password;
-        }
-
-        /// <summary>
-        ///Retrieves the user name from the User-Name attribute.
-        ///@return user name
-        /// </summary>
-
-        public String getUserName()
-        {
-            var attrs = GetAttributes(USER_NAME);
-            if (attrs.Count < 1 || attrs.Count > 1)
-                throw new NotImplementedException("exactly one User-Name attribute required");
-
-            var ra = (RadiusAttribute)attrs[0];
-            return ((StringAttribute)ra).Value;
-        }
-
-        /// <summary>
-        ///Returns the protocol used for encrypting the passphrase.
-        ///@return AUTH_PAP or AUTH_CHAP
-        /// </summary>
-
-        public String getAuthProtocol()
-        {
-            return authProtocol;
-        }
-
-        /// <summary>
-        ///Selects the protocol to use for encrypting the passphrase when
-        ///encoding this Radius packet.
-        ///@param authProtocol AUTH_PAP or AUTH_CHAP
-        /// </summary>
-
-        public void setAuthProtocol(String authProtocol)
-        {
-            if (authProtocol != null && (authProtocol.Equals(AUTH_PAP) || authProtocol.Equals(AUTH_CHAP)))
-                this.authProtocol = authProtocol;
-            else
-                throw new ArgumentException("protocol must be pap or chap");
         }
 
         /// <summary>
@@ -164,13 +150,12 @@ namespace TinyRadius.Net.Packet
         ///@param plaintext
         ///@return true if the password is valid, false otherwise
         /// </summary>
-
-        public bool verifyPassword(String plaintext)
+        public bool VerifyPassword(String plaintext)
         {
             if (plaintext == null || plaintext.Length == 0)
                 throw new ArgumentException("password is empty");
-            if (getAuthProtocol().Equals(AUTH_CHAP))
-                return verifyChapPassword(plaintext);
+            if (AuthProtocol.Equals(AUTH_CHAP))
+                return VerifyChapPassword(plaintext);
             else
                 return getUserPassword().Equals(plaintext);
         }
@@ -179,8 +164,7 @@ namespace TinyRadius.Net.Packet
         ///Decrypts the User-Password attribute.
         ///@see TinyRadius.packet.RadiusPacket#decodeRequestAttributes(java.lang.String)
         /// </summary>
-
-        protected void decodeRequestAttributes(String sharedSecret)
+        protected override void DecodeRequestAttributes(String sharedSecret)
         {
             // detect auth protocol 
             RadiusAttribute userPassword = GetAttribute(USER_PASSWORD);
@@ -189,14 +173,14 @@ namespace TinyRadius.Net.Packet
 
             if (userPassword != null)
             {
-                setAuthProtocol(AUTH_PAP);
-                password = decodePapPassword(userPassword.Data, RadiusUtil.GetUtf8Bytes(sharedSecret));
+                AuthProtocol = AUTH_PAP;
+                password = DecodePapPassword(userPassword.Data, RadiusUtil.GetUtf8Bytes(sharedSecret));
                 // copy truncated data
                 userPassword.Data = RadiusUtil.GetUtf8Bytes(password);
             }
             else if (chapPassword != null && chapChallenge != null)
             {
-                setAuthProtocol(AUTH_CHAP);
+                AuthProtocol = AUTH_CHAP;
                 this.chapPassword = chapPassword.Data;
                 this.chapChallenge = chapChallenge.Data;
             }
@@ -208,24 +192,23 @@ namespace TinyRadius.Net.Packet
         ///Sets and encrypts the User-Password attribute.
         ///@see TinyRadius.packet.RadiusPacket#encodeRequestAttributes(java.lang.String)
         /// </summary>
-
-        protected void encodeRequestAttributes(String sharedSecret)
+        protected override void EncodeRequestAttributes(String sharedSecret)
         {
-            if (password == null || password.Length == 0)
+            if (string.IsNullOrEmpty(password))
                 return;
             // ok for proxied packets whose CHAP password is already encrypted
             //throw new NotImplementedException("no password set");
 
-            if (getAuthProtocol().Equals(AUTH_PAP))
+            if (AuthProtocol.Equals(AUTH_PAP))
             {
-                byte[] pass = encodePapPassword(RadiusUtil.GetUtf8Bytes(password), RadiusUtil.GetUtf8Bytes(sharedSecret));
+                byte[] pass = EncodePapPassword(RadiusUtil.GetUtf8Bytes(password), RadiusUtil.GetUtf8Bytes(sharedSecret));
                 RemoveAttributes(USER_PASSWORD);
                 AddAttribute(new RadiusAttribute(USER_PASSWORD, pass));
             }
-            else if (getAuthProtocol().Equals(AUTH_CHAP))
+            else if (AuthProtocol.Equals(AUTH_CHAP))
             {
-                byte[] challenge = createChapChallenge();
-                byte[] pass = encodeChapPassword(password, challenge);
+                byte[] challenge = CreateChapChallenge();
+                byte[] pass = EncodeChapPassword(password, challenge);
                 RemoveAttributes(CHAP_PASSWORD);
                 RemoveAttributes(CHAP_CHALLENGE);
                 AddAttribute(new RadiusAttribute(CHAP_PASSWORD, pass));
@@ -240,8 +223,7 @@ namespace TinyRadius.Net.Packet
         ///@param sharedSecret shared secret
         ///@return the byte array containing the encrypted password
         /// </summary>
-
-        private byte[] encodePapPassword(byte[] userPass, byte[] sharedSecret)
+        private byte[] EncodePapPassword(byte[] userPass, byte[] sharedSecret)
         {
             // the password must be a multiple of 16 bytes and less than or equal
             // to 128 bytes. If it isn't a multiple of 16 bytes fill it out with zeroes
@@ -262,7 +244,7 @@ namespace TinyRadius.Net.Packet
             byte[] encryptedPass = null;
             if (userPassBytes.Length < 128)
             {
-                if (userPassBytes.Length % 16 == 0)
+                if (userPassBytes.Length%16 == 0)
                 {
                     // tt is already a multiple of 16 bytes
                     encryptedPass = new byte[userPassBytes.Length];
@@ -270,7 +252,7 @@ namespace TinyRadius.Net.Packet
                 else
                 {
                     // make it a multiple of 16 bytes
-                    encryptedPass = new byte[((userPassBytes.Length / 16) * 16) + 16];
+                    encryptedPass = new byte[((userPassBytes.Length/16)*16) + 16];
                 }
             }
             else
@@ -288,21 +270,21 @@ namespace TinyRadius.Net.Packet
 
             // digest shared secret and authenticator
 
-            var md5 = MD5.Create();
+            MD5 md5 = MD5.Create();
             var lastBlock = new byte[16];
-
+            var byteAry = new List<byte>();
             for (int i = 0; i < encryptedPass.Length; i += 16)
             {
-                md5.reset();
-                md5.update(sharedSecret);
-                md5.update(i == 0 ? getAuthenticator() : lastBlock);
-                byte[] bn = md5.digest();
+                byteAry.Clear();
+                byteAry.AddRange(sharedSecret);
+                byteAry.AddRange(i == 0 ? Authenticator : lastBlock);
+                byte[] bn = md5.ComputeHash(byteAry.ToArray());
 
                 Array.Copy(encryptedPass, i, lastBlock, 0, 16);
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
             }
 
             return encryptedPass;
@@ -314,32 +296,31 @@ namespace TinyRadius.Net.Packet
         ///@param sharedSecret shared secret
         ///@return decrypted password
         /// </summary>
-
-        private String decodePapPassword(byte[] encryptedPass, byte[] sharedSecret)
+        private String DecodePapPassword(byte[] encryptedPass, byte[] sharedSecret)
         {
             if (encryptedPass == null || encryptedPass.Length < 16)
             {
                 // PAP passwords require at least 16 bytes
                 logger.Warn("invalid Radius packet: User-Password attribute with malformed PAP password, Length = " +
-                            encryptedPass.Length + ", but Length must be greater than 15");
+                            (encryptedPass != null ? encryptedPass.Length : 0) + ", but Length must be greater than 15");
                 throw new RadiusException("malformed User-Password attribute");
             }
 
-            MessageDigest md5 = GetMd5Digest();
+            var byteAry = new List<byte>();
             var lastBlock = new byte[16];
-
+            MD5 md5 = MD5.Create();
             for (int i = 0; i < encryptedPass.Length; i += 16)
             {
-                md5.reset();
-                md5.update(sharedSecret);
-                md5.update(i == 0 ? getAuthenticator() : lastBlock);
-                byte[] bn = md5.digest();
+                byteAry.Clear();
+                byteAry.AddRange(sharedSecret);
+                byteAry.AddRange(i == 0 ? Authenticator : lastBlock);
+                byte[] bn = md5.ComputeHash(byteAry.ToArray());
 
                 Array.Copy(encryptedPass, i, lastBlock, 0, 16);
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
             }
 
             // remove trailing zeros
@@ -357,8 +338,7 @@ namespace TinyRadius.Net.Packet
         ///Creates a random CHAP challenge using a secure random algorithm.
         ///@return 16 byte CHAP challenge
         /// </summary>
-
-        private byte[] createChapChallenge()
+        private byte[] CreateChapChallenge()
         {
             var challenge = new byte[16];
             random.NextBytes(challenge);
@@ -371,19 +351,18 @@ namespace TinyRadius.Net.Packet
         ///@param chapChallenge CHAP challenge
         ///@return CHAP-encoded password
         /// </summary>
-
-        private byte[] encodeChapPassword(String plaintext, byte[] chapChallenge)
+        private byte[] EncodeChapPassword(String plaintext, byte[] chapChallenge)
         {
             // see RFC 2865 section 2.2
-            var chapIdentifier = (byte)random.nextInt(256);
+            var chapIdentifier = (byte) random.Next(256);
             var chapPassword = new byte[17];
             chapPassword[0] = chapIdentifier;
 
-            MessageDigest md5 = GetMd5Digest();
-            md5.reset();
-            md5.update(chapIdentifier);
-            md5.update(RadiusUtil.GetUtf8Bytes(plaintext));
-            byte[] chapHash = md5.digest(chapChallenge);
+            MD5 md5 = MD5.Create();
+            var aryList = new List<byte>();
+            aryList.Add(chapIdentifier);
+            aryList.AddRange(RadiusUtil.GetUtf8Bytes(plaintext));
+            byte[] chapHash = md5.ComputeHash(chapChallenge);
 
             Array.Copy(chapHash, 0, chapPassword, 1, 16);
             return chapPassword;
@@ -393,10 +372,9 @@ namespace TinyRadius.Net.Packet
         ///Verifies a CHAP password against the given plaintext password.
         ///@return plain-text password
         /// </summary>
-
-        private bool verifyChapPassword(String plaintext)
+        private bool VerifyChapPassword(String plaintext)
         {
-            if (plaintext == null || plaintext.Length == 0)
+            if (string.IsNullOrEmpty(plaintext))
                 throw new ArgumentException("plaintext must not be empty");
             if (chapChallenge == null || chapChallenge.Length != 16)
                 throw new RadiusException("CHAP challenge must be 16 bytes");
@@ -404,22 +382,16 @@ namespace TinyRadius.Net.Packet
                 throw new RadiusException("CHAP password must be 17 bytes");
 
             byte chapIdentifier = chapPassword[0];
-            MessageDigest md5 = GetMd5Digest();
-            md5.reset();
-            md5.update(chapIdentifier);
-            md5.update(RadiusUtil.GetUtf8Bytes(plaintext));
-            byte[] chapHash = md5.digest(chapChallenge);
 
-            // compare
+            var byteAry = new List<byte> {chapIdentifier};
+            byteAry.AddRange(RadiusUtil.GetUtf8Bytes(plaintext));
+            byte[] chapHash = MD5.Create().ComputeHash(chapChallenge);
+
+            // compar
             for (int i = 0; i < 16; i++)
                 if (chapHash[i] != chapPassword[i + 1])
                     return false;
             return true;
         }
-
-        /// <summary>
-        ///Temporary storage for the unencrypted User-Password
-        ///attribute.
-        /// </summary>
     }
 }

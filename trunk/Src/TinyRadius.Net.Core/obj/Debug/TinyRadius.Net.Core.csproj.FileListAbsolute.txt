@@ -1,2 +1,3 @@
 E:\TinyRadius.Net\ClassLibrary1\ClassLibrary1\obj\Debug\ResolveAssemblyReference.cache
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
+F:\Radius.net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache

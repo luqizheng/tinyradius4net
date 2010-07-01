@@ -26,7 +26,7 @@ namespace TinyRadius.Net.Attributes
         public IpAttribute(int type, String value)
         {
             Type = type;
-            setAttributeValue(value);
+            this.Value = value;
         }
 
         /**
