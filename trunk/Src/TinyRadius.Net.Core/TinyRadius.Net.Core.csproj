@@ -8,7 +8,7 @@
     <ProjectGuid>{E3577C9B-AA09-4448-9601-F3E240110F52}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TinyRadius.Net.Net</RootNamespace>
+    <RootNamespace>TinyRadius.Net</RootNamespace>
     <AssemblyName>TinyRadius.Net.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -60,7 +60,7 @@
     <Compile Include="Attributes\VendorSpecificAttribute.cs" />
     <Compile Include="Dictionaries\AttributeType.cs" />
     <Compile Include="Dictionaries\DefaultDictionary.cs" />
-    <Compile Include="Dictionaries\Dictionary.cs" />
+    <Compile Include="Dictionaries\IDictionary.cs" />
     <Compile Include="Dictionaries\DictionaryParser.cs" />
     <Compile Include="Dictionaries\MemoryDictionary.cs" />
     <Content Include="Dictionaries\package.html" />

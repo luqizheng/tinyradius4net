@@ -1,107 +1,109 @@
-/**
- * $Id: IntegerAttribute.java,v 1.4 2005/09/04 22:11:03 wuttke Exp $
- * Created on 08.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.4 $
- */
-using TinyRadius.Net.Directories;
-using TinyRadius.Net.Util;
 using System;
+using TinyRadius.Net.Dictionaries;
+using TinyRadius.Net.Util;
 
-namespace TinyRadius.Net.Attribute
+namespace TinyRadius.Net.Attributes
 {
+    /// <summary>
+    ///  This class represents a Radius attribute which only
+    ///  contains a 32 bit integer.
+    /// </summary>
+
+    public class IntegerAttribute : RadiusAttribute
+    {
+        /// <summary>
+        ///  Constructs an empty integer attribute.
+        /// </summary>
+
+        public IntegerAttribute()
+        {
+        }
+
+        /// <summary>
+        ///  Constructs an integer attribute with the given value.
+        ///  @param type attribute type
+        ///  @param value attribute value
+        /// </summary>
+
+        public IntegerAttribute(int type, int value)
+        {
+            Type = type;
+            ValueInt = value;
+        }
+
+        /// <summary>
+        ///  Returns the string value of this attribute.
+        ///  @return a string
+        /// </summary>
+
+        public int ValueInt
+        {
+            get
+            {
+                byte[] data = Data;
+                return (((data[0] & 0x0ff) << 24) | ((data[1] & 0x0ff) << 16) |
+                        ((data[2] & 0x0ff) << 8) | (data[3] & 0x0ff));
+            }
+            set
+            {
+                var data = new byte[4];
+                data[0] = (byte)(value >> 24 & 0x0ff);
+                data[1] = (byte)(value >> 16 & 0x0ff);
+                data[2] = (byte)(value >> 8 & 0x0ff);
+                data[3] = (byte)(value & 0x0ff);
+                Data = data;
+            }
+        }
+
+        /// <summary>
+        ///  Returns the value of this attribute as a string.
+        ///  Tries to resolve enumerations.
+        ///  @see TinyRadius.attribute.RadiusAttribute#getAttributeValue()
+        /// </summary>
+
+        public override string Value
+        {
+            get
+            {
+                int value = ValueInt;
+                AttributeType at = GetAttributeTypeObject();
+                if (at != null)
+                {
+                    String name = at.GetEnumeration(value);
+                    if (name != null)
+                        return name;
+                }
+                return value.ToString();
+            }
+            set
+            {
+                AttributeType at = GetAttributeTypeObject();
+                if (at != null)
+                {
+                    int val = at.GetEnumeration(value);
+                    if (val != -1)
+                    {
+                        ValueInt = val;
+                        return;
+                    }
+                }
+
+                ValueInt = Convert.ToInt32(value);
+            }
+        }
 
 
-/**
- * This class represents a Radius attribute which only
- * contains a 32 bit integer.
- */
-public class IntegerAttribute : RadiusAttribute {
 
-	/**
-	 * Constructs an empty integer attribute.
-	 */
-	public IntegerAttribute() {		
-	}
-	
-	/**
-	 * Constructs an integer attribute with the given value.
-	 * @param type attribute type
-	 * @param value attribute value
-	 */
-	public IntegerAttribute(int type, int value) {
-		setAttributeType(type);
-		setAttributeValue(value);
-	}
-	
-	/**
-	 * Returns the string value of this attribute.
-	 * @return a string
-	 */
-	public int getAttributeValueInt() {
-		byte[] data = getAttributeData();
-		return (((data[0] & 0x0ff) << 24) | ((data[1] & 0x0ff) << 16) | 
-				((data[2] & 0x0ff) << 8) | (data[3] & 0x0ff));
-	}
-	
-	/**
-	 * Returns the value of this attribute as a string.
-	 * Tries to resolve enumerations.
-	 * @see TinyRadius.attribute.RadiusAttribute#getAttributeValue()
-	 */
-	public String getAttributeValue() {
-		int value = getAttributeValueInt();
-		AttributeType at = getAttributeTypeObject();
-		if (at != null) {
-			String name = at.getEnumeration(value);
-			if (name != null)
-				return name;
-		}
+        /// <summary>
+        ///  Check attribute Length.
+        ///  @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
+        /// </summary>
 
-		return Integer.toString(value);
-	}
-	
-	/**
-	 * Sets the value of this attribute.
-	 * @param value integer value
-	 */
-	public void setAttributeValue(int value) {
-		byte[] data = new byte[4];
-		data[0] = (byte)(value >> 24 & 0x0ff);
-		data[1] = (byte)(value >> 16 & 0x0ff);
-		data[2] = (byte)(value >> 8 & 0x0ff);
-		data[3] = (byte)(value & 0x0ff);
-		setAttributeData(data);
-	}
-	
-	/**
-	 * Sets the value of this attribute.
-	 * @exception NumberFormatException if value is not a number and constant cannot be resolved
-	 * @see TinyRadius.attribute.RadiusAttribute#setAttributeValue(java.lang.String)
-	 */
-	public void setAttributeValue(String value) {
-		AttributeType at = getAttributeTypeObject();
-		if (at != null) {
-			Integer val = at.getEnumeration(value);
-			if (val != null) {
-				setAttributeValue(val.intValue());
-				return;
-			}
-		}
-		
-		setAttributeValue(Convert.ToInt32(value));
-	}
-	
-	/**
-	 * Check attribute length.
-	 * @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
-	 */
-	public void readAttribute(byte[] data, int offset, int length)
-	{
-		if (length != 6)
-			throw new RadiusException("integer attribute: expected 4 bytes data");
-		base.readAttribute(data, offset, length);
-	}
-	
-}
+        public override void ReadAttribute(byte[] data, int offset, int length)
+        {
+            if (length != 6)
+                throw new RadiusException("integer attribute: expected 4 bytes data");
+            base.ReadAttribute(data, offset, length);
+        }
+    }
 }

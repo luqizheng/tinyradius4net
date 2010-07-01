@@ -1,233 +1,193 @@
-/**
- * $Id: RadiusAttribute.java,v 1.4 2006/02/20 23:37:38 wuttke Exp $
- * Created on 07.04.2005
- * Released under the terms of the LGPL
- * @author Matthias Wuttke
- * @version $Revision: 1.4 $
- */
-
-using TinyRadius.Net.Util;
 using System;
-using TinyRadius.Net.Directories;
-namespace TinyRadius.Net.Attribute
+using TinyRadius.Net.Dictionaries;
+using TinyRadius.Net.Util;
+
+namespace TinyRadius.Net.Attributes
 {
-
-
-
-    /**
-     * This class represents a generic Radius attribute. Subclasses implement
-     * methods to access the fields of special attributes.
-     */
+    /// <summary>
+    ///  This class represents a generic Radius attribute. Subclasses implement
+    ///  methods to access the fields of special attributes.
+    /// </summary>
     public class RadiusAttribute
     {
+        /// <summary>
+        ///  Constructs an empty Radius attribute.
+        /// </summary>
+        private byte[] _Data;
 
-        /**
-         * Constructs an empty Radius attribute.
-         */
+        private int attributeType = -1;
+        private IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
+        private int vendorId = -1;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public RadiusAttribute()
         {
         }
 
-        /**
-         * Constructs a Radius attribute with the specified
-         * type and data.
-         * @param type attribute type, see AttributeTypes.*
-         * @param data attribute data
-         */
+        /// <summary>
+        ///  Constructs a Radius attribute with the specified
+        ///  type and data.
+        ///  @param type attribute type, see AttributeTypes./// 
+        ///  @param data attribute data
+        /// </summary>
         public RadiusAttribute(int type, byte[] data)
         {
-            setAttributeType(type);
-            setAttributeData(data);
+            Type = type;
+            Data = data;
         }
 
-        /**
-         * Returns the data for this attribute.
-         * @return attribute data
-         */
-        public byte[] getAttributeData()
+        /// <summary>
+        ///  Returns the data for this attribute.
+        ///  @return attribute data
+        /// </summary>
+        public byte[] Data
         {
-            return attributeData;
+            get { return _Data; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Value", "attribute data is null");
+                this._Data = value;
+            }
         }
 
-        /**
-         * Sets the data for this attribute.
-         * @param attributeData attribute data
-         */
-        public void setAttributeData(byte[] attributeData)
+        /// <summary>
+        ///  Returns the type of this Radius attribute.
+        ///  @return type code, 0-255
+        /// </summary>
+        public int Type
         {
-            if (attributeData == null)
-                throw new ArgumentNullException("attribute data is null");
-            this.attributeData = attributeData;
+            get { return attributeType; }
+            set
+            {
+                if (value < 0 || value > 255)
+                    throw new ArgumentException("attribute type invalid: " + value);
+                this.attributeType = value;
+            }
         }
 
-        /**
-         * Returns the type of this Radius attribute.
-         * @return type code, 0-255
-         */
-        public int getAttributeType()
+        /// <summary>
+        ///  Sets the value of the attribute using a string.
+        ///  @param value value as a string
+        /// </summary>
+        public virtual string Value
         {
-            return attributeType;
+            set { throw new NotImplementedException("cannot set the value of attribute " + attributeType + " as a string"); }
+            get { return RadiusUtil.GetHexString(Data); }
         }
 
-        /**
-         * Sets the type of this Radius attribute.
-         * @param attributeType type code, 0-255
-         */
-        public void setAttributeType(int attributeType)
+        /// <summary>
+        ///  Gets the Vendor-Id of the Vendor-Specific attribute this
+        ///  attribute belongs to. Returns -1 if this attribute is not
+        ///  a sub attribute of a Vendor-Specific attribute.
+        ///  @return vendor ID
+        /// </summary>
+        public int VendorId
         {
-            if (attributeType < 0 || attributeType > 255)
-                throw new ArgumentException("attribute type invalid: " + attributeType);
-            this.attributeType = attributeType;
+            get { return vendorId; }
+            set { this.vendorId = value; }
         }
 
-        /**
-         * Sets the value of the attribute using a string.
-         * @param value value as a string
-         */
-        public void setAttributeValue(String value)
+        /// <summary>
+        ///  Returns the dictionary this Radius attribute uses.
+        ///  @return Hashtable instance
+        /// </summary>
+        public virtual IWritableDictionary Dictionary
         {
-            throw new RuntimeException("cannot set the value of attribute " + attributeType + " as a string");
+            get { return dictionary; }
+            set { this.dictionary = value; }
         }
 
-        /**
-         * Gets the value of this attribute as a string.
-         * @return value
-         * @exception RadiusException if the value is invalid
-         */
-        public String getAttributeValue()
+        /// <summary>
+        ///  Returns this attribute encoded as a byte array.
+        ///  @return attribute
+        /// </summary>
+        public virtual byte[] WriteAttribute()
         {
-            return RadiusUtil.getHexString(getAttributeData());
-        }
+            if (Type == -1)
+                throw new ArgumentException("Type type not set");
+            if (this.Data == null)
+                throw new ArgumentNullException("Data", "attribute data not set");
 
-        /**
-         * Gets the Vendor-Id of the Vendor-Specific attribute this
-         * attribute belongs to. Returns -1 if this attribute is not
-         * a sub attribute of a Vendor-Specific attribute.
-         * @return vendor ID
-         */
-        public int getVendorId()
-        {
-            return vendorId;
-        }
-
-        /**
-         * Sets the Vendor-Id of the Vendor-Specific attribute this
-         * attribute belongs to. The default value of -1 means this attribute
-         * is not a sub attribute of a Vendor-Specific attribute.
-         * @param vendorId vendor ID
-         */
-        public void setVendorId(int vendorId)
-        {
-            this.vendorId = vendorId;
-        }
-
-        /**
-         * Returns the dictionary this Radius attribute uses.
-         * @return Hashtable instance
-         */
-        public IWritableDictionary getDictionary()
-        {
-            return dictionary;
-        }
-
-        /**
-         * Sets a custom dictionary to use. If no dictionary is set,
-         * the default dictionary is used.
-         * @param dictionary Hashtable class to use
-         * @see DefaultDictionary
-         */
-        public void setDictionary(IWritableDictionary dictionary)
-        {
-            this.dictionary = dictionary;
-        }
-
-        /**
-         * Returns this attribute encoded as a byte array.
-         * @return attribute
-         */
-        public byte[] writeAttribute()
-        {
-            if (getAttributeType() == -1)
-                throw new ArgumentException("attribute type not set");
-            if (attributeData == null)
-                throw new ArgumentNullException("attribute data not set");
-
-            byte[] attr = new byte[2 + attributeData.length];
-            attr[0] = (byte)getAttributeType();
-            attr[1] = (byte)(2 + attributeData.length);
-            System.arraycopy(attributeData, 0, attr, 2, attributeData.length);
+            var attr = new byte[2 + _Data.Length];
+            attr[0] = (byte)Type;
+            attr[1] = (byte)(2 + _Data.Length);
+            Array.Copy(_Data, 0, attr, 2, _Data.Length);
             return attr;
         }
 
-        /**
-         * Reads in this attribute from the passed byte array.
-         * @param data
-         */
-        public void readAttribute(byte[] data, int offset, int length)
+        /// <summary>
+        ///  Reads in this attribute from the passed byte array.
+        ///  @param data
+        /// </summary>
+        public virtual void ReadAttribute(byte[] data, int offset, int Length)
         {
-            if (length < 2)
-                throw new RadiusException("attribute length too small: " + length);
+            if (Length < 2)
+                throw new RadiusException("attribute Length too small: " + Length);
             int attrType = data[offset] & 0x0ff;
             int attrLen = data[offset + 1] & 0x0ff;
-            byte[] attrData = new byte[attrLen - 2];
-            System.arraycopy(data, offset + 2, attrData, 0, attrLen - 2);
-            setAttributeType(attrType);
-            setAttributeData(attrData);
+            var attrData = new byte[attrLen - 2];
+            Array.Copy(data, offset + 2, attrData, 0, attrLen - 2);
+            Type = attrType;
+            Data = attrData;
         }
 
-        /**
-         * String representation for debugging purposes.
-         * @see java.lang.Object#toString()
-         */
+        /// <summary>
+        ///  String representation for debugging purposes.
+        ///  @see java.lang.Object#toString()
+        /// </summary>
         public override String ToString()
         {
             String name;
 
             // determine attribute name
-            AttributeType at = getAttributeTypeObject();
+            AttributeType at = GetAttributeTypeObject();
             if (at != null)
-                name = at.getName();
-            else if (getVendorId() != -1)
-                name = "Unknown-Sub-Attribute-" + getAttributeType();
+                name = at.Name;
+            else if (VendorId != -1)
+                name = "Unknown-Sub-Attribute-" + Type;
             else
-                name = "Unknown-Attribute-" + getAttributeType();
+                name = "Unknown-Attribute-" + Type;
 
             // indent sub attributes
-            if (getVendorId() != -1)
+            if (VendorId != -1)
                 name = "  " + name;
 
-            return name + ": " + getAttributeValue();
+            return name + ": " + Value;
         }
 
-        /**
-         * Retrieves an AttributeType object for this attribute.
-         * @return AttributeType object for (sub-)attribute or null
-         */
-        public AttributeType getAttributeTypeObject()
+        /// <summary>
+        ///  Retrieves an AttributeType object for this attribute.
+        ///  @return AttributeType object for (sub-)attribute or null
+        /// </summary>
+        public AttributeType GetAttributeTypeObject()
         {
-            if (getVendorId() != -1)
-                return dictionary.getAttributeTypeByCode(getVendorId(), getAttributeType());
+            if (VendorId != -1)
+                return dictionary.GetAttributeTypeByCode(VendorId, Type);
             else
-                return dictionary.getAttributeTypeByCode(getAttributeType());
+                return dictionary.GetAttributeTypeByCode(Type);
         }
 
-        /**
-         * Creates a RadiusAttribute object of the appropriate type.
-         * @param dictionary Hashtable to use
-         * @param vendorId vendor ID or -1
-         * @param attributeType attribute type
-         * @return RadiusAttribute object
-         */
-        public static RadiusAttribute createRadiusAttribute(IWritableDictionary dictionary, int vendorId, int attributeType)
+        /// <summary>
+        ///  Creates a RadiusAttribute object of the appropriate type.
+        ///  @param dictionary Hashtable to use
+        ///  @param vendorId vendor ID or -1
+        ///  @param attributeType attribute type
+        ///  @return RadiusAttribute object
+        /// </summary>
+        public static RadiusAttribute CreateRadiusAttribute(IWritableDictionary dictionary, int vendorId,
+                                                            int attributeType)
         {
-            RadiusAttribute attribute = new RadiusAttribute();
+            var attribute = new RadiusAttribute();
 
-            AttributeType at = dictionary.getAttributeTypeByCode(vendorId, attributeType);
-            if (at != null && at.getAttributeClass() != null)
+            AttributeType at = dictionary.GetAttributeTypeByCode(vendorId, attributeType);
+            if (at != null && at.Class != null)
             {
                 try
                 {
-                    attribute = (RadiusAttribute)at.getAttributeClass().newInstance();
+                    attribute = (RadiusAttribute)Activator.CreateInstance(at.Class);
                 }
                 catch (Exception e)
                 {
@@ -235,56 +195,35 @@ namespace TinyRadius.Net.Attribute
                 }
             }
 
-            attribute.setAttributeType(attributeType);
-            attribute.setDictionary(dictionary);
-            attribute.setVendorId(vendorId);
+            attribute.Type = attributeType;
+            attribute.Dictionary = dictionary;
+            attribute.VendorId = vendorId;
             return attribute;
         }
 
-        /**
-         * Creates a Radius attribute, including vendor-specific
-         * attributes. The default dictionary is used.
-         * @param vendorId vendor ID or -1
-         * @param attributeType attribute type
-         * @return RadiusAttribute instance
-         */
-        public static RadiusAttribute createRadiusAttribute(int vendorId, int attributeType)
+        /// <summary>
+        ///  Creates a Radius attribute, including vendor-specific
+        ///  attributes. The default dictionary is used.
+        ///  @param vendorId vendor ID or -1
+        ///  @param attributeType attribute type
+        ///  @return RadiusAttribute instance
+        /// </summary>
+        public static RadiusAttribute CreateRadiusAttribute(int vendorId, int attributeType)
         {
-            MemoryDictionary dictionary = DefaultDictionary.getDefaultDictionary();
-            return createRadiusAttribute(dictionary, vendorId, attributeType);
+            IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
+            return CreateRadiusAttribute(dictionary, vendorId, attributeType);
         }
 
-        /**
-         * Creates a Radius attribute. The default dictionary is
-         * used.
-         * @param attributeType attribute type
-         * @return RadiusAttribute instance
-         */
-        public static RadiusAttribute createRadiusAttribute(int attributeType)
+        /// <summary>
+        ///  Creates a Radius attribute. The default dictionary is
+        ///  used.
+        ///  @param attributeType attribute type
+        ///  @return RadiusAttribute instance
+        /// </summary>
+        public static RadiusAttribute CreateRadiusAttribute(int attributeType)
         {
-            Hashtable dictionary = DefaultDictionary.getDefaultDictionary();
-            return createRadiusAttribute(dictionary, -1, attributeType);
+            IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
+            return CreateRadiusAttribute(dictionary, -1, attributeType);
         }
-
-        /**
-         * Hashtable to look up attribute names.
-         */
-        private IWritableDictionary dictionary = DefaultDictionary.getDefaultDictionary();
-
-        /**
-         * Attribute type
-         */
-        private int attributeType = -1;
-
-        /**
-         * Vendor ID, only for sub-attributes of Vendor-Specific attributes.
-         */
-        private int vendorId = -1;
-
-        /**
-         * Attribute data
-         */
-        private byte[] attributeData = null;
-
     }
 }

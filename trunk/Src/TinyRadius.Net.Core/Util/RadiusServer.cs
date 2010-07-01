@@ -1,10 +1,4 @@
-/**
- * $Id: RadiusServer.java,v 1.11 2008/04/24 05:22:50 wuttke Exp $
- * Created on 09.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.11 $
- */
-using TinyRadius.Net.Attribute;
+using TinyRadius.Net.Attributes;
 using TinyRadius.Net.Packet;
 using System;
 using TinyRadius.Net.packet;
@@ -77,7 +71,7 @@ namespace TinyRadius.Net.Util
             if (plaintext != null && accessRequest.verifyPassword(plaintext))
                 type = RadiusPacket.ACCESS_ACCEPT;
 
-            RadiusPacket answer = new RadiusPacket(type, accessRequest.getPacketIdentifier());
+            RadiusPacket answer = new RadiusPacket(type, accessRequest.Identifier);
             copyProxyState(accessRequest, answer);
             return answer;
         }
@@ -93,7 +87,7 @@ namespace TinyRadius.Net.Util
          */
         public RadiusPacket accountingRequestReceived(AccountingRequest accountingRequest, InetSocketAddress client)
         {
-            RadiusPacket answer = new RadiusPacket(RadiusPacket.ACCOUNTING_RESPONSE, accountingRequest.getPacketIdentifier());
+            RadiusPacket answer = new RadiusPacket(RadiusPacket.ACCOUNTING_RESPONSE, accountingRequest.Identifier);
             copyProxyState(accountingRequest, answer);
             return answer;
         }
@@ -322,11 +316,11 @@ namespace TinyRadius.Net.Util
          */
         protected void copyProxyState(RadiusPacket request, RadiusPacket answer)
         {
-            ArrayList proxyStateAttrs = request.getAttributes(33);
+            ArrayList proxyStateAttrs = request.GetAttributes(33);
             for (Iterator i = proxyStateAttrs.iterator(); i.hasNext(); )
             {
                 RadiusAttribute proxyStateAttr = (RadiusAttribute)i.next();
-                answer.addAttribute(proxyStateAttr);
+                answer.AddAttribute(proxyStateAttr);
             }
         }
 
@@ -360,7 +354,7 @@ namespace TinyRadius.Net.Util
         protected void listen(DatagramSocket s)
         {
             DatagramPacket packetIn = new DatagramPacket
-                (new byte[RadiusPacket.MAX_PACKET_LENGTH], RadiusPacket.MAX_PACKET_LENGTH);
+                (new byte[RadiusPacket.MaxPacketLength], RadiusPacket.MaxPacketLength);
             while (true)
             {
                 try
@@ -460,7 +454,7 @@ namespace TinyRadius.Net.Util
                     if (GetType(AccessRequest).IsInstanceOfType(request))
                         response = accessRequestReceived((AccessRequest)request, remoteAddress);
                     else
-                        logger.error("unknown Radius packet type: " + request.getPacketType());
+                        logger.error("unknown Radius packet type: " + request.Type);
                 }
                 else if (localAddress.getPort() == getAcctPort())
                 {
@@ -468,7 +462,7 @@ namespace TinyRadius.Net.Util
                     if (typeof(AccountingRequest).IsInstanceOfType(request))
                         response = accountingRequestReceived((AccountingRequest)request, remoteAddress);
                     else
-                        logger.error("unknown Radius packet type: " + request.getPacketType());
+                        logger.error("unknown Radius packet type: " + request.Type);
                 }
                 else
                 {
@@ -530,9 +524,9 @@ namespace TinyRadius.Net.Util
         protected DatagramPacket makeDatagramPacket(RadiusPacket packet, String secret, InetAddress address, int port, RadiusPacket request)
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            packet.encodeResponsePacket(bos, secret, request);
+            packet.EncodeResponsePacket(bos, secret, request);
             byte[] data = bos.toByteArray();
-            DatagramPacket datagram = new DatagramPacket(data, data.length, address, port);
+            DatagramPacket datagram = new DatagramPacket(data, data.Length, address, port);
             return datagram;
 
         }
@@ -549,7 +543,7 @@ namespace TinyRadius.Net.Util
         protected RadiusPacket makeRadiusPacket(DatagramPacket packet, String sharedSecret)
         {
             ByteArrayInputStream @in = new ByteArrayInputStream(packet.getData());
-            return RadiusPacket.decodeRequestPacket(@in, sharedSecret);
+            return RadiusPacket.DecodeRequestPacket(@in, sharedSecret);
         }
 
         /**
@@ -579,7 +573,7 @@ namespace TinyRadius.Net.Util
                     }
                     else
                     {
-                        if (p.address.equals(address) && p.packetIdentifier == packet.getPacketIdentifier())
+                        if (p.address.equals(address) && p.packetIdentifier == packet.Identifier)
                         {
                             if (authenticator != null && p.authenticator != null)
                             {
@@ -599,7 +593,7 @@ namespace TinyRadius.Net.Util
                 // add packet to receive list
                 ReceivedPacket rp = new ReceivedPacket();
                 rp.address = address;
-                rp.packetIdentifier = packet.getPacketIdentifier();
+                rp.packetIdentifier = packet.Identifier;
                 rp.receiveTime = now;
                 rp.authenticator = authenticator;
                 receivedPackets.add(rp);

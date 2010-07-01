@@ -1,212 +1,173 @@
-/**
- * $Id: AttributeType.java,v 1.3 2005/09/06 18:06:33 wuttke Exp $
- * Copyright by teuto.net Netzdienste GmbH 2005. All rights reserved.
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation. Commercial licenses also available.
- * See the accompanying file LICENSE for details.
- * @author Matthias Wuttke
- * @version $Revision: 1.3 $
- */
-using TinyRadius.Net.Attribute;
 using System;
-using System.Collections;
-namespace TinyRadius.Net.Directories
+using System.Collections.Generic;
+using TinyRadius.Net.Attributes;
+
+namespace TinyRadius.Net.Dictionaries
 {
-
-    /*using java.util.HashMap;
-    using java.util.Iterator;
-    using java.util.Map;
-    */
-
-
-    /**
-     * Represents a Radius attribute type.
-     */
+    /// <summary>
+    /// Represents a Radius attribute type.
+    /// </summary>
     public class AttributeType
     {
+        private Type _attributeClass;
+        private Dictionary<int, string> _enumeration;
+        private String _name;
+        private int _typeCode;
 
-        /**
-         * Create a new attribute type.
-         * @param code Radius attribute type code
-         * @param name Attribute type name
-         * @param type RadiusAttribute descendant who handles
-         * attributes of this type
-         */
+        /// <summary>
+        /// Create a new attribute type.
+        /// @param code Radius attribute type code
+        /// @param name Attribute type name
+        /// @param type RadiusAttribute descendant who handles
+        /// attributes of this type
+        /// </summary>
         public AttributeType(int code, String name, Type type)
         {
-            setTypeCode(code);
-            setName(name);
-            setAttributeClass(type);
+            VendorId = -1;
+            TypeCode = code;
+            Name = name;
+            Class = type;
         }
 
-        /**
-         * Constructs a Vendor-Specific sub-attribute type.
-         * @param vendor vendor ID
-         * @param code sub-attribute type code
-         * @param name sub-attribute name
-         * @param type sub-attribute class
-         */
+        /// <summary>
+        /// Constructs a Vendor-Specific sub-attribute type.
+        /// @param vendor vendor ID
+        /// @param code sub-attribute type code
+        /// @param name sub-attribute name
+        /// @param type sub-attribute class
+        /// </summary>
         public AttributeType(int vendor, int code, String name, Type type)
         {
-            setTypeCode(code);
-            setName(name);
-            setAttributeClass(type);
-            setVendorId(vendor);
+            TypeCode = code;
+            Name = name;
+            Class = type;
+            VendorId = vendor;
         }
 
-        /**
-         * Retrieves the Radius type code for this attribute type.
-         * @return Radius type code
-         */
-        public int getTypeCode()
+        /// <summary>
+        /// Sets the Radius type code for this attribute type.
+        /// @param code type code, 1-255
+        /// </summary>
+        public int TypeCode
         {
-            return typeCode;
+            set
+            {
+                if (value < 1 || value > 255)
+                    throw new ArgumentException("code out of bounds");
+                _typeCode = value;
+            }
+            get { return _typeCode; }
         }
 
-        /**
-         * Sets the Radius type code for this attribute type.
-         * @param code type code, 1-255
-         */
-        public void setTypeCode(int code)
+        /// <summary>
+        /// Sets the name of this type.
+        /// @param name type name
+        /// </summary>
+        public string Name
         {
-            if (code < 1 || code > 255)
-                throw new ArgumentException("code out of bounds");
-            this.typeCode = code;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException("name is empty");
+                this._name = value;
+            }
+            get { return _name; }
         }
 
-        /**
-         * Retrieves the name of this type.
-         * @return name
-         */
-        public String getName()
+        /// <summary>
+        /// Sets the RadiusAttribute descendant class which represents
+        /// attributes of this type.
+        /// </summary>
+        public Type Class
         {
-            return name;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value", "Class is null");
+                if (typeof(RadiusAttribute) != value)
+                    throw new ArgumentException("type is not a RadiusAttribute descendant");
+                _attributeClass = value;
+            }
+            get { return _attributeClass; }
         }
 
-        /**
-         * Sets the name of this type.
-         * @param name type name
-         */
-        public void setName(String name)
-        {
-            if (name == null || name.length() == 0)
-                throw new ArgumentException("name is empty");
-            this.name = name;
-        }
+        /// <summary>
+        /// Returns the vendor ID.
+        /// No vendor specific attribute = -1 
+        /// @return vendor ID
+        /// </summary>
+        public int VendorId { get; set; }
 
-        /**
-         * Retrieves the RadiusAttribute descendant class which represents
-         * attributes of this type.
-         * @return class
-         */
-        public Type getAttributeClass()
+        /// <summary>
+        /// Returns the name of the given integer value if this attribute
+        /// is an enumeration, or null if it is not or if the integer value
+        /// is unknown. 
+        /// @return name
+        /// </summary>
+        public String GetEnumeration(int value)
         {
-            return attributeClass;
-        }
-
-        /**
-         * Sets the RadiusAttribute descendant class which represents
-         * attributes of this type.
-         */
-        public void setAttributeClass(Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type is null");
-            if (typeof(RadiusAttribute) != type)
-                throw new ArgumentException("type is not a RadiusAttribute descendant");
-            this.attributeClass = type;
-        }
-
-        /**
-         * Returns the vendor ID.
-         * No vendor specific attribute = -1 
-         * @return vendor ID
-         */
-        public int getVendorId()
-        {
-            return vendorId;
-        }
-
-        /**
-         * Sets the vendor ID.
-         * @param vendorId vendor ID
-         */
-        public void setVendorId(int vendorId)
-        {
-            this.vendorId = vendorId;
-        }
-
-        /**
-         * Returns the name of the given integer value if this attribute
-         * is an enumeration, or null if it is not or if the integer value
-         * is unknown. 
-         * @return name
-         */
-        public String getEnumeration(int value)
-        {
-            if (enumeration != null)
-                return (String)enumeration.get(new Integer(value));
+            if (_enumeration != null)
+                /*return (String) enumeration.get(new Integer(value));*/
+                return _enumeration[value];
             else
                 return null;
         }
 
-        /**
-         * Returns the number of the given string value if this attribute is
-         * an enumeration, or null if it is not or if the string value is unknown.
-         * @param value string value
-         * @return Integer or null
-         */
-        public int getEnumeration(String value)
+        /// <summary>
+        /// Returns the number of the given string value if this attribute is
+        /// an enumeration, or null if it is not or if the string value is unknown.
+        /// @param value string value
+        /// @return Integer or -1
+        /// </summary>
+        public int GetEnumeration(String value)
         {
-            if (value == null || value.length() == 0)
+            if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
-            if (enumeration == null)
-                return null;
-            for (Iterator i = enumeration.entrySet().iterator(); i.hasNext(); )
+            if (_enumeration == null)
+                return -1;
+            foreach (var entry in _enumeration)
             {
-                Map.Entry e = (Map.Entry)i.next();
-                if (e.getValue().equals(value))
-                    return (Integer)e.getKey();
+                if (entry.Value == value)
+                    return entry.Key;
             }
-            return null;
+            return -1;
+            /*for (Iterator i = enumeration.entrySet().iterator(); i.hasNext();)
+            {
+                var e = (Map.Entry) i.next();
+                if (e.getValue().equals(value))
+                    return (Integer) e.getKey();
+            }
+            return null;*/
         }
 
-        /**
-         * Adds a name for an integer value of this attribute.
-         * @param num number that shall get a name
-         * @param name the name for this number
-         */
-        public void addEnumerationValue(int num, String name)
+        /// <summary>
+        /// Adds a name for an integer value of this attribute.
+        /// @param num number that shall get a name
+        /// @param name the name for this number
+        /// </summary>
+        public void AddEnumerationValue(int num, String name)
         {
-            if (name == null || name.length() == 0)
+            if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("name is empty");
-            if (enumeration == null)
-                enumeration = new HashMap();
-            enumeration.put(new Integer(num), name);
+            if (_enumeration == null)
+                _enumeration = new Dictionary<int, string>();
+            _enumeration.Add(num, name);
         }
 
-        /**
-         * String representation of AttributeType object
-         * for debugging purposes.
-         * @return string
-         * @see java.lang.Object#toString()
-         */
+        /// <summary>
+        /// String representation of AttributeType object
+        /// for debugging purposes.
+        /// @return string
+        /// @see java.lang.Object#toString()
+        /// </summary>
         public override String ToString()
         {
-            String s = getTypeCode() +
-                "/" + getName() +
-                ": " + attributeClass.getName();
-            if (getVendorId() != -1)
-                s += " (vendor " + getVendorId() + ")";
+            String s = TypeCode +
+                       "/" + Name +
+                       ": " + _attributeClass.Name;
+            if (VendorId != -1)
+                s += " (vendor " + VendorId + ")";
             return s;
         }
-
-        private int vendorId = -1;
-        private int typeCode;
-        private String name;
-        private Type attributeClass;
-        private Hashtable enumeration = null;
-
     }
 }

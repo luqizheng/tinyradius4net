@@ -47,7 +47,7 @@ public class AccountingRequest : RadiusPacket {
 	 * @param acctStatusType ACCT_STATUS_TYPE_*
 	 */
 	public AccountingRequest(String userName, int acctStatusType) 
-        :base(ACCOUNTING_REQUEST, getNextPacketIdentifier())
+        :base(ACCOUNTING_REQUEST, GetNextPacketIdentifier())
     {		
 		setUserName(userName);
 		setAcctStatusType(acctStatusType);
@@ -68,11 +68,11 @@ public class AccountingRequest : RadiusPacket {
 	public void setUserName(String userName) {
 		if (userName == null)
 			throw new ArgumentNullException("user name not set");
-		if (userName.length() == 0)
+		if (userName.Length == 0)
 			throw new ArgumentException("empty user name not allowed");
 		
-		removeAttributes(USER_NAME);
-		addAttribute(new StringAttribute(USER_NAME, userName));		
+		RemoveAttributes(USER_NAME);
+		AddAttribute(new StringAttribute(USER_NAME, userName));		
 	}
 	
 	/**
@@ -81,9 +81,9 @@ public class AccountingRequest : RadiusPacket {
 	 */
 	public String getUserName() 
 	{
-		ArrayList attrs = getAttributes(USER_NAME);
+		ArrayList attrs = GetAttributes(USER_NAME);
 		if (attrs.size() < 1 || attrs.size() > 1)
-			throw new RuntimeException("exactly one User-Name attribute required");
+			throw new NotImplementedException("exactly one User-Name attribute required");
 		
 		RadiusAttribute ra = (RadiusAttribute)attrs.get(0);
 		return ((StringAttribute)ra).getAttributeValue();
@@ -96,8 +96,8 @@ public class AccountingRequest : RadiusPacket {
 	public void setAcctStatusType(int acctStatusType) {
 		if (acctStatusType < 1 || acctStatusType > 15)
 			throw new ArgumentException("bad Acct-Status-Type");
-		removeAttributes(ACCT_STATUS_TYPE);
-		addAttribute(new IntegerAttribute(ACCT_STATUS_TYPE, acctStatusType));
+		RemoveAttributes(ACCT_STATUS_TYPE);
+		AddAttribute(new IntegerAttribute(ACCT_STATUS_TYPE, acctStatusType));
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class AccountingRequest : RadiusPacket {
 	 */
 	public int getAcctStatusType() 
 	{
-		RadiusAttribute ra = getAttribute(ACCT_STATUS_TYPE);
+		RadiusAttribute ra = GetAttribute(ACCT_STATUS_TYPE);
 		if (ra == null)
 			return -1;
 		else
@@ -122,14 +122,14 @@ public class AccountingRequest : RadiusPacket {
 		for (int i = 0; i < 16; i++)
 			authenticator[i] = 0;
 		
-		MessageDigest md5 = getMd5Digest();
+		MessageDigest md5 = GetMd5Digest();
         md5.reset();
-        md5.update((byte)getPacketType());
-        md5.update((byte)getPacketIdentifier());
+        md5.update((byte)Type);
+        md5.update((byte)Identifier);
         md5.update((byte)(packetLength >> 8));
         md5.update((byte)(packetLength & 0xff));
-        md5.update(authenticator, 0, authenticator.length);
-        md5.update(attributes, 0, attributes.length);
+        md5.update(authenticator, 0, authenticator.Length);
+        md5.update(attributes, 0, attributes.Length);
         md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
         return md5.digest();
 	}

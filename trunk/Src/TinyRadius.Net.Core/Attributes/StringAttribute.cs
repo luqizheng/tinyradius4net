@@ -5,23 +5,23 @@
  * @version $Revision: 1.1.1.1 $
  */
 using System;
-namespace TinyRadius.Net.Attribute
+using System.Text;
+
+namespace TinyRadius.Net.Attributes
 {
-
-
     /**
      * This class represents a Radius attribute which only
      * contains a string.
      */
+
     public class StringAttribute : RadiusAttribute
     {
-
         /**
          * Constructs an empty string attribute.
          */
+
         public StringAttribute()
         {
-
         }
 
         /**
@@ -29,45 +29,28 @@ namespace TinyRadius.Net.Attribute
          * @param type attribute type
          * @param value attribute value
          */
+
         public StringAttribute(int type, String value)
         {
-            setAttributeType(type);
-            setAttributeValue(value);
+            Type = type;
+            Value = value;
         }
 
-        /**
-         * Returns the string value of this attribute.
-         * @return a string
-         */
-        public String getAttributeValue()
+        /// <summary>
+        /// Returns the string value of this attribute.
+        /// @return a string
+        /// </summary>
+        public override string Value
         {
-            try
+            get { return Encoding.UTF8.GetString(Data); }
+            set
             {
-                return new String(getAttributeData(), "UTF-8");
-            }
-            catch (UnsupportedEncodingException uee)
-            {
-                return new String(getAttributeData());
+                if (value == null)
+                    throw new ArgumentNullException("value", "Value not set");
+                Data = Encoding.UTF8.GetBytes(value);
+
+                base.Value = value;
             }
         }
-
-        /**
-         * Sets the string value of this attribute.
-         * @param value string, not null
-         */
-        public void setAttributeValue(String value)
-        {
-            if (value == null)
-                throw new ArgumentNullException("string value not set");
-            try
-            {
-                setAttributeData(value.getBytes("UTF-8"));
-            }
-            catch (UnsupportedEncodingException uee)
-            {
-                setAttributeData(value.getBytes());
-            }
-        }
-
     }
 }

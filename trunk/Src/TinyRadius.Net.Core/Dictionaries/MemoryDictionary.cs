@@ -1,18 +1,8 @@
-/**
- * $Id: MemoryDictionary.java,v 1.2 2006/09/24 10:06:38 wuttke Exp $
- * Created on 28.08.2005
- * @author mw
- * @version $Revision: 1.2 $
- */
-using TinyRadius.Net.Directories;
 using System;
 using System.Collections.Generic;
-namespace TinyRadius.Net.Directories
-{
 
-    /*using java.util.HashMap;
-    using java.util.Iterator;
-    using java.util.Map;*/
+namespace TinyRadius.Net.Dictionaries
+{
 
     /**
      * A dictionary that keeps the values and names in hash maps
@@ -34,9 +24,9 @@ namespace TinyRadius.Net.Directories
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Dictionary#getAttributeTypeByCode(int)
          */
-        public AttributeType getAttributeTypeByCode(int typeCode)
+        public AttributeType GetAttributeTypeByCode(int typeCode)
         {
-            return getAttributeTypeByCode(-1, typeCode);
+            return GetAttributeTypeByCode(-1, typeCode);
         }
 
         /**
@@ -46,7 +36,7 @@ namespace TinyRadius.Net.Directories
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Hashtable#getAttributeTypeByCode(int, int)
          */
-        public AttributeType getAttributeTypeByCode(int vendorCode, int typeCode)
+        public AttributeType GetAttributeTypeByCode(int vendorCode, int typeCode)
         {
             var vendorAttributes = attributesByCode[vendorCode];
             if (vendorAttributes == null)
@@ -61,9 +51,9 @@ namespace TinyRadius.Net.Directories
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Hashtable#getAttributeTypeByName(java.lang.String)
          */
-        public AttributeType getAttributeTypeByName(String typeName)
+        public AttributeType GetAttributeTypeByName(String typeName)
         {
-            return (AttributeType)attributesByName.get(typeName);
+            return (AttributeType)attributesByName[typeName];
         }
 
         /**
@@ -73,15 +63,21 @@ namespace TinyRadius.Net.Directories
          * @return vendor code or -1
          * @see TinyRadius.dictionary.Hashtable#getVendorId(java.lang.String)
          */
-        public int getVendorId(String vendorName)
+        public int GetVendorId(String vendorName)
         {
-            for (Iterator i = vendorsByCode.entrySet().iterator(); i.hasNext(); )
+            foreach (var entry in vendorsByCode)
+            {
+                if (entry.Value == vendorName)
+                    return entry.Key;
+            }
+            return -1;
+            /*for (Iterator i = vendorsByCode.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry e = (Map.Entry)i.next();
                 if (e.getValue().equals(vendorName))
                     return ((Integer)e.getKey()).intValue();
             }
-            return -1;
+            return -1;*/
         }
 
         /**
@@ -91,7 +87,7 @@ namespace TinyRadius.Net.Directories
          * @return vendor name or null
          * @see TinyRadius.dictionary.Hashtable#getVendorName(int)
          */
-        public String getVendorName(int vendorId)
+        public String GetVendorName(int vendorId)
         {
             return (String)vendorsByCode.get(new Integer(vendorId));
         }
@@ -102,15 +98,15 @@ namespace TinyRadius.Net.Directories
          * @param vendorName name of the vendor
          * @exception ArgumentException empty vendor name, invalid vendor ID
          */
-        public void addVendor(int vendorId, String vendorName)
+        public void AddVendor(int vendorId, String vendorName)
         {
             if (vendorId < 0)
                 throw new ArgumentException("vendor ID must be positive");
-            if (getVendorName(vendorId) != null)
+            if (GetVendorName(vendorId) != null)
                 throw new ArgumentException("duplicate vendor code");
-            if (vendorName == null || vendorName.length() == 0)
+            if (string.IsNullOrEmpty(vendorName))
                 throw new ArgumentException("vendor name empty");
-            vendorsByCode.put(new Integer(vendorId), vendorName);
+            vendorsByCode.Add(vendorId, vendorName);
         }
 
         /**
@@ -118,33 +114,35 @@ namespace TinyRadius.Net.Directories
          * @param attributeType AttributeType object
          * @exception ArgumentException duplicate attribute name/type code
          */
-        public void addAttributeType(AttributeType attributeType)
+        public void AddAttributeType(AttributeType attributeType)
         {
             if (attributeType == null)
                 throw new ArgumentException("attribute type must not be null");
 
-            Integer vendorId = new Integer(attributeType.getVendorId());
-            Integer typeCode = new Integer(attributeType.getTypeCode());
-            String attributeName = attributeType.getName();
+            var vendorId = attributeType.VendorId;
+            var typeCode = attributeType.TypeCode;
+            String attributeName = attributeType.Name;
 
-            if (attributesByName.containsKey(attributeName))
+            if (attributesByName.ContainsKey(attributeName))
                 throw new ArgumentException("duplicate attribute name: " + attributeName);
 
-            Map vendorAttributes = (Map)attributesByCode.get(vendorId);
-            if (vendorAttributes == null)
+            Dictionary<int, AttributeType> vendorAttributes;
+            if (attributesByCode.ContainsKey(vendorId))
             {
-                vendorAttributes = new HashMap();
-                attributesByCode.put(vendorId, vendorAttributes);
+                vendorAttributes = new Dictionary<int, AttributeType>();
+                attributesByCode.Add(vendorId, vendorAttributes);
             }
-            if (vendorAttributes.containsKey(typeCode))
+            vendorAttributes = attributesByCode[vendorId];
+
+            if (vendorAttributes.ContainsKey(typeCode))
                 throw new ArgumentException("duplicate type code: " + typeCode);
 
-            attributesByName.put(attributeName, attributeType);
-            vendorAttributes.put(typeCode, attributeType);
+            attributesByName.Add(attributeName, attributeType);
+            vendorAttributes.Add(typeCode, attributeType);
         }
 
         private Dictionary<int, string> vendorsByCode = new Dictionary<int, string>();   // <Integer, String>
-        private Dictionary<int, Hashtable<int, AttributeType>> attributesByCode = new Dictionary<int, Dictionary<int, AttributeType>>();// <Integer, <Integer, AttributeType>>
+        private Dictionary<int, Dictionary<int, AttributeType>> attributesByCode = new Dictionary<int, Dictionary<int, AttributeType>>();// <Integer, <Integer, AttributeType>>
         private Dictionary<String, AttributeType> attributesByName = new Dictionary<string, AttributeType>();	// <String, AttributeType>
 
     }

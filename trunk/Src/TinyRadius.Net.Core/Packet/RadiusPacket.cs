@@ -1,938 +1,990 @@
-/**
- * $Id: RadiusPacket.java,v 1.12 2008/06/16 22:20:34 wuttke Exp $
- * Created on 07.04.2005
- * Released under the LGPL
- * @author Matthias Wuttke
- * @version $Revision: 1.12 $
- */
-using System.Collections;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using TinyRadius.Net.Attribute;
+using System.Linq;
 using System.Security.Cryptography;
-using TinyRadius.Net.Directories;
+using System.Text;
+using TinyRadius.Net.Attributes;
+using TinyRadius.Net.Dictionaries;
+using TinyRadius.Net.Net.JavaHelper;
+using TinyRadius.Net.packet;
+using TinyRadius.Net.Util;
+
 namespace TinyRadius.Net.Packet
 {
-
-
-    /**
-     * This class represents a Radius packet. Subclasses provide convenience methods
-     * for special packet types.
-     */
+    /// <summary>
+    ///  This class represents a Radius packet. Subclasses provide convenience methods
+    ///  for special packet types.
+    /// </summary>
     public class RadiusPacket
     {
+        /// <summary>
+        /// Maximum packet Length.
+        ///</summary>
+        public static readonly int MaxPacketLength = 4096;
 
-        /**
-         * Packet type codes.
-         */
-        public static readonly int ACCESS_REQUEST = 1;
-        public static readonly int ACCESS_ACCEPT = 2;
-        public static readonly int ACCESS_REJECT = 3;
-        public static readonly int ACCOUNTING_REQUEST = 4;
-        public static readonly int ACCOUNTING_RESPONSE = 5;
-        public static readonly int ACCOUNTING_STATUS = 6;
-        public static readonly int PASSWORD_REQUEST = 7;
-        public static readonly int PASSWORD_ACCEPT = 8;
-        public static readonly int PASSWORD_REJECT = 9;
-        public static readonly int ACCOUNTING_MESSAGE = 10;
-        public static readonly int ACCESS_CHALLENGE = 11;
-        public static readonly int STATUS_SERVER = 12;
-        public static readonly int STATUS_CLIENT = 13;
-        public static readonly int DISCONNECT_REQUEST = 40;	// RFC 2882
-        public static readonly int DISCONNECT_ACK = 41;
-        public static readonly int DISCONNECT_NAK = 42;
-        public static readonly int COA_REQUEST = 43;
-        public static readonly int COA_ACK = 44;
-        public static readonly int COA_NAK = 45;
-        public static readonly int STATUS_REQUEST = 46;
-        public static readonly int STATUS_ACCEPT = 47;
-        public static readonly int STATUS_REJECT = 48;
-        public static readonly int RESERVED = 255;
+        /// <summary>
+        ///  Packet header Length.
+        /// </summary>
+        public static readonly int RadiusHeaderLength = 20;
 
-        /**
-         * Maximum packet length.
-         */
-        public static readonly int MAX_PACKET_LENGTH = 4096;
+        /// <summary>
+        ///  Next packet identifier.
+        /// </summary>
+        private static int nextPacketId;
 
-        /**
-         * Packet header length.
-         */
-        public static readonly int RADIUS_HEADER_LENGTH = 20;
+        /// <summary>
+        ///  Random number generator.
+        /// </summary>
+        private static readonly Random random = new Random();
 
-        /**
-         * Builds a Radius packet without attributes. Retrieves
-         * the next packet identifier.
-         * @param type packet type 
-         */
+        /// <summary>
+        ///  Attributes for this packet.
+        /// </summary>
+        private IList<RadiusAttribute> attributes = new List<RadiusAttribute>();
+
+        /// <summary>
+        ///  Authenticator for this Radius packet.
+        /// </summary>
+        private byte[] authenticator;
+
+        /// <summary>
+        ///  Dictionary to look up attribute names.
+        /// </summary>
+        private IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
+
+        /// <summary>
+        ///  MD5 digest.
+        /// </summary>
+        private MD5 md5Digest;
+
+        /// <summary>
+        ///  Identifier of this packet.
+        /// </summary>
+        private int _identifier;
+
+        /// <summary>
+        ///  Type of this Radius packet.
+        /// </summary>
+        private int _type;
+
+        /// <summary>
+        ///  Builds a Radius packet without attributes. Retrieves
+        ///  the next packet identifier.
+        ///  @param type packet type 
+        /// </summary>
         public RadiusPacket(int type)
-            : this(type, getNextPacketIdentifier(), new ArrayList())
+            : this(type, GetNextPacketIdentifier(), new List<RadiusAttribute>())
         {
-
         }
 
-        /**
-         * Builds a Radius packet with the given type and identifier
-         * and without attributes.
-         * @param type packet type
-         * @param identifier packet identifier
-         */
+        /// <summary>
+        ///  Builds a Radius packet with the given type and identifier
+        ///  and without attributes.
+        ///  @param type packet type
+        ///  @param identifier packet identifier
+        /// </summary>
         public RadiusPacket(int type, int identifier) :
-            this(type, identifier, new ArrayList())
+            this(type, identifier, new List<RadiusAttribute>())
         {
         }
 
-        /**
-         * Builds a Radius packet with the given type, identifier and
-         * attributes. 
-         * @param type packet type
-         * @param identifier packet identifier
-         * @param attributes list of RadiusAttribute objects
-         */
-        public RadiusPacket(int type, int identifier, ArrayList attributes)
+        /// <summary>
+        ///  Builds a Radius packet with the given type, identifier and
+        ///  attributes. 
+        ///  @param type packet type
+        ///  @param identifier packet identifier
+        ///  @param attributes list of RadiusAttribute objects
+        /// </summary>
+        public RadiusPacket(int type, int identifier, IList<RadiusAttribute> attributes)
         {
-            setPacketType(type);
-            setPacketIdentifier(identifier);
-            setAttributes(attributes);
+            Type = type;
+            Identifier = identifier;
+            Attributes = attributes;
         }
 
-        /**
-         * Builds an empty Radius packet.
-         */
+        /// <summary>
+        ///  Builds an empty Radius packet.
+        /// </summary>
         public RadiusPacket()
         {
         }
 
-        /**
-         * Returns the packet identifier for this Radius packet.
-         * @return packet identifier
-         */
-        public int getPacketIdentifier()
+        /// <summary>
+        ///  Returns the packet identifier for this Radius packet.
+        ///  @return packet identifier
+        /// </summary>
+        public int Identifier
         {
-            return packetIdentifier;
-        }
-
-        /**
-         * Sets the packet identifier for this Radius packet.
-         * @param identifier packet identifier, 0-255
-         */
-        public void setPacketIdentifier(int identifier)
-        {
-            if (identifier < 0 || identifier > 255)
-                throw new ArgumentException("packet identifier out of bounds");
-            this.packetIdentifier = identifier;
-        }
-
-        /**
-         * Returns the type of this Radius packet.
-         * @return packet type
-         */
-        public int getPacketType()
-        {
-            return packetType;
-        }
-
-        /**
-         * Returns the type name of this Radius packet.
-         * @return name
-         */
-        public String getPacketTypeName()
-        {
-            switch (getPacketType())
+            get { return _identifier; }
+            set
             {
-                case ACCESS_REQUEST: return "Access-Request";
-                case ACCESS_ACCEPT: return "Access-Accept";
-                case ACCESS_REJECT: return "Access-Reject";
-                case ACCOUNTING_REQUEST: return "Accounting-Request";
-                case ACCOUNTING_RESPONSE: return "Accounting-Response";
-                case ACCOUNTING_STATUS: return "Accounting-Status";
-                case PASSWORD_REQUEST: return "Password-Request";
-                case PASSWORD_ACCEPT: return "Password-Accept";
-                case PASSWORD_REJECT: return "Password-Reject";
-                case ACCOUNTING_MESSAGE: return "Accounting-Message";
-                case ACCESS_CHALLENGE: return "Access-Challenge";
-                case STATUS_SERVER: return "Status-Server";
-                case STATUS_CLIENT: return "Status-Client";
-                // RFC 2882
-                case DISCONNECT_REQUEST: return "Disconnect-Request";
-                case DISCONNECT_ACK: return "Disconnect-ACK";
-                case DISCONNECT_NAK: return "Disconnect-NAK";
-                case COA_REQUEST: return "CoA-Request";
-                case COA_ACK: return "CoA-ACK";
-                case COA_NAK: return "CoA-NAK";
-                case STATUS_REQUEST: return "Status-Request";
-                case STATUS_ACCEPT: return "Status-Accept";
-                case STATUS_REJECT: return "Status-Reject";
-                case RESERVED: return "Reserved";
-                default: return "Unknown (" + getPacketType() + ")";
+                if (value < 0 || value > 255)
+                    throw new ArgumentException("packet identifier out of bounds");
+                _identifier = value;
             }
         }
 
-        /**
-         * Sets the type of this Radius packet.
-         * @param type packet type, 0-255
-         */
-        public void setPacketType(int type)
+        /// <summary>
+        ///  Returns the type of this Radius packet.
+        ///  @return packet type
+        /// </summary>
+        public int Type
         {
-            if (type < 1 || type > 255)
-                throw new ArgumentException("packet type out of bounds");
-            this.packetType = type;
-        }
-
-        /**
-         * Sets the list of attributes for this Radius packet.
-         * @param attributes list of RadiusAttribute objects
-         */
-        public void setAttributes(ArrayList attributes)
-        {
-            if (attributes == null)
-                throw new ArgumentNullException("attributes list is null");
-
-            foreach (var element in attributes)
+            get { return _type; }
+            set
             {
-                if (!typeof(RadiusAttribute).IsInstanceOfType(element))
-                    throw new ArgumentException("attribute not an instance of RadiusAttribute");
+                if (value < 1 || value > 255)
+                    throw new ArgumentException("packet type out of bounds");
+                _type = value;
             }
-
-            this.attributes = attributes;
         }
 
-        /**
-         * Adds a Radius attribute to this packet. Can also be used
-         * to add Vendor-Specific sub-attributes. If a attribute with
-         * a vendor code != -1 is passed in, a VendorSpecificAttribute
-         * is created for the sub-attribute.
-         * @param attribute RadiusAttribute object
-         */
-        public void addAttribute(RadiusAttribute attribute)
+        private const int AccessRequest = 1;
+        private const int AccountingRequest = 4;
+        private const int AccessAccept = 2;
+        private const int AccessReject = 3;
+        private const int AccountingResponse = 5;
+        /// <summary>
+        ///  Returns the type name of this Radius packet.
+        ///  @return name
+        /// </summary>
+        public string TypeName
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case AccessRequest:
+                        return "Access-Request";
+                    case AccessAccept:
+                        return "Access-Accept";
+                    case AccessReject:
+                        return "Access-Reject";
+                    case AccountingRequest:
+                        return "Accounting-Request";
+                    case 5:
+                        return "Accounting-Response";
+                    case 6:
+                        return "Accounting-Status";
+                    case 7:
+                        return "Password-Request";
+                    case 8:
+                        return "Password-Accept";
+                    case 9:
+                        return "Password-Reject";
+                    case 10:
+                        return "Accounting-Message";
+                    case 11:
+                        return "Access-Challenge";
+                    case 12:
+                        return "Status-Server";
+                    case 13:
+                        return "Status-Client";
+                    // RFC 2882
+                    case 40:
+                        return "Disconnect-Request";
+                    case 41:
+                        return "Disconnect-ACK";
+                    case 42:
+                        return "Disconnect-NAK";
+                    case 43:
+                        return "CoA-Request";
+                    case 44:
+                        return "CoA-ACK";
+                    case 45:
+                        return "CoA-NAK";
+                    case 46:
+                        return "Status-Request";
+                    case 47:
+                        return "Status-Accept";
+                    case 48:
+                        return "Status-Reject";
+                    case 255:
+                        return "Reserved";
+                    default:
+                        return "Unknown (" + Type + ")";
+                }
+            }
+        }
+
+        /// <summary>
+        ///  Sets the list of attributes for this Radius packet.
+        ///  @param attributes list of RadiusAttribute objects
+        /// </summary>
+        public IList<RadiusAttribute> Attributes
+        {
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value", "attributes list is null");
+
+                this.attributes = value;
+            }
+        }
+
+        /// <summary>
+        ///  Adds a Radius attribute to this packet. Can also be used
+        ///  to add Vendor-Specific sub-attributes. If a attribute with
+        ///  a vendor code != -1 is passed in, a VendorSpecificAttribute
+        ///  is created for the sub-attribute.
+        ///  @param attribute RadiusAttribute object
+        /// </summary>
+        public void AddAttribute(RadiusAttribute attribute)
         {
             if (attribute == null)
-                throw new ArgumentNullException("attribute is null");
-            attribute.setDictionary(getDictionary());
-            if (attribute.getVendorId() == -1)
-                this.attributes.add(attribute);
+                throw new ArgumentNullException("attribute", "attribute is null");
+            attribute.Dictionary = Dictionary;
+            if (attribute.VendorId == -1)
+                attributes.Add(attribute);
             else
             {
-                VendorSpecificAttribute vsa = new VendorSpecificAttribute(attribute.getVendorId());
-                vsa.addSubAttribute(attribute);
-                this.attributes.add(vsa);
+                var vsa = new VendorSpecificAttribute(attribute.VendorId);
+                vsa.AddSubAttribute(attribute);
+                attributes.Add(vsa);
             }
         }
 
-        /**
-         * Adds a Radius attribute to this packet.
-         * Uses AttributeTypes to lookup the type code and converts
-         * the value.
-         * Can also be used to add sub-attributes.
-         * @param typeName name of the attribute, for example "NAS-Ip-Address"
-         * @param value value of the attribute, for example "127.0.0.1"
-         * @throws ArgumentException if type name is unknown
-         */
-        public void addAttribute(String typeName, String value)
+        /// <summary>
+        ///  Adds a Radius attribute to this packet.
+        ///  Uses AttributeTypes to lookup the type code and converts
+        ///  the value.
+        ///  Can also be used to add sub-attributes.
+        ///  @param typeName name of the attribute, for example "NAS-Ip-Address"
+        ///  @param value value of the attribute, for example "127.0.0.1"
+        ///  @throws ArgumentException if type name is unknown
+        /// </summary>
+        public void AddAttribute(String typeName, String value)
         {
-            if (typeName == null || typeName.length() == 0)
+            if (string.IsNullOrEmpty(typeName))
                 throw new ArgumentException("type name is empty");
-            if (value == null || value.length() == 0)
+            if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            AttributeType type = dictionary.getAttributeTypeByName(typeName);
+            AttributeType type = this.Dictionary.GetAttributeTypeByName(typeName);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '" + typeName + "'");
 
-            RadiusAttribute attribute = RadiusAttribute.createRadiusAttribute(getDictionary(), type.getVendorId(), type.getTypeCode());
-            attribute.setAttributeValue(value);
-            addAttribute(attribute);
+            RadiusAttribute attribute = RadiusAttribute.CreateRadiusAttribute(Dictionary, type.VendorId,
+                                                                              type.TypeCode);
+            attribute.Value = value;
+            AddAttribute(attribute);
         }
 
-        /**
-         * Removes the specified attribute from this packet.
-         * @param attribute RadiusAttribute to remove
-         */
-        public void removeAttribute(RadiusAttribute attribute)
+        /// <summary>
+        ///  Removes the specified attribute from this packet.
+        ///  @param attribute RadiusAttribute to remove
+        /// </summary>
+        public void RemoveAttribute(RadiusAttribute attribute)
         {
-            if (attribute.getVendorId() == -1)
+            if (attribute.VendorId == -1)
             {
-                if (!this.attributes.remove(attribute))
+                if (!attributes.Remove(attribute))
                     throw new ArgumentException("no such attribute");
             }
             else
             {
                 // remove Vendor-Specific sub-attribute
-                List vsas = getVendorAttributes(attribute.getVendorId());
-                for (Iterator i = vsas.iterator(); i.hasNext(); )
+                var vsas = GetVendorAttributes(attribute.VendorId);
+
+                foreach (VendorSpecificAttribute vsa in vsas)
                 {
-                    VendorSpecificAttribute vsa = (VendorSpecificAttribute)i.next();
-                    List sas = vsa.getSubAttributes();
-                    if (sas.contains(attribute))
+                    List<RadiusAttribute> sas = vsa.SubAttributes;
+                    if (sas.Contains(attribute))
                     {
-                        vsa.removeSubAttribute(attribute);
-                        if (sas.size() == 1)
+                        vsa.RemoveSubAttribute(attribute);
+                        if (sas.Count == 1)
                             // removed the last sub-attribute
                             // --> remove the whole Vendor-Specific attribute
-                            removeAttribute(vsa);
+                            RemoveAttribute(vsa);
                     }
                 }
             }
         }
 
-        /**
-         * Removes all attributes from this packet which have got
-         * the specified type.
-         * @param type attribute type to remove
-         */
-        public void removeAttributes(int type)
+        /// <summary>
+        ///  Removes all attributes from this packet which have got
+        ///  the specified type.
+        ///  @param type attribute type to remove
+        /// </summary>
+        public void RemoveAttributes(int type)
         {
             if (type < 1 || type > 255)
                 throw new ArgumentException("attribute type out of bounds");
 
-            Iterator i = attributes.iterator();
-            while (i.hasNext())
+            var removedInt = new List<int>();
+            for (int i = attributes.Count; i > 0; i--)
             {
-                RadiusAttribute attribute = (RadiusAttribute)i.next();
-                if (attribute.getAttributeType() == type)
-                    i.remove();
+                if (attributes[i].Type == type)
+                    removedInt.Add(i);
+            }
+            foreach (var index in removedInt)
+            {
+                this.attributes.RemoveAt(index);
             }
         }
 
-        /**
-         * Removes the last occurence of the attribute of the given
-         * type from the packet.
-         * @param type attribute type code
-         */
-        public void removeLastAttribute(int type)
+        /// <summary>
+        ///  Removes the last occurence of the attribute of the given
+        ///  type from the packet.
+        ///  @param type attribute type code
+        /// </summary>
+        public void RemoveLastAttribute(int type)
         {
-            List attrs = getAttributes(type);
-            if (attrs == null || attrs.size() == 0)
+            var attrs = GetAttributes(type);
+            if (attrs == null || attrs.Count == 0)
                 return;
 
-            RadiusAttribute lastAttribute =
-                (RadiusAttribute)attrs.get(attrs.size() - 1);
-            removeAttribute(lastAttribute);
+            var lastAttribute =
+                attrs[attrs.Count - 1];
+            RemoveAttribute(lastAttribute);
         }
 
-        /**
-         * Removes all sub-attributes of the given vendor and
-         * type.
-         * @param vendorId vendor ID
-         * @param typeCode attribute type code
-         */
-        public void removeAttributes(int vendorId, int typeCode)
+        /// <summary>
+        ///  Removes all sub-attributes of the given vendor and
+        ///  type.
+        ///  @param vendorId vendor ID
+        ///  @param typeCode attribute type code
+        /// </summary>
+        public void RemoveAttributes(int vendorId, int typeCode)
         {
             if (vendorId == -1)
             {
-                removeAttributes(typeCode);
+                RemoveAttributes(typeCode);
                 return;
             }
-
-            List vsas = getVendorAttributes(vendorId);
-            for (Iterator i = vsas.iterator(); i.hasNext(); )
+            List<Int32> removeVendorList = new List<int>();
+            var vendorList = GetVendorAttributes(vendorId);
+            var lengthOfVendor = GetVendorAttributes(vendorId).Count;
+            for (int i = 0; i < lengthOfVendor; i++)
             {
-                VendorSpecificAttribute vsa = (VendorSpecificAttribute)i.next();
+                VendorSpecificAttribute vsa = vendorList[i] as VendorSpecificAttribute;
+                if (vsa == null)
+                    continue;
+                var sas = vsa.SubAttributes;
+                var removeId = new List<int>();
 
-                List sas = vsa.getSubAttributes();
-                for (Iterator j = sas.iterator(); j.hasNext(); )
+                for (int j = 0; j < sas.Count; j++)
                 {
-                    RadiusAttribute attr = (RadiusAttribute)j.next();
-                    if (attr.getAttributeType() == typeCode &&
-                        attr.getVendorId() == vendorId)
-                        j.remove();
+                    var attr = sas[j];
+                    if (attr.Type == typeCode && attr.VendorId == vendorId)
+                    {
+                        removeId.Add(j);
+                    }
                 }
-                if (sas.size() == 0)
-                    // removed the last sub-attribute
-                    // --> remove the whole Vendor-Specific attribute
-                    removeAttribute(vsa);
             }
+
         }
 
-        /**
-         * Returns all attributes of this packet of the given type.
-         * Returns an empty list if there are no such attributes.
-         * @param attributeType type of attributes to get 
-         * @return list of RadiusAttribute objects, does not return null
-         */
-        public ArrayList getAttributes(int attributeType)
+        /// <summary>
+        ///  Returns all attributes of this packet of the given type.
+        ///  Returns an empty list if there are no such attributes.
+        ///  @param attributeType type of attributes to get 
+        ///  @return list of RadiusAttribute objects, does not return null
+        /// </summary>
+        public IList<RadiusAttribute> GetAttributes(int attributeType)
         {
             if (attributeType < 1 || attributeType > 255)
                 throw new ArgumentException("attribute type out of bounds");
 
-            LinkedList result = new LinkedList();
-            for (Iterator i = attributes.iterator(); i.hasNext(); )
+            IList<RadiusAttribute> result = new List<RadiusAttribute>();
+            foreach (RadiusAttribute a in attributes)
             {
-                RadiusAttribute a = (RadiusAttribute)i.next();
-                if (attributeType == a.getAttributeType())
-                    result.add(a);
+                if (attributeType == a.Type)
+                    result.Add(a);
             }
             return result;
         }
 
-        /**
-         * Returns all attributes of this packet that have got the
-         * given type and belong to the given vendor ID.
-         * Returns an empty list if there are no such attributes.
-         * @param vendorId vendor ID
-         * @param attributeType attribute type code
-         * @return list of RadiusAttribute objects, never null
-         */
-        public List getAttributes(int vendorId, int attributeType)
+        /// <summary>
+        ///  Returns all attributes of this packet that have got the
+        ///  given type and belong to the given vendor ID.
+        ///  Returns an empty list if there are no such attributes.
+        ///  @param vendorId vendor ID
+        ///  @param attributeType attribute type code
+        ///  @return list of RadiusAttribute objects, never null
+        /// </summary>
+        public IList<RadiusAttribute> GetAttributes(int vendorId, int attributeType)
         {
             if (vendorId == -1)
-                return getAttributes(attributeType);
+                return GetAttributes(attributeType);
 
-            LinkedList result = new LinkedList();
-            List vsas = getVendorAttributes(vendorId);
-            for (Iterator i = vsas.iterator(); i.hasNext(); )
+            IList<RadiusAttribute> vsas = GetVendorAttributes(vendorId);
+            var result = from radius in vsas
+                         where
+                         radius.Type == attributeType && radius.VendorId == vendorId
+                         select radius;
+            /*for (Iterator i = vsas.iterator(); i.hasNext(); )
             {
-                VendorSpecificAttribute vsa = (VendorSpecificAttribute)i.next();
-                List sas = vsa.getSubAttributes();
+                var vsa = (VendorSpecificAttribute)i.next();
+                List sas = vsa.SubAttributes;
                 for (Iterator j = sas.iterator(); j.hasNext(); )
                 {
-                    RadiusAttribute attr = (RadiusAttribute)j.next();
-                    if (attr.getAttributeType() == attributeType &&
-                        attr.getVendorId() == vendorId)
+                    var attr = (RadiusAttribute)j.next();
+                    if (attr.Type == attributeType &&
+                        attr.VendorId == vendorId)
                         result.add(attr);
                 }
-            }
+            }*/
 
-            return result;
+            return result.ToList<RadiusAttribute>();
         }
 
-        /**
-         * Returns a list of all attributes belonging to this Radius
-         * packet.
-         * @return List of RadiusAttribute objects
-         */
-        public List getAttributes()
+        /// <summary>
+        ///  Returns a list of all attributes belonging to this Radius
+        ///  packet.
+        ///  @return List of RadiusAttribute objects
+        /// </summary>
+        public IList<RadiusAttribute> GetAttributes()
         {
             return attributes;
         }
 
-        /**
-         * Returns a Radius attribute of the given type which may only occur once
-         * in the Radius packet.
-         * @param type attribute type
-         * @return RadiusAttribute object or null if there is no such attribute
-         * @throws RuntimeException if there are multiple occurences of the
-         * requested attribute type
-         */
-        public RadiusAttribute getAttribute(int type)
+        /// <summary>
+        ///  Returns a Radius attribute of the given type which may only occur once
+        ///  in the Radius packet.
+        ///  @param type attribute type
+        ///  @return RadiusAttribute object or null if there is no such attribute
+        ///  @throws NotImplementedException if there are multiple occurences of the
+        ///  requested attribute type
+        /// </summary>
+        public RadiusAttribute GetAttribute(int type)
         {
-            List attrs = getAttributes(type);
-            if (attrs.size() > 1)
-                throw new RuntimeException("multiple attributes of requested type " + type);
-            else if (attrs.size() == 0)
+            var attrs = GetAttributes(type);
+            if (attrs.Count > 1)
+                throw new NotImplementedException("multiple attributes of requested type " + type);
+            else if (attrs.Count == 0)
                 return null;
             else
-                return (RadiusAttribute)attrs.get(0);
+                return (RadiusAttribute)attrs[0];
         }
 
-        /**
-         * Returns a Radius attribute of the given type and vendor ID
-         * which may only occur once in the Radius packet.
-         * @param vendorId vendor ID
-         * @param type attribute type
-         * @return RadiusAttribute object or null if there is no such attribute
-         * @throws RuntimeException if there are multiple occurences of the
-         * requested attribute type
-         */
-        public RadiusAttribute getAttribute(int vendorId, int type)
+        /// <summary>
+        ///  Returns a Radius attribute of the given type and vendor ID
+        ///  which may only occur once in the Radius packet.
+        ///  @param vendorId vendor ID
+        ///  @param type attribute type
+        ///  @return RadiusAttribute object or null if there is no such attribute
+        ///  @throws NotImplementedException if there are multiple occurences of the
+        ///  requested attribute type
+        /// </summary>
+        public RadiusAttribute GetAttribute(int vendorId, int type)
         {
             if (vendorId == -1)
-                return getAttribute(type);
+                return GetAttribute(type);
 
-            List attrs = getAttributes(vendorId, type);
-            if (attrs.size() > 1)
-                throw new RuntimeException("multiple attributes of requested type " + type);
-            else if (attrs.size() == 0)
+            var attrs = GetAttributes(vendorId, type);
+            if (attrs.Count > 1)
+                throw new NotImplementedException("multiple attributes of requested type " + type);
+            else if (attrs.Count == 0)
                 return null;
             else
-                return (RadiusAttribute)attrs.get(0);
+                return (RadiusAttribute)attrs[0];
         }
 
-        /**
-         * Returns a single Radius attribute of the given type name.
-         * Also returns sub-attributes.
-         * @param type attribute type name
-         * @return RadiusAttribute object or null if there is no such attribute
-         * @throws RuntimeException if the attribute occurs multiple times
-         */
-        public RadiusAttribute getAttribute(String type)
+        /// <summary>
+        ///  Returns a single Radius attribute of the given type name.
+        ///  Also returns sub-attributes.
+        ///  @param type attribute type name
+        ///  @return RadiusAttribute object or null if there is no such attribute
+        ///  @throws NotImplementedException if the attribute occurs multiple times
+        /// </summary>
+        public RadiusAttribute GetAttribute(String type)
         {
-            if (type == null || type.length() == 0)
+            if (string.IsNullOrEmpty(type))
                 throw new ArgumentException("type name is empty");
 
-            AttributeType t = dictionary.getAttributeTypeByName(type);
+            AttributeType t = dictionary.GetAttributeTypeByName(type);
             if (t == null)
                 throw new ArgumentException("unknown attribute type name '" + type + "'");
 
-            return getAttribute(t.getVendorId(), t.getTypeCode());
+            return GetAttribute(t.VendorId, t.TypeCode);
         }
 
-        /**
-         * Returns the value of the Radius attribute of the given type or
-         * null if there is no such attribute.
-         * Also returns sub-attributes.
-         * @param type attribute type name
-         * @return value of the attribute as a string or null if there
-         * is no such attribute
-         * @throws ArgumentException if the type name is unknown
-         * @throws RuntimeException attribute occurs multiple times
-         */
-        public String getAttributeValue(String type)
+        /// <summary>
+        ///  Returns the value of the Radius attribute of the given type or
+        ///  null if there is no such attribute.
+        ///  Also returns sub-attributes.
+        ///  @param type attribute type name
+        ///  @return value of the attribute as a string or null if there
+        ///  is no such attribute
+        ///  @throws ArgumentException if the type name is unknown
+        ///  @throws NotImplementedException attribute occurs multiple times
+        /// </summary>
+        public String GetAttributeValue(String type)
         {
-            RadiusAttribute attr = getAttribute(type);
+            RadiusAttribute attr = GetAttribute(type);
             if (attr == null)
                 return null;
             else
-                return attr.getAttributeValue();
+                return attr.Value;
         }
 
-        /**
-         * Returns the Vendor-Specific attribute(s) for the given vendor ID.
-         * @param vendorId vendor ID of the attribute(s)
-         * @return List with VendorSpecificAttribute objects, never null
-         */
-        public List getVendorAttributes(int vendorId)
+        /// <summary>
+        ///  Returns the Vendor-Specific attribute(s) for the given vendor ID.
+        ///  @param vendorId vendor ID of the attribute(s)
+        ///  @return List with VendorSpecificAttribute objects, never null
+        /// </summary>
+        public IList<RadiusAttribute> GetVendorAttributes(int vendorId)
         {
-            LinkedList result = new LinkedList();
+            var result = new List<RadiusAttribute>();
             foreach (RadiusAttribute a in attributes)
             {
                 if (typeof(VendorSpecificAttribute).IsInstanceOfType(a))
                 {
-                    VendorSpecificAttribute vsa = (VendorSpecificAttribute)a;
-                    if (vsa.getChildVendorId() == vendorId)
-                        result.add(vsa);
+                    var vsa = (VendorSpecificAttribute)a;
+                    if (vsa.ChildVendorId == vendorId)
+                        result.Add(vsa);
                 }
             }
             return result;
         }
 
-        /**
-         * Returns the Vendor-Specific attribute for the given vendor ID.
-         * If there is more than one Vendor-Specific
-         * attribute with the given vendor ID, the first attribute found is
-         * returned. If there is no such attribute, null is returned.
-         * @param vendorId vendor ID of the attribute
-         * @return the attribute or null if there is no such attribute
-         * @deprecated use getVendorAttributes(int)
-         * @see #getVendorAttributes(int)
-         */
-        public VendorSpecificAttribute getVendorAttribute(int vendorId)
+        /// <summary>
+        ///  Returns the Vendor-Specific attribute for the given vendor ID.
+        ///  If there is more than one Vendor-Specific
+        ///  attribute with the given vendor ID, the first attribute found is
+        ///  returned. If there is no such attribute, null is returned.
+        ///  @param vendorId vendor ID of the attribute
+        ///  @return the attribute or null if there is no such attribute
+        ///  @deprecated use getVendorAttributes(int)
+        ///  @see #getVendorAttributes(int)
+        /// </summary>
+        public VendorSpecificAttribute GetVendorAttribute(int vendorId)
         {
-            for (Iterator i = getAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC).iterator(); i.hasNext(); )
+            foreach (VendorSpecificAttribute vsa in GetAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC))
             {
-                VendorSpecificAttribute vsa = (VendorSpecificAttribute)i.next();
-                if (vsa.getChildVendorId() == vendorId)
+                if (vsa.ChildVendorId == vendorId)
                     return vsa;
             }
             return null;
         }
 
-        /**
-         * Encodes this Radius packet and sends it to the specified output
-         * stream.
-         * @param out output stream to use
-         * @param sharedSecret shared secret to be used to encode this packet
-         * @exception IOException communication error
-         */
-        public void encodeRequestPacket(Stream outputStream, String sharedSecret)
+        /// <summary>
+        ///  Encodes this Radius packet and sends it to the specified output
+        ///  stream.
+        ///  @param out output stream to use
+        ///  @param sharedSecret shared secret to be used to encode this packet
+        ///  @exception IOException communication error
+        /// </summary>
+        public void EncodeRequestPacket(Stream outputStream, String sharedSecret)
         {
             encodePacket(outputStream, sharedSecret, null);
         }
 
-        /**
-         * Encodes this Radius response packet and sends it to the specified output
-         * stream.
-         * @param out output stream to use
-         * @param sharedSecret shared secret to be used to encode this packet
-         * @param request Radius request packet
-         * @exception IOException communication error
-         */
-        public void encodeResponsePacket(Stream @out, String sharedSecret, RadiusPacket request)
+        /// <summary>
+        ///  Encodes this Radius response packet and sends it to the specified output
+        ///  stream.
+        ///  @param out output stream to use
+        ///  @param sharedSecret shared secret to be used to encode this packet
+        ///  @param request Radius request packet
+        ///  @exception IOException communication error
+        /// </summary>
+        public void EncodeResponsePacket(Stream @out, String sharedSecret, RadiusPacket request)
         {
             if (request == null)
                 throw new ArgumentNullException("request", "request cannot be null");
             encodePacket(@out, sharedSecret, request);
         }
 
-        /**
-         * Reads a Radius request packet from the given input stream and
-         * creates an appropiate RadiusPacket descendant object.
-         * Reads in all attributes and returns the object. 
-         * Decodes the encrypted fields and attributes of the packet.
-         * @param sharedSecret shared secret to be used to decode this packet
-         * @return new RadiusPacket object
-         * @exception IOException IO error
-         * @exception RadiusException malformed packet
-         */
-        public static RadiusPacket decodeRequestPacket(Stream @in, String sharedSecret)
+        /// <summary>
+        ///  Reads a Radius request packet from the given input stream and
+        ///  creates an appropiate RadiusPacket descendant object.
+        ///  Reads in all attributes and returns the object. 
+        ///  Decodes the encrypted fields and attributes of the packet.
+        ///  @param sharedSecret shared secret to be used to decode this packet
+        ///  @return new RadiusPacket object
+        ///  @exception IOException IO error
+        ///  @exception RadiusException malformed packet
+        /// </summary>
+        public static RadiusPacket DecodeRequestPacket(Stream @in, String sharedSecret)
         {
-            return decodePacket(DefaultDictionary.getDefaultDictionary(), @in, sharedSecret, null);
+            return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, null);
         }
 
-        /**
-         * Reads a Radius response packet from the given input stream and
-         * creates an appropiate RadiusPacket descendant object.
-         * Reads in all attributes and returns the object.
-         * Checks the packet authenticator. 
-         * @param sharedSecret shared secret to be used to decode this packet
-         * @param request Radius request packet
-         * @return new RadiusPacket object
-         * @exception IOException IO error
-         * @exception RadiusException malformed packet
-         */
+        /// <summary>
+        ///  Reads a Radius response packet from the given input stream and
+        ///  creates an appropiate RadiusPacket descendant object.
+        ///  Reads in all attributes and returns the object.
+        ///  Checks the packet authenticator. 
+        ///  @param sharedSecret shared secret to be used to decode this packet
+        ///  @param request Radius request packet
+        ///  @return new RadiusPacket object
+        ///  @exception IOException IO error
+        ///  @exception RadiusException malformed packet
+        /// </summary>
         public static RadiusPacket decodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
         {
             if (request == null)
                 throw new ArgumentNullException("request may not be null");
-            return decodePacket(DefaultDictionary.getDefaultDictionary(), @in, sharedSecret, request);
+            return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, request);
         }
 
-        /**
-         * Reads a Radius request packet from the given input stream and
-         * creates an appropiate RadiusPacket descendant object.
-         * Reads in all attributes and returns the object. 
-         * Decodes the encrypted fields and attributes of the packet.
-         * @param dictionary dictionary to use for attributes
-         * @param in InputStream to read packet from
-         * @param sharedSecret shared secret to be used to decode this packet
-         * @return new RadiusPacket object
-         * @exception IOException IO error
-         * @exception RadiusException malformed packet
-         */
-        public static RadiusPacket decodeRequestPacket(IWritableDictionary dictionary, Stream @in, String sharedSecret)
+        /// <summary>
+        ///  Reads a Radius request packet from the given input stream and
+        ///  creates an appropiate RadiusPacket descendant object.
+        ///  Reads in all attributes and returns the object. 
+        ///  Decodes the encrypted fields and attributes of the packet.
+        ///  @param dictionary dictionary to use for attributes
+        ///  @param in InputStream to read packet from
+        ///  @param sharedSecret shared secret to be used to decode this packet
+        ///  @return new RadiusPacket object
+        ///  @exception IOException IO error
+        ///  @exception RadiusException malformed packet
+        /// </summary>
+        public static RadiusPacket DecodeRequestPacket(IWritableDictionary dictionary, Stream @in, String sharedSecret)
         {
-            return decodePacket(dictionary, @in, sharedSecret, null);
+            return DecodePacket(dictionary, @in, sharedSecret, null);
         }
 
-        /**
-         * Reads a Radius response packet from the given input stream and
-         * creates an appropiate RadiusPacket descendant object.
-         * Reads in all attributes and returns the object.
-         * Checks the packet authenticator. 
-         * @param dictionary dictionary to use for attributes
-         * @param in InputStream to read packet from
-         * @param sharedSecret shared secret to be used to decode this packet
-         * @param request Radius request packet
-         * @return new RadiusPacket object
-         * @exception IOException IO error
-         * @exception RadiusException malformed packet
-         */
-        public static RadiusPacket decodeResponsePacket(IWritableDictionary dictionary, InputStream @in, String sharedSecret, RadiusPacket request)
+        /// <summary>
+        ///  Reads a Radius response packet from the given input stream and
+        ///  creates an appropiate RadiusPacket descendant object.
+        ///  Reads in all attributes and returns the object.
+        ///  Checks the packet authenticator. 
+        ///  @param dictionary dictionary to use for attributes
+        ///  @param in InputStream to read packet from
+        ///  @param sharedSecret shared secret to be used to decode this packet
+        ///  @param request Radius request packet
+        ///  @return new RadiusPacket object
+        ///  @exception IOException IO error
+        ///  @exception RadiusException malformed packet
+        /// </summary>
+        public static RadiusPacket decodeResponsePacket(IWritableDictionary dictionary, Stream @in,
+                                                        String sharedSecret, RadiusPacket request)
         {
             if (request == null)
-                throw new ArgumentNullException("request may not be null");
-            return decodePacket(dictionary, @in, sharedSecret, request);
+                throw new ArgumentNullException("request", "request may not be null");
+            return DecodePacket(dictionary, @in, sharedSecret, request);
         }
 
-        /**
-         * Retrieves the next packet identifier to use and increments the static
-         * storage.
-         * @return the next packet identifier to use
-         */
-        public static int getNextPacketIdentifier()
+        /// <summary>
+        ///  Retrieves the next packet identifier to use and increments the static
+        ///  storage.
+        ///  @return the next packet identifier to use
+        /// </summary>
+        public static int GetNextPacketIdentifier()
         {
-            lock (nextPacketId)
-            {
-                nextPacketId++;
-                if (nextPacketId > 255)
-                    nextPacketId = 0;
-                return nextPacketId;
-            }
+
+
+            nextPacketId++;
+            if (nextPacketId > 255)
+                nextPacketId = 0;
+            return nextPacketId;
+
         }
 
-        /**
-         * Creates a RadiusPacket object. Depending on the passed type, the
-         * appropiate successor is chosen. Sets the type, but does not touch
-         * the packet identifier.
-         * @param type packet type
-         * @return RadiusPacket object
-         */
+        /// <summary>
+        ///  Creates a RadiusPacket object. Depending on the passed type, the
+        ///  appropiate successor is chosen. Sets the type, but does not touch
+        ///  the packet identifier.
+        ///  @param type packet type
+        ///  @return RadiusPacket object
+        /// </summary>
         public static RadiusPacket createRadiusPacket(int type)
         {
             RadiusPacket rp;
             switch (type)
             {
-                case ACCESS_REQUEST:
+                case AccessRequest:
                     rp = new AccessRequest();
                     break;
 
-                case ACCOUNTING_REQUEST:
+                case AccountingRequest:
                     rp = new AccountingRequest();
                     break;
-
-                case ACCESS_ACCEPT:
-                case ACCESS_REJECT:
-                case ACCOUNTING_RESPONSE:
+                case AccessAccept:
+                case AccessReject:
+                case AccountingResponse:
                 default:
                     rp = new RadiusPacket();
+                    break;
             }
-
-            rp.setPacketType(type);
+            rp.Type = type;
             return rp;
         }
 
-        /**
-         * String representation of this packet, for debugging purposes.
-         * @see java.lang.Object#toString()
-         */
-        public String toString()
+        /// <summary>
+        ///  String representation of this packet, for debugging purposes.
+        ///  @see java.lang.Object#toString()
+        /// </summary>
+        public override String ToString()
         {
-            StringBuffer s = new StringBuffer();
-            s.append(getPacketTypeName());
-            s.append(", ID ");
-            s.append(packetIdentifier);
-            for (Iterator i = attributes.iterator(); i.hasNext(); )
+            var s = new StringBuilder();
+            s.Append(TypeName);
+            s.Append(", ID ");
+            s.Append(_identifier);
+            //for (Iterator i = attributes.iterator(); i.hasNext(); )
+            foreach (var attr in attributes)
             {
-                RadiusAttribute attr = (RadiusAttribute)i.next();
-                s.append("\n");
-                s.append(attr.toString());
+                //var attr = (RadiusAttribute)i.next();
+                s.Append("\n").Append(attr.ToString());
             }
-            return s.toString();
+            return s.ToString();
         }
 
-        /**
-         * Returns the authenticator for this Radius packet.
-         * For a Radius packet read from a stream, this will return the
-         * authenticator sent by the server. For a new Radius packet to be sent,
-         * this will return the authenticator created by the method
-         * createAuthenticator() and will return null if no authenticator
-         * has been created yet.
-         * @return authenticator, 16 bytes
-         */
+        /// <summary>
+        ///  Returns the authenticator for this Radius packet.
+        ///  For a Radius packet read from a stream, this will return the
+        ///  authenticator sent by the server. For a new Radius packet to be sent,
+        ///  this will return the authenticator created by the method
+        ///  createAuthenticator() and will return null if no authenticator
+        ///  has been created yet.
+        ///  @return authenticator, 16 bytes
+        /// </summary>
         public byte[] getAuthenticator()
         {
             return authenticator;
         }
 
-        /**
-         * Sets the authenticator to be used for this Radius packet.
-         * This method should seldomly be used.
-         * Authenticators are created and managed by this class internally.
-         * @param authenticator authenticator
-         */
+        /// <summary>
+        ///  Sets the authenticator to be used for this Radius packet.
+        ///  This method should seldomly be used.
+        ///  Authenticators are created and managed by this class internally.
+        ///  @param authenticator authenticator
+        /// </summary>
         public void setAuthenticator(byte[] authenticator)
         {
             this.authenticator = authenticator;
         }
 
-        /**
-         * Returns the dictionary this Radius packet uses.
-         * @return Dictionary instance
-         */
-        public Dictionary getDictionary()
+        /// <summary>
+        ///  Returns the dictionary this Radius packet uses.
+        ///  @return Dictionary instance
+        /// </summary>
+        public IWritableDictionary Dictionary
         {
-            return dictionary;
-        }
-
-        /**
-         * Sets a custom dictionary to use. If no dictionary is set,
-         * the default dictionary is used.
-         * Also copies the dictionary to the attributes.
-         * @param dictionary Dictionary class to use
-         * @see DefaultDictionary
-         */
-        public void setDictionary(Dictionary dictionary)
-        {
-            this.dictionary = dictionary;
-            for (Iterator i = attributes.iterator(); i.hasNext(); )
+            get { return dictionary; }
+            set
             {
-                RadiusAttribute attr = (RadiusAttribute)i.next();
-                attr.setDictionary(dictionary);
+                this.dictionary = value;
+                foreach (var direct in attributes)
+                {
+                    direct.Dictionary = value;
+                }
             }
         }
 
-        /**
-         * Encodes this Radius packet and sends it to the specified output
-         * stream.
-         * @param out output stream to use
-         * @param sharedSecret shared secret to be used to encode this packet
-         * @param request Radius request packet if this packet to be encoded
-         * is a response packet, null if this packet is a request packet
-         * @exception IOException communication error
-         * @exception RuntimeException if required packet data has not been set 
-         */
+        /// <summary>
+        ///  Encodes this Radius packet and sends it to the specified output
+        ///  stream.
+        ///  @param out output stream to use
+        ///  @param sharedSecret shared secret to be used to encode this packet
+        ///  @param request Radius request packet if this packet to be encoded
+        ///  is a response packet, null if this packet is a request packet
+        ///  @exception IOException communication error
+        ///  @exception NotImplementedException if required packet data has not been set 
+        /// </summary>
         protected void encodePacket(Stream outputStream, String sharedSecret, RadiusPacket request)
         {
             // check shared secret
-            if (sharedSecret == null || sharedSecret.length() == 0)
-                throw new RuntimeException("no shared secret has been set");
+            if (sharedSecret == null || sharedSecret.Length == 0)
+                throw new NotImplementedException("no shared secret has been set");
 
             // check request authenticator
             if (request != null && request.getAuthenticator() == null)
-                throw new RuntimeException("request authenticator not set");
+                throw new NotImplementedException("request authenticator not set");
 
             // request packet authenticator
             if (request == null)
             {
                 // first create authenticator, then encode attributes
                 // (User-Password attribute needs the authenticator)
-                authenticator = createRequestAuthenticator(sharedSecret);
+                authenticator = CreateRequestAuthenticator(sharedSecret);
                 encodeRequestAttributes(sharedSecret);
             }
 
-            byte[] attributes = getAttributeBytes();
-            int packetLength = RADIUS_HEADER_LENGTH + attributes.length;
-            if (packetLength > MAX_PACKET_LENGTH)
-                throw new RuntimeException("packet too long");
+            byte[] attributes = GetAttributeBytes();
+            int packetLength = RadiusHeaderLength + attributes.Length;
+            if (packetLength > MaxPacketLength)
+                throw new NotImplementedException("packet too long");
 
             // response packet authenticator
             if (request != null)
             {
                 // after encoding attributes, create authenticator
-                authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes, request.getAuthenticator());
+                authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes,
+                                                            request.getAuthenticator());
             }
             else
             {
                 // update authenticator after encoding attributes
-                authenticator = updateRequestAuthenticator(sharedSecret, packetLength, attributes);
+                authenticator = UpdateRequestAuthenticator(sharedSecret, packetLength, attributes);
             }
-
-            DataOutputStream dos = new DataOutputStream(outputStream);
-            dos.writeByte(getPacketType());
-            dos.writeByte(getPacketIdentifier());
+            outputStream.WriteByte(Convert.ToByte(Type));
+            outputStream.WriteByte(Convert.ToByte(Identifier));
+            outputStream.WriteByte(Convert.ToByte(packetLength));
+            var authen = getAuthenticator();
+            outputStream.Write(authen, 0, authen.Length);
+            outputStream.Write(attributes, 0, attributes.Length);
+            /*var dos = new MemoryStream(outputStream);
+            dos.writeByte(Type);
+            dos.writeByte(Identifier);
             dos.writeShort(packetLength);
             dos.write(getAuthenticator());
             dos.write(attributes);
-            dos.flush();
+            dos.flush();*/
         }
 
-        /**
-         * This method exists for subclasses to be overridden in order to
-         * encode packet attributes like the User-Password attribute.
-         * The method may use getAuthenticator() to get the request
-         * authenticator.
-         * @param sharedSecret
-         */
+        /// <summary>
+        ///  This method exists for subclasses to be overridden in order to
+        ///  encode packet attributes like the User-Password attribute.
+        ///  The method may use getAuthenticator() to get the request
+        ///  authenticator.
+        ///  @param sharedSecret
+        /// </summary>
         protected void encodeRequestAttributes(String sharedSecret)
         {
         }
 
-        /**
-         * Creates a request authenticator for this packet. This request authenticator
-         * is constructed as described in RFC 2865.
-         * @param sharedSecret shared secret that secures the communication
-         * with the other Radius server/client
-         * @return request authenticator, 16 bytes
-         */
-        protected byte[] createRequestAuthenticator(String sharedSecret)
+        /// <summary>
+        ///  Creates a request authenticator for this packet. This request authenticator
+        ///  is constructed as described in RFC 2865.
+        ///  @param sharedSecret shared secret that secures the communication
+        ///  with the other Radius server/client
+        ///  @return request authenticator, 16 bytes
+        /// </summary>
+        protected byte[] CreateRequestAuthenticator(String sharedSecret)
         {
-            byte[] secretBytes = RadiusUtil.getUtf8Bytes(sharedSecret);
-            byte[] randomBytes = new byte[16];
-            random.nextBytes(randomBytes);
+            byte[] secretBytes = RadiusUtil.GetUtf8Bytes(sharedSecret);
 
-            MessageDigest md5 = getMd5Digest();
+            var randomBytes = new byte[16];
+            random.NextBytes(randomBytes);
+
+            byte[] md5Bytes = new byte[secretBytes.Length + 16];
+
+            /*code from java
+            var md5 = GetMd5Digest();
             md5.reset();
             md5.update(secretBytes);
-            md5.update(randomBytes);
-            return md5.digest();
+            md5.update(randomBytes);*/
+            Array.Copy(secretBytes, 0, md5Bytes, 0, secretBytes.Length);
+            Array.Copy(randomBytes, 0, md5Bytes, secretBytes.Length, 16);
+            return MD5.Create().ComputeHash(md5Bytes);
         }
 
-        /**
-         * AccountingRequest overrides this
-         * method to create a request authenticator as specified by RFC 2866.		 
-         * @param sharedSecret shared secret
-         * @param packetLength length of the final Radius packet
-         * @param attributes attribute data
-         * @return new request authenticator
-         */
-        protected byte[] updateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
+        /// <summary>
+        ///  AccountingRequest overrides this
+        ///  method to create a request authenticator as specified by RFC 2866.		 
+        ///  @param sharedSecret shared secret
+        ///  @param packetLength Length of the final Radius packet
+        ///  @param attributes attribute data
+        ///  @return new request authenticator
+        /// </summary>
+        protected byte[] UpdateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
         {
             return authenticator;
         }
 
-        /**
-         * Creates an authenticator for a Radius response packet.
-         * @param sharedSecret shared secret
-         * @param packetLength length of response packet
-         * @param attributes encoded attributes of response packet
-         * @param requestAuthenticator request packet authenticator
-         * @return new 16 byte response authenticator
-         */
-        protected byte[] createResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes, byte[] requestAuthenticator)
+        /// <summary>
+        ///  Creates an authenticator for a Radius response packet.
+        ///  @param sharedSecret shared secret
+        ///  @param packetLength Length of response packet
+        ///  @param attributes encoded attributes of response packet
+        ///  @param requestAuthenticator request packet authenticator
+        ///  @return new 16 byte response authenticator
+        /// </summary>
+        protected byte[] createResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
+                                                     byte[] requestAuthenticator)
         {
-            MessageDigest md5 = getMd5Digest();
-            md5.reset();
-            md5.update((byte)getPacketType());
-            md5.update((byte)getPacketIdentifier());
-            md5.update((byte)(packetLength >> 8));
-            md5.update((byte)(packetLength & 0x0ff));
-            md5.update(requestAuthenticator, 0, requestAuthenticator.length);
-            md5.update(attributes, 0, attributes.length);
-            md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
-            return md5.digest();
+            //MessageDigest md5 = GetMd5Digest();
+            //md5.reset();
+            //md5.update((byte)Type);
+            //md5.update((byte)Identifier);
+            //md5.update((byte)(packetLength >> 8));
+            //md5.update((byte)(packetLength & 0x0ff));
+            //md5.update(requestAuthenticator, 0, requestAuthenticator.Length);
+            //md5.update(attributes, 0, attributes.Length);
+            //md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
+            //return md5.digest();
+
+            var bytes = new List<byte>
+                          {
+                              Convert.ToByte(Type),
+                              Convert.ToByte(Identifier),
+                              Convert.ToByte(packetLength >> 8),
+                              Convert.ToByte(packetLength & 0x0ff)
+                          };
+            bytes.AddRange(requestAuthenticator);
+            bytes.AddRange(RadiusUtil.GetUtf8Bytes(sharedSecret));
+
+            return MD5.Create().ComputeHash(bytes.ToArray());
         }
 
-        /**
-         * Reads a Radius packet from the given input stream and
-         * creates an appropiate RadiusPacket descendant object.
-         * Reads in all attributes and returns the object. 
-         * Decodes the encrypted fields and attributes of the packet.
-         * @param dictionary dictionary to use for attributes
-         * @param sharedSecret shared secret to be used to decode this packet
-         * @param request Radius request packet if this is a response packet to be 
-         * decoded, null if this is a request packet to be decoded
-         * @return new RadiusPacket object
-         * @exception IOException if an IO error occurred
-         * @exception RadiusException if the Radius packet is malformed
-         */
-        protected static RadiusPacket decodePacket(Dictionary dictionary, Stream inputStream, String sharedSecret, RadiusPacket request)
+        /// <summary>
+        ///  Reads a Radius packet from the given input stream and
+        ///  creates an appropiate RadiusPacket descendant object.
+        ///  Reads in all attributes and returns the object. 
+        ///  Decodes the encrypted fields and attributes of the packet.
+        ///  @param dictionary dictionary to use for attributes
+        ///  @param sharedSecret shared secret to be used to decode this packet
+        ///  @param request Radius request packet if this is a response packet to be 
+        ///  decoded, null if this is a request packet to be decoded
+        ///  @return new RadiusPacket object
+        ///  @exception IOException if an IO error occurred
+        ///  @exception RadiusException if the Radius packet is malformed
+        /// </summary>
+        protected static RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream, String sharedSecret,
+                                                   RadiusPacket request)
         {
             // check shared secret
-            if (sharedSecret == null || sharedSecret.length() == 0)
-                throw new RuntimeException("no shared secret has been set");
+            if (string.IsNullOrEmpty(sharedSecret))
+                throw new NotImplementedException("no shared secret has been set");
 
             // check request authenticator
             if (request != null && request.getAuthenticator() == null)
-                throw new RuntimeException("request authenticator not set");
+                throw new NotImplementedException("request authenticator not set");
 
             // read and check header
             int type = inputStream.ReadByte() & 0x0ff;
             int identifier = inputStream.ReadByte() & 0x0ff;
-            int length = (inputStream.read() & 0x0ff) << 8 | (inputStream.ReadByte() & 0x0ff);
+            int length = (inputStream.ReadByte() & 0x0ff) << 8 | (inputStream.ReadByte() & 0x0ff);
 
-            if (request != null && request.getPacketIdentifier() != identifier)
-                throw new RadiusException("bad packet: invalid packet identifier (request: " + request.getPacketIdentifier() + ", response: " + identifier);
-            if (length < RADIUS_HEADER_LENGTH)
+            if (request != null && request.Identifier != identifier)
+                throw new RadiusException("bad packet: invalid packet identifier (request: " +
+                                          request.Identifier + ", response: " + identifier);
+            if (length < RadiusHeaderLength)
                 throw new RadiusException("bad packet: packet too short (" + length + " bytes)");
-            if (length > MAX_PACKET_LENGTH)
+            if (length > MaxPacketLength)
                 throw new RadiusException("bad packet: packet too long (" + length + " bytes)");
 
             // read rest of packet
-            byte[] authenticator = new byte[16];
-            byte[] attributeData = new byte[length - RADIUS_HEADER_LENGTH];
+            var authenticator = new byte[16];
+            var attributeData = new byte[length - RadiusHeaderLength];
             inputStream.Read(authenticator, 0, 16);
             inputStream.Read(attributeData, 0, attributeData.Length);
 
             // check and count attributes
             int pos = 0;
             int attributeCount = 0;
-            while (pos < attributeData.length)
+            while (pos < attributeData.Length)
             {
-                if (pos + 1 >= attributeData.length)
-                    throw new RadiusException("bad packet: attribute length mismatch");
+                if (pos + 1 >= attributeData.Length)
+                    throw new RadiusException("bad packet: attribute Length mismatch");
                 int attributeLength = attributeData[pos + 1] & 0x0ff;
                 if (attributeLength < 2)
-                    throw new RadiusException("bad packet: invalid attribute length");
+                    throw new RadiusException("bad packet: invalid attribute Length");
                 pos += attributeLength;
                 attributeCount++;
             }
-            if (pos != attributeData.length)
-                throw new RadiusException("bad packet: attribute length mismatch");
+            if (pos != attributeData.Length)
+                throw new RadiusException("bad packet: attribute Length mismatch");
 
             // create RadiusPacket object; set properties
             RadiusPacket rp = createRadiusPacket(type);
-            rp.setPacketType(type);
-            rp.setPacketIdentifier(identifier);
+            rp.Type = type;
+            rp.Identifier = identifier;
             rp.authenticator = authenticator;
 
             // load attributes
             pos = 0;
-            while (pos < attributeData.length)
+            while (pos < attributeData.Length)
             {
                 int attributeType = attributeData[pos] & 0x0ff;
                 int attributeLength = attributeData[pos + 1] & 0x0ff;
-                RadiusAttribute a = RadiusAttribute.createRadiusAttribute(dictionary, -1, attributeType);
-                a.readAttribute(attributeData, pos, attributeLength);
-                rp.addAttribute(a);
+                RadiusAttribute a = RadiusAttribute.CreateRadiusAttribute(dictionary, -1, attributeType);
+                a.ReadAttribute(attributeData, pos, attributeLength);
+                rp.AddAttribute(a);
                 pos += attributeLength;
             }
 
@@ -940,128 +992,93 @@ namespace TinyRadius.Net.Packet
             if (request == null)
             {
                 // decode attributes
-                rp.decodeRequestAttributes(sharedSecret);
-                rp.checkRequestAuthenticator(sharedSecret, length, attributeData);
+                rp.DecodeRequestAttributes(sharedSecret);
+                rp.CheckRequestAuthenticator(sharedSecret, length, attributeData);
             }
             else
             {
                 // response packet: check authenticator
-                rp.checkResponseAuthenticator(sharedSecret, length, attributeData, request.getAuthenticator());
+                rp.CheckResponseAuthenticator(sharedSecret, length, attributeData, request.getAuthenticator());
             }
 
             return rp;
         }
 
-        /**
-         * Checks the request authenticator against the supplied shared secret.
-         * Overriden by AccountingRequest to handle special accounting request
-         * authenticators. There is no way to check request authenticators for
-         * authentication requests as they contain secret bytes.
-         * @param sharedSecret shared secret
-         * @param packetLength total length of the packet
-         * @param attributes request attribute data
-         */
-        protected void checkRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
+        /// <summary>
+        ///  Checks the request authenticator against the supplied shared secret.
+        ///  Overriden by AccountingRequest to handle special accounting request
+        ///  authenticators. There is no way to check request authenticators for
+        ///  authentication requests as they contain secret bytes.
+        ///  @param sharedSecret shared secret
+        ///  @param packetLength total Length of the packet
+        ///  @param attributes request attribute data
+        /// </summary>
+        protected virtual void CheckRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
         {
         }
 
-        /**
-         * Can be overriden to decode encoded request attributes such as
-         * User-Password. This method may use getAuthenticator() to get the
-         * request authenticator.
-         * @param sharedSecret
-         */
-        protected void decodeRequestAttributes(String sharedSecret)
+        /// <summary>
+        ///  Can be overriden to decode encoded request attributes such as
+        ///  User-Password. This method may use getAuthenticator() to get the
+        ///  request authenticator.
+        ///  @param sharedSecret
+        /// </summary>
+        protected virtual void DecodeRequestAttributes(String sharedSecret)
         {
         }
 
-        /**
-         * This method checks the authenticator of this Radius packet. This method
-         * may be overriden to include special attributes in the authenticator check.
-         * @param sharedSecret shared secret to be used to encrypt the authenticator
-         * @param packetLength length of the response packet
-         * @param attributes attribute data of the response packet
-         * @param requestAuthenticator 16 bytes authenticator of the request packet belonging
-         * to this response packet
-         */
-        protected void checkResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes, byte[] requestAuthenticator)
+        /// <summary>
+        ///  This method checks the authenticator of this Radius packet. This method
+        ///  may be overriden to include special attributes in the authenticator check.
+        ///  @param sharedSecret shared secret to be used to encrypt the authenticator
+        ///  @param packetLength Length of the response packet
+        ///  @param attributes attribute data of the response packet
+        ///  @param requestAuthenticator 16 bytes authenticator of the request packet belonging
+        ///  to this response packet
+        /// </summary>
+        protected virtual void CheckResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
+                                                  byte[] requestAuthenticator)
         {
-            byte[] authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes, requestAuthenticator);
+            byte[] authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes,
+                                                               requestAuthenticator);
             byte[] receivedAuth = getAuthenticator();
             for (int i = 0; i < 16; i++)
                 if (authenticator[i] != receivedAuth[i])
                     throw new RadiusException("response authenticator invalid");
         }
 
-        /**
-         * Returns a MD5 digest.
-         * @return MessageDigest object
-         */
-        protected MD5 getMd5Digest()
+        /// <summary>
+        ///  Returns a MD5 digest.
+        ///  @return MessageDigest object
+        /// </summary>
+        protected virtual MD5 GetMd5Digest()
         {
-            if (md5Digest == null)
-            {
-                md5Digest = MD5.Create();
-            }
-            return md5Digest;
+            return md5Digest ?? (md5Digest = MD5.Create());
         }
 
-        /**
-         * Encodes the attributes of this Radius packet to a byte array.
-         * @return byte array with encoded attributes
-         * @throws IOException error writing data
-         */
-        protected byte[] getAttributeBytes()
+        /// <summary>
+        ///  Encodes the attributes of this Radius packet to a byte array.
+        ///  @return byte array with encoded attributes
+        ///  @throws IOException error writing data
+        /// </summary>
+        protected virtual byte[] GetAttributeBytes()
         {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(MAX_PACKET_LENGTH);
-            for (Iterator i = attributes.iterator(); i.hasNext(); )
+            var bos = new MemoryStream(MaxPacketLength);
+            try
             {
-                RadiusAttribute a = (RadiusAttribute)i.next();
-                bos.write(a.writeAttribute());
+                foreach (var a in attributes)
+                {
+                    var bytes = a.WriteAttribute();
+                    bos.Write(bytes, 0, bytes.Length);
+                }
+                bos.Flush();
+                return bos.ToArray();
             }
-            bos.flush();
-            return bos.toByteArray();
+            finally
+            {
+                bos.Close();
+                bos.Dispose();
+            }
         }
-
-        /**
-         * Type of this Radius packet.
-         */
-        private int packetType = 0;
-
-        /**
-         * Identifier of this packet.
-         */
-        private int packetIdentifier = 0;
-
-        /**
-         * Attributes for this packet.
-         */
-        private ArrayList attributes = new ArrayList();
-
-        /**
-         * MD5 digest.
-         */
-        private MD5 md5Digest = null;
-
-        /**
-         * Authenticator for this Radius packet.
-         */
-        private byte[] authenticator = null;
-
-        /**
-         * Dictionary to look up attribute names.
-         */
-        private Dictionary dictionary = DefaultDictionary.getDefaultDictionary();
-
-        /**
-         * Next packet identifier.
-         */
-        private static int nextPacketId = 0;
-
-        /**
-         * Random number generator.
-         */
-        private static SecureRandom random = new SecureRandom();
-
     }
 }
