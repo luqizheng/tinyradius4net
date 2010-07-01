@@ -1,39 +1,48 @@
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using TinyRadius.Net.Packet;
+using TinyRadius.Net.Util;
+
 namespace TinyRadius.Net.packet
 {
-
-
-
-    using TinyRadius.Net.Util;
-    using System;
-    using System.Security.Cryptography;
-    using TinyRadius.Net.Packet;
-
     /**
      * CoA packet. Thanks to Michael Krastev.
      * @author Michael Krastev <mkrastev@gmail.com>
      */
+
     public class CoaRequest : RadiusPacket
     {
-
         public CoaRequest()
-            : base(COA_REQUEST, GetNextPacketIdentifier())
+            : base(CoaRequest, GetNextPacketIdentifier())
         {
         }
 
         /**
          * @see AccountingRequest#updateRequestAuthenticator(String, int, byte[])
          */
-        protected byte[] updateRequestAuthenticator(String sharedSecret,
-                int packetLength, byte[] attributes)
+
+        protected override byte[] UpdateRequestAuthenticator(String sharedSecret,
+                                                             int packetLength, byte[] attributes)
         {
-            byte[] authenticator = new byte[16];
+            var authenticator = new byte[16];
             /*for (int i = 0; i < 16; i++)
                 authenticator[i] = 0;*/
 
-            MD5 md5 = GetMd5Digest();
-            md5.Initialize();
 
+            var ms = new List<byte>
+                         {
+                             Convert.ToByte(Type),
+                             Convert.ToByte(Identifier),
+                             Convert.ToByte(packetLength >> 8),
+                             Convert.ToByte(packetLength & 0xff)
+                         };
 
+            ms.AddRange(authenticator);
+            ms.AddRange(attributes);
+            ms.AddRange(RadiusUtil.GetUtf8Bytes(sharedSecret));
+
+            return MD5.Create().ComputeHash(ms.ToArray());
 
             /*MessageDigest md5 = getMd5Digest();
             md5.reset();
@@ -46,6 +55,5 @@ namespace TinyRadius.Net.packet
             md5.update(RadiusUtil.getUtf8Bytes(sharedSecret));
             return md5.digest();*/
         }
-
     }
 }

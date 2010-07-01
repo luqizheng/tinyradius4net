@@ -25,7 +25,7 @@ namespace TinyRadius.Net.Proxy
          */
         public void start(bool listenAuth, bool listenAcct, bool listenProxy)
         {
-            base.start(listenAuth, listenAcct);
+            base.Start(listenAuth, listenAcct);
             if (listenProxy)
             {
                 ThreadPool.QueueUserWorkItem(delegate(object state)
@@ -33,8 +33,8 @@ namespace TinyRadius.Net.Proxy
                     setName("Radius Proxy Listener");
                     try
                     {
-                        logger.info("starting RadiusProxyListener on port " + getProxyPort());
-                        listen(getProxySocket());
+                        logger.Info("starting RadiusProxyListener on port " + getProxyPort());
+                        Listen(getProxySocket());
                     }
                     catch (Exception e)
                     {
@@ -45,7 +45,7 @@ namespace TinyRadius.Net.Proxy
                     public void run() {
                         setName("Radius Proxy Listener");
                         try {
-                            logger.info("starting RadiusProxyListener on port " + getProxyPort());
+                            logger.Info("starting RadiusProxyListener on port " + getProxyPort());
                             listen(getProxySocket());
                         } catch(Exception e) {
                             e.printStackTrace();
@@ -60,7 +60,7 @@ namespace TinyRadius.Net.Proxy
          */
         public void stop()
         {
-            logger.info("stopping Radius Proxy");
+            logger.Info("stopping Radius Proxy");
             if (proxySocket != null)
                 proxySocket.close();
             super.stop();
@@ -149,7 +149,7 @@ namespace TinyRadius.Net.Proxy
             {
                 // Proxy incoming packet to other radius server
                 RadiusProxyConnection proxyConnection = new RadiusProxyConnection(radiusServer, radiusClient, request, localAddress.getPort());
-                logger.info("Proxy packet to " + proxyConnection);
+                logger.Info("Proxy packet to " + proxyConnection);
                 proxyPacket(request, proxyConnection);
                 return null;
             }
@@ -185,10 +185,10 @@ namespace TinyRadius.Net.Proxy
 
             // retrieve client
             RadiusEndpoint client = proxyConnection.getRadiusClient();
-            if (logger.isInfoEnabled())
+            if (logger.IsInfoEnabled())
             {
-                logger.info("received Proxy packet: " + packet);
-                logger.info("forward packet to " + client.getEndpointAddress().toString() + " with secret " + client.getSharedSecret());
+                logger.Info("received Proxy packet: " + packet);
+                logger.Info("forward packet to " + client.getEndpointAddress().toString() + " with secret " + client.getSharedSecret());
             }
 
             // remove only own Proxy-State (last attribute)
@@ -234,7 +234,7 @@ namespace TinyRadius.Net.Proxy
             String serverSecret = proxyConnection.getRadiusServer().getSharedSecret();
 
             // save request authenticator (will be calculated new)
-            byte[] auth = packet.getAuthenticator();
+            byte[] auth = packet.Authenticator;
 
             // encode new packet (with new authenticator)
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -243,7 +243,7 @@ namespace TinyRadius.Net.Proxy
             DatagramPacket datagram = new DatagramPacket(data, data.Length, serverAddress, serverPort);
 
             // restore original authenticator
-            packet.setAuthenticator(auth);
+            packet.Authenticator = auth;
 
             // send packet
             DatagramSocket proxySocket = getProxySocket();

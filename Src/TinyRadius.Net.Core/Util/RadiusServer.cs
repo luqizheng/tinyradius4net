@@ -1,51 +1,44 @@
-using TinyRadius.Net.Attributes;
-using TinyRadius.Net.Packet;
 using System;
-using TinyRadius.Net.packet;
-using System.Threading;
-using TinyRadius.Net.Net.JavaHelper;
-using TinyRadius.Net.JavaHelper;
-using log4net;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using log4net;
+using TinyRadius.Net.Attributes;
+using TinyRadius.Net.JavaHelper;
+using TinyRadius.Net.Net.JavaHelper;
+using TinyRadius.Net.packet;
+using TinyRadius.Net.Packet;
 
 namespace TinyRadius.Net.Util
 {
-
-    /*using java.io.ByteArrayInputStream;
-    using java.io.ByteArrayOutputStream;
-    using java.io.IOException;
-    using java.net.DatagramPacket;
-    using java.net.DatagramSocket;
-    using java.net.InetAddress;
-    using java.net.InetSocketAddress;
-    using java.net.SocketException;
-    using java.net.SocketTimeoutException;
-    using java.Util.Arrays;
-    using java.Util.Iterator;
-    using java.Util.LinkedList;
-    using java.Util.ArrayList;
-
-    using org.apache.commons.logging.Log;
-    using org.apache.commons.logging.LogFactory;*/
-
-
     /**
      * Implements a simple Radius server. This class must be subclassed to
      * provide an implementation for getSharedSecret() and getUserPassword().
      * If the server supports accounting, it must override
      * accountingRequestReceived().
      */
+
     public abstract class RadiusServer
     {
-
         /**
          * Returns the shared secret used to communicate with the client with the
          * passed IP address or null if the client is not allowed at this server.
          * @param client IP address and port number of client
          * @return shared secret or null
          */
-        public abstract String getSharedSecret(InetSocketAddress client);
+        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusServer));
+        private readonly ArrayList receivedPackets = new ArrayList();
+        private int acctPort = 1813;
+        private DatagramSocket acctSocket;
+        private int authPort = 1812;
+        private DatagramSocket authSocket;
+        private bool closing;
+        private long duplicateInterval = 30000; // 30 s
+        private InetAddress listenAddress;
+        private int socketTimeout = 3000;
+        public abstract String GetSharedSecret(InetSocketAddress client);
 
         /**
          * Returns the password of the passed user. Either this
@@ -53,7 +46,7 @@ namespace TinyRadius.Net.Util
          * @param userName user name
          * @return plain-text password or null if user unknown
          */
-        public abstract String getUserPassword(String userName);
+        public abstract String GetUserPassword(String userName);
 
         /**
          * Constructs an answer for an Access-Request packet. Either this
@@ -64,14 +57,15 @@ namespace TinyRadius.Net.Util
          * @exception RadiusException malformed request packet; if this
          * exception is thrown, no answer will be sent
          */
-        public RadiusPacket accessRequestReceived(AccessRequest accessRequest, System.Net.IPAddress client)
-        {
-            String plaintext = getUserPassword(accessRequest.getUserName());
-            int type = RadiusPacket.ACCESS_REJECT;
-            if (plaintext != null && accessRequest.verifyPassword(plaintext))
-                type = RadiusPacket.ACCESS_ACCEPT;
 
-            RadiusPacket answer = new RadiusPacket(type, accessRequest.Identifier);
+        public RadiusPacket accessRequestReceived(AccessRequest accessRequest, IPAddress client)
+        {
+            String plaintext = GetUserPassword(accessRequest.UserName);
+            int type = RadiusPacket.AccessReject;
+            if (plaintext != null && accessRequest.VerifyPassword(plaintext))
+                type = RadiusPacket.AccessAccept;
+
+            var answer = new RadiusPacket(type, accessRequest.Identifier);
             copyProxyState(accessRequest, answer);
             return answer;
         }
@@ -85,9 +79,10 @@ namespace TinyRadius.Net.Util
          * @exception RadiusException malformed request packet; if this
          * exception is thrown, no answer will be sent
          */
-        public RadiusPacket accountingRequestReceived(AccountingRequest accountingRequest, InetSocketAddress client)
+
+        public RadiusPacket AccountingRequestReceived(AccountingRequest accountingRequest, InetSocketAddress client)
         {
-            RadiusPacket answer = new RadiusPacket(RadiusPacket.ACCOUNTING_RESPONSE, accountingRequest.Identifier);
+            var answer = new RadiusPacket(RadiusPacket.AccountingResponse, accountingRequest.Identifier);
             copyProxyState(accountingRequest, answer);
             return answer;
         }
@@ -97,37 +92,38 @@ namespace TinyRadius.Net.Util
          * @param listenAuth open auth port?
          * @param listenAcct open acct port?
          */
-        public void start(bool listenAuth, bool listenAcct)
+
+        public void Start(bool listenAuth, bool listenAcct)
         {
             if (listenAuth)
             {
-                ThreadPool.QueueUserWorkItem(delegate(object state)
-                {
-                    setName("Radius Auth Listener");
-                    try
-                    {
-                        logger.info("starting RadiusAuthListener on port " + getAuthPort());
-                        listenAuth();
-                        logger.info("RadiusAuthListener is being terminated");
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        logger.fatal("auth thread stopped by exception", e);
-                    }
-                    finally
-                    {
-                        authSocket.close();
-                        logger.debug("auth socket closed");
-                    }
-                });
+                ThreadPool.QueueUserWorkItem(delegate
+                                                 {
+                                                     setName("Radius Auth Listener");
+                                                     try
+                                                     {
+                                                         logger.Info("starting RadiusAuthListener on port " +
+                                                                     getAuthPort());
+                                                         listenAuth();
+                                                         logger.Info("RadiusAuthListener is being terminated");
+                                                     }
+                                                     catch (Exception e)
+                                                     {
+                                                         logger.Fatal("auth thread stopped by exception", e);
+                                                     }
+                                                     finally
+                                                     {
+                                                         authSocket.close();
+                                                         logger.Debug("auth socket closed");
+                                                     }
+                                                 });
                 /*new Thread() {
                     public void run() {
                         setName("Radius Auth Listener");
                         try {
-                            logger.info("starting RadiusAuthListener on port " + getAuthPort());
+                            logger.Info("starting RadiusAuthListener on port " + getAuthPort());
                             listenAuth();
-                            logger.info("RadiusAuthListener is being terminated");
+                            logger.Info("RadiusAuthListener is being terminated");
                         } catch(Exception e) {
                             e.printStackTrace();
                             logger.fatal("auth thread stopped by exception", e);
@@ -141,33 +137,33 @@ namespace TinyRadius.Net.Util
 
             if (listenAcct)
             {
-                ThreadPool.QueueUserWorkItem(delegate(object state)
-                {
-                    setName("Radius Acct Listener");
-                    try
-                    {
-                        logger.info("starting RadiusAcctListener on port " + getAcctPort());
-                        listenAcct();
-                        logger.info("RadiusAcctListener is being terminated");
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        logger.fatal("acct thread stopped by exception", e);
-                    }
-                    finally
-                    {
-                        acctSocket.close();
-                        logger.debug("acct socket closed");
-                    }
-                });
+                ThreadPool.QueueUserWorkItem(delegate
+                                                 {
+                                                     setName("Radius Acct Listener");
+                                                     try
+                                                     {
+                                                         logger.Info("starting RadiusAcctListener on port " +
+                                                                     getAcctPort());
+                                                         listenAcct();
+                                                         logger.Info("RadiusAcctListener is being terminated");
+                                                     }
+                                                     catch (Exception e)
+                                                     {
+                                                         logger.Fatal("acct thread stopped by exception", e);
+                                                     }
+                                                     finally
+                                                     {
+                                                         acctSocket.close();
+                                                         logger.Debug("acct socket closed");
+                                                     }
+                                                 });
                 /*new Thread() {
                     public void run() {
                         setName("Radius Acct Listener");
                         try {
-                            logger.info("starting RadiusAcctListener on port " + getAcctPort());
+                            logger.Info("starting RadiusAcctListener on port " + getAcctPort());
                             listenAcct();
-                            logger.info("RadiusAcctListener is being terminated");
+                            logger.Info("RadiusAcctListener is being terminated");
                         } catch(Exception e) {
                             e.printStackTrace();
                             logger.fatal("acct thread stopped by exception", e);
@@ -183,9 +179,10 @@ namespace TinyRadius.Net.Util
         /**
          * Stops the server and closes the sockets.
          */
+
         public void stop()
         {
-            logger.info("stopping Radius server");
+            logger.Info("stopping Radius server");
             closing = true;
             if (authSocket != null)
                 authSocket.close();
@@ -197,6 +194,7 @@ namespace TinyRadius.Net.Util
          * Returns the auth port the server will listen on.
          * @return auth port
          */
+
         public int getAuthPort()
         {
             return authPort;
@@ -206,18 +204,20 @@ namespace TinyRadius.Net.Util
          * Sets the auth port the server will listen on.
          * @param authPort auth port, 1-65535
          */
+
         public void setAuthPort(int authPort)
         {
             if (authPort < 1 || authPort > 65535)
                 throw new ArgumentException("bad port number");
             this.authPort = authPort;
-            this.authSocket = null;
+            authSocket = null;
         }
 
         /**
          * Returns the socket timeout (ms).
          * @return socket timeout
          */
+
         public int getSocketTimeout()
         {
             return socketTimeout;
@@ -228,6 +228,7 @@ namespace TinyRadius.Net.Util
          * @param socketTimeout socket timeout, >0 ms
          * @throws SocketException
          */
+
         public void setSocketTimeout(int socketTimeout)
         {
             if (socketTimeout < 1)
@@ -243,18 +244,20 @@ namespace TinyRadius.Net.Util
          * Sets the acct port the server will listen on.
          * @param acctPort acct port 1-65535
          */
+
         public void setAcctPort(int acctPort)
         {
             if (acctPort < 1 || acctPort > 65535)
                 throw new ArgumentException("bad port number");
             this.acctPort = acctPort;
-            this.acctSocket = null;
+            acctSocket = null;
         }
 
         /**
          * Returns the acct port the server will listen on.
          * @return acct port
          */
+
         public int getAcctPort()
         {
             return acctPort;
@@ -267,6 +270,7 @@ namespace TinyRadius.Net.Util
          * same address.
          * @return duplicate interval (ms)
          */
+
         public long getDuplicateInterval()
         {
             return duplicateInterval;
@@ -279,6 +283,7 @@ namespace TinyRadius.Net.Util
          * same address.
          * @param duplicateInterval duplicate interval (ms), >0
          */
+
         public void setDuplicateInterval(long duplicateInterval)
         {
             if (duplicateInterval <= 0)
@@ -291,6 +296,7 @@ namespace TinyRadius.Net.Util
          * Returns null if listening on the wildcard address.
          * @return listen address or null
          */
+
         public InetAddress getListenAddress()
         {
             return listenAddress;
@@ -303,6 +309,7 @@ namespace TinyRadius.Net.Util
          * local address (wildcard address).
          * @param listenAddress listen address or null
          */
+
         public void setListenAddress(InetAddress listenAddress)
         {
             this.listenAddress = listenAddress;
@@ -314,12 +321,14 @@ namespace TinyRadius.Net.Util
          * @param request request packet
          * @param answer response packet
          */
+
         protected void copyProxyState(RadiusPacket request, RadiusPacket answer)
         {
-            ArrayList proxyStateAttrs = request.GetAttributes(33);
-            for (Iterator i = proxyStateAttrs.iterator(); i.hasNext(); )
+            IList<RadiusAttribute> proxyStateAttrs = request.GetAttributes(33);
+            //for (Iterator i = proxyStateAttrs.iterator(); i.hasNext(); )
+            foreach (RadiusAttribute proxyStateAttr in proxyStateAttrs)
             {
-                RadiusAttribute proxyStateAttr = (RadiusAttribute)i.next();
+                //RadiusAttribute proxyStateAttr = (RadiusAttribute)i.next();
                 answer.AddAttribute(proxyStateAttr);
             }
         }
@@ -331,9 +340,10 @@ namespace TinyRadius.Net.Util
          * @throws InterruptedException
          * 
          */
-        protected void listenAuth()
+
+        protected void ListenAuth()
         {
-            listen(getAuthSocket());
+            Listen(getAuthSocket());
         }
 
         /**
@@ -342,18 +352,20 @@ namespace TinyRadius.Net.Util
          * @throws SocketException
          * @throws InterruptedException
          */
-        protected void listenAcct()
+
+        protected void ListenAcct()
         {
-            listen(getAcctSocket());
+            Listen(getAcctSocket());
         }
 
         /**
          * Listens on the passed socket, blocks until stop() is called.
          * @param s socket to listen on
          */
-        protected void listen(DatagramSocket s)
+
+        protected void Listen(DatagramSocket s)
         {
-            DatagramPacket packetIn = new DatagramPacket
+            var packetIn = new DatagramPacket
                 (new byte[RadiusPacket.MaxPacketLength], RadiusPacket.MaxPacketLength);
             while (true)
             {
@@ -372,32 +384,34 @@ namespace TinyRadius.Net.Util
                         if (closing)
                         {
                             // end thread
-                            logger.info("got closing signal - end listen thread");
+                            logger.Info("got closing signal - end listen thread");
                             return;
                         }
                         else
                         {
                             // retry s.receive()
-                            logger.error("SocketException during s.receive() -> retry", se);
+                            logger.Error("SocketException during s.receive() -> retry", se);
                             continue;
                         }
                     }
 
                     // check client
-                    InetSocketAddress localAddress = (InetSocketAddress)s.getLocalSocketAddress();
-                    InetSocketAddress remoteAddress = new InetSocketAddress(packetIn.getAddress(), packetIn.getPort());
-                    String secret = getSharedSecret(remoteAddress);
+                    var localAddress = (InetSocketAddress) s.getLocalSocketAddress();
+                    var remoteAddress = new InetSocketAddress(packetIn.getAddress(), packetIn.getPort());
+                    String secret = GetSharedSecret(remoteAddress);
                     if (secret == null)
                     {
-                        if (logger.isInfoEnabled())
-                            logger.info("ignoring packet from unknown client " + remoteAddress + " received on local address " + localAddress);
+                        if (logger.IsInfoEnabled())
+                            logger.Info("ignoring packet from unknown client " + remoteAddress +
+                                        " received on local address " + localAddress);
                         continue;
                     }
 
                     // parse packet
                     RadiusPacket request = makeRadiusPacket(packetIn, secret);
-                    if (logger.isInfoEnabled())
-                        logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
+                    if (logger.IsInfoEnabled())
+                        logger.Info("received packet from " + remoteAddress + " on local address " + localAddress + ": " +
+                                    request);
 
                     // handle packet
                     logger.trace("about to call RadiusServer.handlePacket()");
@@ -406,13 +420,14 @@ namespace TinyRadius.Net.Util
                     // send response
                     if (response != null)
                     {
-                        if (logger.isInfoEnabled())
-                            logger.info("send response: " + response);
-                        DatagramPacket packetOut = makeDatagramPacket(response, secret, remoteAddress.getAddress(), packetIn.getPort(), request);
+                        if (logger.IsInfoEnabled())
+                            logger.Info("send response: " + response);
+                        DatagramPacket packetOut = makeDatagramPacket(response, secret, remoteAddress.getAddress(),
+                                                                      packetIn.getPort(), request);
                         s.send(packetOut);
                     }
                     else
-                        logger.info("no response sent");
+                        logger.Info("no response sent");
                 }
                 catch (SocketTimeoutException ste)
                 {
@@ -422,12 +437,12 @@ namespace TinyRadius.Net.Util
                 catch (IOException ioe)
                 {
                     // error while reading/writing socket
-                    logger.error("communication error", ioe);
+                    logger.Error("communication error", ioe);
                 }
                 catch (RadiusException re)
                 {
                     // malformed packet
-                    logger.error("malformed Radius packet", re);
+                    logger.Error("malformed Radius packet", re);
                 }
             }
         }
@@ -440,8 +455,9 @@ namespace TinyRadius.Net.Util
          * @return response packet or null for no response
          * @throws RadiusException
          */
+
         protected RadiusPacket handlePacket(InetSocketAddress localAddress,
-            InetSocketAddress remoteAddress, RadiusPacket request, String sharedSecret)
+                                            InetSocketAddress remoteAddress, RadiusPacket request, String sharedSecret)
         {
             RadiusPacket response = null;
 
@@ -452,17 +468,17 @@ namespace TinyRadius.Net.Util
                 {
                     // handle packets on auth port
                     if (GetType(AccessRequest).IsInstanceOfType(request))
-                        response = accessRequestReceived((AccessRequest)request, remoteAddress);
+                        response = accessRequestReceived((AccessRequest) request, remoteAddress);
                     else
-                        logger.error("unknown Radius packet type: " + request.Type);
+                        logger.Error("unknown Radius packet type: " + request.Type);
                 }
                 else if (localAddress.getPort() == getAcctPort())
                 {
                     // handle packets on acct port
-                    if (typeof(AccountingRequest).IsInstanceOfType(request))
-                        response = accountingRequestReceived((AccountingRequest)request, remoteAddress);
+                    if (typeof (AccountingRequest).IsInstanceOfType(request))
+                        response = AccountingRequestReceived((AccountingRequest) request, remoteAddress);
                     else
-                        logger.error("unknown Radius packet type: " + request.Type);
+                        logger.Error("unknown Radius packet type: " + request.Type);
                 }
                 else
                 {
@@ -470,7 +486,7 @@ namespace TinyRadius.Net.Util
                 }
             }
             else
-                logger.info("ignore duplicate packet");
+                logger.Info("ignore duplicate packet");
 
             return response;
         }
@@ -480,6 +496,7 @@ namespace TinyRadius.Net.Util
          * @return socket
          * @throws SocketException
          */
+
         protected DatagramSocket getAuthSocket()
         {
             if (authSocket == null)
@@ -498,6 +515,7 @@ namespace TinyRadius.Net.Util
          * @return socket
          * @throws SocketException
          */
+
         protected DatagramSocket getAcctSocket()
         {
             if (acctSocket == null)
@@ -521,14 +539,15 @@ namespace TinyRadius.Net.Util
          * @return new datagram packet
          * @throws IOException
          */
-        protected DatagramPacket makeDatagramPacket(RadiusPacket packet, String secret, InetAddress address, int port, RadiusPacket request)
+
+        protected DatagramPacket makeDatagramPacket(RadiusPacket packet, String secret, InetAddress address, int port,
+                                                    RadiusPacket request)
         {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            var bos = new ByteArrayOutputStream();
             packet.EncodeResponsePacket(bos, secret, request);
             byte[] data = bos.toByteArray();
-            DatagramPacket datagram = new DatagramPacket(data, data.Length, address, port);
+            var datagram = new DatagramPacket(data, data.Length, address, port);
             return datagram;
-
         }
 
         /**
@@ -540,9 +559,10 @@ namespace TinyRadius.Net.Util
          * @exception IOException communication error (after getRetryCount()
          * retries)
          */
+
         protected RadiusPacket makeRadiusPacket(DatagramPacket packet, String sharedSecret)
         {
-            ByteArrayInputStream @in = new ByteArrayInputStream(packet.getData());
+            var @in = new ByteArrayInputStream(packet.getData());
             return RadiusPacket.DecodeRequestPacket(@in, sharedSecret);
         }
 
@@ -554,18 +574,19 @@ namespace TinyRadius.Net.Util
          * @param address client address
          * @return true if it is duplicate
          */
+
         protected bool isPacketDuplicate(RadiusPacket packet, InetSocketAddress address)
         {
             long now = System.currentTimeMillis();
             long intervalStart = now - getDuplicateInterval();
 
-            byte[] authenticator = packet.getAuthenticator();
+            byte[] authenticator = packet.Authenticator;
 
             lock (receivedPackets)
             {
-                for (Iterator i = receivedPackets.iterator(); i.hasNext(); )
+                for (Iterator i = receivedPackets.iterator(); i.hasNext();)
                 {
-                    ReceivedPacket p = (ReceivedPacket)i.next();
+                    var p = (ReceivedPacket) i.next();
                     if (p.receiveTime < intervalStart)
                     {
                         // packet is older than duplicate interval
@@ -591,7 +612,7 @@ namespace TinyRadius.Net.Util
                 }
 
                 // add packet to receive list
-                ReceivedPacket rp = new ReceivedPacket();
+                var rp = new ReceivedPacket();
                 rp.address = address;
                 rp.packetIdentifier = packet.Identifier;
                 rp.receiveTime = now;
@@ -601,36 +622,18 @@ namespace TinyRadius.Net.Util
 
             return false;
         }
-
-        private InetAddress listenAddress = null;
-        private int authPort = 1812;
-        private int acctPort = 1813;
-        private DatagramSocket authSocket = null;
-        private DatagramSocket acctSocket = null;
-        private int socketTimeout = 3000;
-        private ArrayList receivedPackets = new ArrayList();
-        private long duplicateInterval = 30000; // 30 s
-        private bool closing = false;
-        private static ILog logger = LogManager.GetLog(typeof(RadiusServer));
-
     }
 
     /**
      * This internal class represents a packet that has been received by 
      * the server.
      */
-    class ReceivedPacket
-    {
 
+    internal class ReceivedPacket
+    {
         /**
          * The identifier of the packet.
          */
-        public int packetIdentifier;
-
-        /**
-         * The time the packet was received.
-         */
-        public long receiveTime;
 
         /**
          * The address of the host who sent the packet.
@@ -641,6 +644,11 @@ namespace TinyRadius.Net.Util
          * Authenticator of the received packet.
          */
         public byte[] authenticator;
+        public int packetIdentifier;
 
+        /**
+         * The time the packet was received.
+         */
+        public long receiveTime;
     }
 }

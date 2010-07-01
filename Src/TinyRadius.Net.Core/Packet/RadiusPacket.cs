@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using TinyRadius.Net.Attributes;
 using TinyRadius.Net.Dictionaries;
-using TinyRadius.Net.Net.JavaHelper;
 using TinyRadius.Net.packet;
 using TinyRadius.Net.Util;
 
@@ -18,6 +17,13 @@ namespace TinyRadius.Net.Packet
     /// </summary>
     public class RadiusPacket
     {
+        internal protected const int AccessRequest = 1;
+        internal protected const int AccessAccept = 2;
+        internal protected const int AccessReject = 3;
+        internal protected const int AccountingRequest = 4;
+        internal protected const int AccountingResponse = 5;
+        protected internal const int CoaRequest = 43;
+
         /// <summary>
         /// Maximum packet Length.
         ///</summary>
@@ -39,6 +45,16 @@ namespace TinyRadius.Net.Packet
         private static readonly Random random = new Random();
 
         /// <summary>
+        ///  Identifier of this packet.
+        /// </summary>
+        private int _identifier;
+
+        /// <summary>
+        ///  Type of this Radius packet.
+        /// </summary>
+        private int _type;
+
+        /// <summary>
         ///  Attributes for this packet.
         /// </summary>
         private IList<RadiusAttribute> attributes = new List<RadiusAttribute>();
@@ -51,22 +67,12 @@ namespace TinyRadius.Net.Packet
         /// <summary>
         ///  Dictionary to look up attribute names.
         /// </summary>
-        private IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
+        private IWritableDictionary _dictionary = DefaultDictionary.GetDefaultDictionary();
 
         /// <summary>
         ///  MD5 digest.
         /// </summary>
-        private MD5 md5Digest;
-
-        /// <summary>
-        ///  Identifier of this packet.
-        /// </summary>
-        private int _identifier;
-
-        /// <summary>
-        ///  Type of this Radius packet.
-        /// </summary>
-        private int _type;
+        private MD5 _md5Digest;
 
         /// <summary>
         ///  Builds a Radius packet without attributes. Retrieves
@@ -140,11 +146,6 @@ namespace TinyRadius.Net.Packet
             }
         }
 
-        private const int AccessRequest = 1;
-        private const int AccountingRequest = 4;
-        private const int AccessAccept = 2;
-        private const int AccessReject = 3;
-        private const int AccountingResponse = 5;
         /// <summary>
         ///  Returns the type name of this Radius packet.
         ///  @return name
@@ -163,7 +164,7 @@ namespace TinyRadius.Net.Packet
                         return "Access-Reject";
                     case AccountingRequest:
                         return "Accounting-Request";
-                    case 5:
+                    case AccountingResponse:
                         return "Accounting-Response";
                     case 6:
                         return "Accounting-Status";
@@ -188,7 +189,7 @@ namespace TinyRadius.Net.Packet
                         return "Disconnect-ACK";
                     case 42:
                         return "Disconnect-NAK";
-                    case 43:
+                    case CoaRequest:
                         return "CoA-Request";
                     case 44:
                         return "CoA-ACK";
@@ -219,7 +220,24 @@ namespace TinyRadius.Net.Packet
                 if (value == null)
                     throw new ArgumentNullException("value", "attributes list is null");
 
-                this.attributes = value;
+                attributes = value;
+            }
+        }
+
+        /// <summary>
+        ///  Returns the dictionary this Radius packet uses.
+        ///  @return Dictionary instance
+        /// </summary>
+        public IWritableDictionary Dictionary
+        {
+            get { return _dictionary; }
+            set
+            {
+                _dictionary = value;
+                foreach (RadiusAttribute direct in attributes)
+                {
+                    direct.Dictionary = value;
+                }
             }
         }
 
@@ -261,7 +279,7 @@ namespace TinyRadius.Net.Packet
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            AttributeType type = this.Dictionary.GetAttributeTypeByName(typeName);
+            AttributeType type = Dictionary.GetAttributeTypeByName(typeName);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '" + typeName + "'");
 
@@ -285,7 +303,7 @@ namespace TinyRadius.Net.Packet
             else
             {
                 // remove Vendor-Specific sub-attribute
-                var vsas = GetVendorAttributes(attribute.VendorId);
+                IList<RadiusAttribute> vsas = GetVendorAttributes(attribute.VendorId);
 
                 foreach (VendorSpecificAttribute vsa in vsas)
                 {
@@ -318,9 +336,9 @@ namespace TinyRadius.Net.Packet
                 if (attributes[i].Type == type)
                     removedInt.Add(i);
             }
-            foreach (var index in removedInt)
+            foreach (int index in removedInt)
             {
-                this.attributes.RemoveAt(index);
+                attributes.RemoveAt(index);
             }
         }
 
@@ -331,11 +349,11 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public void RemoveLastAttribute(int type)
         {
-            var attrs = GetAttributes(type);
+            IList<RadiusAttribute> attrs = GetAttributes(type);
             if (attrs == null || attrs.Count == 0)
                 return;
 
-            var lastAttribute =
+            RadiusAttribute lastAttribute =
                 attrs[attrs.Count - 1];
             RemoveAttribute(lastAttribute);
         }
@@ -353,27 +371,26 @@ namespace TinyRadius.Net.Packet
                 RemoveAttributes(typeCode);
                 return;
             }
-            List<Int32> removeVendorList = new List<int>();
-            var vendorList = GetVendorAttributes(vendorId);
-            var lengthOfVendor = GetVendorAttributes(vendorId).Count;
+            var removeVendorList = new List<int>();
+            IList<RadiusAttribute> vendorList = GetVendorAttributes(vendorId);
+            int lengthOfVendor = GetVendorAttributes(vendorId).Count;
             for (int i = 0; i < lengthOfVendor; i++)
             {
-                VendorSpecificAttribute vsa = vendorList[i] as VendorSpecificAttribute;
+                var vsa = vendorList[i] as VendorSpecificAttribute;
                 if (vsa == null)
                     continue;
-                var sas = vsa.SubAttributes;
+                List<RadiusAttribute> sas = vsa.SubAttributes;
                 var removeId = new List<int>();
 
                 for (int j = 0; j < sas.Count; j++)
                 {
-                    var attr = sas[j];
+                    RadiusAttribute attr = sas[j];
                     if (attr.Type == typeCode && attr.VendorId == vendorId)
                     {
                         removeId.Add(j);
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -410,10 +427,10 @@ namespace TinyRadius.Net.Packet
                 return GetAttributes(attributeType);
 
             IList<RadiusAttribute> vsas = GetVendorAttributes(vendorId);
-            var result = from radius in vsas
-                         where
-                         radius.Type == attributeType && radius.VendorId == vendorId
-                         select radius;
+            IEnumerable<RadiusAttribute> result = from radius in vsas
+                                                  where
+                                                      radius.Type == attributeType && radius.VendorId == vendorId
+                                                  select radius;
             /*for (Iterator i = vsas.iterator(); i.hasNext(); )
             {
                 var vsa = (VendorSpecificAttribute)i.next();
@@ -427,7 +444,7 @@ namespace TinyRadius.Net.Packet
                 }
             }*/
 
-            return result.ToList<RadiusAttribute>();
+            return result.ToList();
         }
 
         /// <summary>
@@ -450,13 +467,13 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public RadiusAttribute GetAttribute(int type)
         {
-            var attrs = GetAttributes(type);
+            IList<RadiusAttribute> attrs = GetAttributes(type);
             if (attrs.Count > 1)
                 throw new NotImplementedException("multiple attributes of requested type " + type);
             else if (attrs.Count == 0)
                 return null;
             else
-                return (RadiusAttribute)attrs[0];
+                return attrs[0];
         }
 
         /// <summary>
@@ -473,13 +490,13 @@ namespace TinyRadius.Net.Packet
             if (vendorId == -1)
                 return GetAttribute(type);
 
-            var attrs = GetAttributes(vendorId, type);
+            IList<RadiusAttribute> attrs = GetAttributes(vendorId, type);
             if (attrs.Count > 1)
                 throw new NotImplementedException("multiple attributes of requested type " + type);
             else if (attrs.Count == 0)
                 return null;
             else
-                return (RadiusAttribute)attrs[0];
+                return attrs[0];
         }
 
         /// <summary>
@@ -494,7 +511,7 @@ namespace TinyRadius.Net.Packet
             if (string.IsNullOrEmpty(type))
                 throw new ArgumentException("type name is empty");
 
-            AttributeType t = dictionary.GetAttributeTypeByName(type);
+            AttributeType t = _dictionary.GetAttributeTypeByName(type);
             if (t == null)
                 throw new ArgumentException("unknown attribute type name '" + type + "'");
 
@@ -569,7 +586,7 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public void EncodeRequestPacket(Stream outputStream, String sharedSecret)
         {
-            encodePacket(outputStream, sharedSecret, null);
+            EncodePacket(outputStream, sharedSecret, null);
         }
 
         /// <summary>
@@ -584,7 +601,7 @@ namespace TinyRadius.Net.Packet
         {
             if (request == null)
                 throw new ArgumentNullException("request", "request cannot be null");
-            encodePacket(@out, sharedSecret, request);
+            EncodePacket(@out, sharedSecret, request);
         }
 
         /// <summary>
@@ -597,7 +614,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public static RadiusPacket DecodeRequestPacket(Stream @in, String sharedSecret)
+        public RadiusPacket DecodeRequestPacket(Stream @in, String sharedSecret)
         {
             return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, null);
         }
@@ -613,10 +630,10 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public static RadiusPacket decodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
+        public  RadiusPacket DecodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
         {
             if (request == null)
-                throw new ArgumentNullException("request may not be null");
+                throw new ArgumentNullException("request","request may not be null");
             return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, request);
         }
 
@@ -632,7 +649,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public static RadiusPacket DecodeRequestPacket(IWritableDictionary dictionary, Stream @in, String sharedSecret)
+        public RadiusPacket DecodeRequestPacket(IWritableDictionary dictionary, Stream @in, String sharedSecret)
         {
             return DecodePacket(dictionary, @in, sharedSecret, null);
         }
@@ -650,7 +667,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public static RadiusPacket decodeResponsePacket(IWritableDictionary dictionary, Stream @in,
+        public RadiusPacket DecodeResponsePacket(IWritableDictionary dictionary, Stream @in,
                                                         String sharedSecret, RadiusPacket request)
         {
             if (request == null)
@@ -665,13 +682,10 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public static int GetNextPacketIdentifier()
         {
-
-
             nextPacketId++;
             if (nextPacketId > 255)
                 nextPacketId = 0;
             return nextPacketId;
-
         }
 
         /// <summary>
@@ -715,7 +729,7 @@ namespace TinyRadius.Net.Packet
             s.Append(", ID ");
             s.Append(_identifier);
             //for (Iterator i = attributes.iterator(); i.hasNext(); )
-            foreach (var attr in attributes)
+            foreach (RadiusAttribute attr in attributes)
             {
                 //var attr = (RadiusAttribute)i.next();
                 s.Append("\n").Append(attr.ToString());
@@ -732,37 +746,10 @@ namespace TinyRadius.Net.Packet
         ///  has been created yet.
         ///  @return authenticator, 16 bytes
         /// </summary>
-        public byte[] getAuthenticator()
+        public byte[] Authenticator
         {
-            return authenticator;
-        }
-
-        /// <summary>
-        ///  Sets the authenticator to be used for this Radius packet.
-        ///  This method should seldomly be used.
-        ///  Authenticators are created and managed by this class internally.
-        ///  @param authenticator authenticator
-        /// </summary>
-        public void setAuthenticator(byte[] authenticator)
-        {
-            this.authenticator = authenticator;
-        }
-
-        /// <summary>
-        ///  Returns the dictionary this Radius packet uses.
-        ///  @return Dictionary instance
-        /// </summary>
-        public IWritableDictionary Dictionary
-        {
-            get { return dictionary; }
-            set
-            {
-                this.dictionary = value;
-                foreach (var direct in attributes)
-                {
-                    direct.Dictionary = value;
-                }
-            }
+            get { return authenticator; }
+            set { this.authenticator = value; }
         }
 
         /// <summary>
@@ -775,14 +762,14 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException communication error
         ///  @exception NotImplementedException if required packet data has not been set 
         /// </summary>
-        protected void encodePacket(Stream outputStream, String sharedSecret, RadiusPacket request)
+        protected void EncodePacket(Stream outputStream, String sharedSecret, RadiusPacket request)
         {
             // check shared secret
-            if (sharedSecret == null || sharedSecret.Length == 0)
+            if (string.IsNullOrEmpty(sharedSecret))
                 throw new NotImplementedException("no shared secret has been set");
 
             // check request authenticator
-            if (request != null && request.getAuthenticator() == null)
+            if (request != null && request.Authenticator == null)
                 throw new NotImplementedException("request authenticator not set");
 
             // request packet authenticator
@@ -791,7 +778,7 @@ namespace TinyRadius.Net.Packet
                 // first create authenticator, then encode attributes
                 // (User-Password attribute needs the authenticator)
                 authenticator = CreateRequestAuthenticator(sharedSecret);
-                encodeRequestAttributes(sharedSecret);
+                EncodeRequestAttributes(sharedSecret);
             }
 
             byte[] attributes = GetAttributeBytes();
@@ -803,8 +790,8 @@ namespace TinyRadius.Net.Packet
             if (request != null)
             {
                 // after encoding attributes, create authenticator
-                authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes,
-                                                            request.getAuthenticator());
+                authenticator = CreateResponseAuthenticator(sharedSecret, packetLength, attributes,
+                                                            request.Authenticator);
             }
             else
             {
@@ -814,7 +801,7 @@ namespace TinyRadius.Net.Packet
             outputStream.WriteByte(Convert.ToByte(Type));
             outputStream.WriteByte(Convert.ToByte(Identifier));
             outputStream.WriteByte(Convert.ToByte(packetLength));
-            var authen = getAuthenticator();
+            byte[] authen = Authenticator;
             outputStream.Write(authen, 0, authen.Length);
             outputStream.Write(attributes, 0, attributes.Length);
             /*var dos = new MemoryStream(outputStream);
@@ -833,7 +820,7 @@ namespace TinyRadius.Net.Packet
         ///  authenticator.
         ///  @param sharedSecret
         /// </summary>
-        protected void encodeRequestAttributes(String sharedSecret)
+        protected virtual void EncodeRequestAttributes(String sharedSecret)
         {
         }
 
@@ -844,14 +831,14 @@ namespace TinyRadius.Net.Packet
         ///  with the other Radius server/client
         ///  @return request authenticator, 16 bytes
         /// </summary>
-        protected byte[] CreateRequestAuthenticator(String sharedSecret)
+        protected virtual byte[] CreateRequestAuthenticator(String sharedSecret)
         {
             byte[] secretBytes = RadiusUtil.GetUtf8Bytes(sharedSecret);
 
             var randomBytes = new byte[16];
             random.NextBytes(randomBytes);
 
-            byte[] md5Bytes = new byte[secretBytes.Length + 16];
+            var md5Bytes = new byte[secretBytes.Length + 16];
 
             /*code from java
             var md5 = GetMd5Digest();
@@ -871,7 +858,7 @@ namespace TinyRadius.Net.Packet
         ///  @param attributes attribute data
         ///  @return new request authenticator
         /// </summary>
-        protected byte[] UpdateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
+        protected virtual byte[] UpdateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
         {
             return authenticator;
         }
@@ -884,7 +871,7 @@ namespace TinyRadius.Net.Packet
         ///  @param requestAuthenticator request packet authenticator
         ///  @return new 16 byte response authenticator
         /// </summary>
-        protected byte[] createResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
+        protected virtual byte[] CreateResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
                                                      byte[] requestAuthenticator)
         {
             //MessageDigest md5 = GetMd5Digest();
@@ -899,12 +886,12 @@ namespace TinyRadius.Net.Packet
             //return md5.digest();
 
             var bytes = new List<byte>
-                          {
-                              Convert.ToByte(Type),
-                              Convert.ToByte(Identifier),
-                              Convert.ToByte(packetLength >> 8),
-                              Convert.ToByte(packetLength & 0x0ff)
-                          };
+                            {
+                                Convert.ToByte(Type),
+                                Convert.ToByte(Identifier),
+                                Convert.ToByte(packetLength >> 8),
+                                Convert.ToByte(packetLength & 0x0ff)
+                            };
             bytes.AddRange(requestAuthenticator);
             bytes.AddRange(RadiusUtil.GetUtf8Bytes(sharedSecret));
 
@@ -924,7 +911,8 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException if an IO error occurred
         ///  @exception RadiusException if the Radius packet is malformed
         /// </summary>
-        protected static RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream, String sharedSecret,
+        protected virtual RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream,
+                                                   String sharedSecret,
                                                    RadiusPacket request)
         {
             // check shared secret
@@ -932,7 +920,7 @@ namespace TinyRadius.Net.Packet
                 throw new NotImplementedException("no shared secret has been set");
 
             // check request authenticator
-            if (request != null && request.getAuthenticator() == null)
+            if (request != null && request.Authenticator == null)
                 throw new NotImplementedException("request authenticator not set");
 
             // read and check header
@@ -998,7 +986,7 @@ namespace TinyRadius.Net.Packet
             else
             {
                 // response packet: check authenticator
-                rp.CheckResponseAuthenticator(sharedSecret, length, attributeData, request.getAuthenticator());
+                rp.CheckResponseAuthenticator(sharedSecret, length, attributeData, request.Authenticator);
             }
 
             return rp;
@@ -1037,24 +1025,24 @@ namespace TinyRadius.Net.Packet
         ///  to this response packet
         /// </summary>
         protected virtual void CheckResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
-                                                  byte[] requestAuthenticator)
+                                                          byte[] requestAuthenticator)
         {
-            byte[] authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes,
+            byte[] authenticator = CreateResponseAuthenticator(sharedSecret, packetLength, attributes,
                                                                requestAuthenticator);
-            byte[] receivedAuth = getAuthenticator();
+            byte[] receivedAuth = Authenticator;
             for (int i = 0; i < 16; i++)
                 if (authenticator[i] != receivedAuth[i])
                     throw new RadiusException("response authenticator invalid");
         }
 
-        /// <summary>
-        ///  Returns a MD5 digest.
-        ///  @return MessageDigest object
-        /// </summary>
-        protected virtual MD5 GetMd5Digest()
-        {
-            return md5Digest ?? (md5Digest = MD5.Create());
-        }
+        ///// <summary>
+        /////  Returns a MD5 digest.
+        /////  @return MessageDigest object
+        ///// </summary>
+        //protected virtual MD5 GetMd5Digest()
+        //{
+        //    return _md5Digest ?? (_md5Digest = MD5.Create());
+        //}
 
         /// <summary>
         ///  Encodes the attributes of this Radius packet to a byte array.
@@ -1068,7 +1056,7 @@ namespace TinyRadius.Net.Packet
             {
                 foreach (var a in attributes)
                 {
-                    var bytes = a.WriteAttribute();
+                    byte[] bytes = a.WriteAttribute();
                     bos.Write(bytes, 0, bytes.Length);
                 }
                 bos.Flush();
