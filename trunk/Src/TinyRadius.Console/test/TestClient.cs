@@ -43,7 +43,7 @@ namespace TinyRadius.test
 
             // 1. Send Access-Request
             AccessRequest ar = new AccessRequest(user, pass);
-            ar.AuthProtocol = AccessRequest.AUTH_PAP; // or AUTH_CHAP
+            ar.AuthProtocol = TinyRadius.Net.AuthenticationType.pap; // or AUTH_CHAP
             ar.AddAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
             ar.AddAttribute("NAS-IP-Address", "192.168.0.100");
             ar.AddAttribute("Service-Type", "Login-User");
@@ -51,7 +51,7 @@ namespace TinyRadius.test
             ar.AddAttribute("WISPr-Location-ID", "net.sourceforge.ap1");
 
             Console.WriteLine("Packet before it is sent\n" + ar + "\n");
-            RadiusPacket response = rc.authenticate(ar);
+            RadiusPacket response = rc.Authenticate(ar);
             Console.WriteLine("Packet after it was sent\n" + ar + "\n");
             Console.WriteLine("Response\n" + response + "\n");
 

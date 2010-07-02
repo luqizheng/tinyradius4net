@@ -17,12 +17,12 @@ namespace TinyRadius.Net.Packet
     /// </summary>
     public class RadiusPacket
     {
-        internal protected const int AccessRequest = 1;
-        internal protected const int AccessAccept = 2;
-        internal protected const int AccessReject = 3;
-        internal protected const int AccountingRequest = 4;
-        internal protected const int AccountingResponse = 5;
-        protected internal const int CoaRequest = 43;
+        public const int AccessRequest = 1;
+        public const int AccessAccept = 2;
+        public const int AccessReject = 3;
+        public const int AccountingRequest = 4;
+        public const int AccountingResponse = 5;
+        public const int CoaRequest = 43;
 
         /// <summary>
         /// Maximum packet Length.
@@ -633,7 +633,7 @@ namespace TinyRadius.Net.Packet
         public static RadiusPacket DecodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
         {
             if (request == null)
-                throw new ArgumentNullException("request","request may not be null");
+                throw new ArgumentNullException("request", "request may not be null");
             return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, request);
         }
 
@@ -804,7 +804,7 @@ namespace TinyRadius.Net.Packet
             byte[] authen = Authenticator;
             outputStream.Write(authen, 0, authen.Length);
             outputStream.Write(attributes, 0, attributes.Length);
-          
+
         }
 
         /// <summary>
