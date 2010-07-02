@@ -89,7 +89,7 @@ namespace TinyRadius.Net.Dictionaries
          */
         public String GetVendorName(int vendorId)
         {
-            return (String)vendorsByCode.get(new Integer(vendorId));
+            return (String) vendorsByCode[vendorId];
         }
 
         /**

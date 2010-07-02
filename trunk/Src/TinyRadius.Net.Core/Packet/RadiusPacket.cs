@@ -37,12 +37,12 @@ namespace TinyRadius.Net.Packet
         /// <summary>
         ///  Next packet identifier.
         /// </summary>
-        private static int nextPacketId;
+        private static int _nextPacketId;
 
         /// <summary>
         ///  Random number generator.
         /// </summary>
-        private static readonly Random random = new Random();
+        private static readonly Random Random = new Random();
 
         /// <summary>
         ///  Identifier of this packet.
@@ -57,12 +57,12 @@ namespace TinyRadius.Net.Packet
         /// <summary>
         ///  Attributes for this packet.
         /// </summary>
-        private IList<RadiusAttribute> attributes = new List<RadiusAttribute>();
+        private IList<RadiusAttribute> _attributes = new List<RadiusAttribute>();
 
         /// <summary>
         ///  Authenticator for this Radius packet.
         /// </summary>
-        private byte[] authenticator;
+        private byte[] _authenticator;
 
         /// <summary>
         ///  Dictionary to look up attribute names.
@@ -220,7 +220,7 @@ namespace TinyRadius.Net.Packet
                 if (value == null)
                     throw new ArgumentNullException("value", "attributes list is null");
 
-                attributes = value;
+                _attributes = value;
             }
         }
 
@@ -234,7 +234,7 @@ namespace TinyRadius.Net.Packet
             set
             {
                 _dictionary = value;
-                foreach (RadiusAttribute direct in attributes)
+                foreach (RadiusAttribute direct in _attributes)
                 {
                     direct.Dictionary = value;
                 }
@@ -254,12 +254,12 @@ namespace TinyRadius.Net.Packet
                 throw new ArgumentNullException("attribute", "attribute is null");
             attribute.Dictionary = Dictionary;
             if (attribute.VendorId == -1)
-                attributes.Add(attribute);
+                _attributes.Add(attribute);
             else
             {
                 var vsa = new VendorSpecificAttribute(attribute.VendorId);
                 vsa.AddSubAttribute(attribute);
-                attributes.Add(vsa);
+                _attributes.Add(vsa);
             }
         }
 
@@ -297,7 +297,7 @@ namespace TinyRadius.Net.Packet
         {
             if (attribute.VendorId == -1)
             {
-                if (!attributes.Remove(attribute))
+                if (!_attributes.Remove(attribute))
                     throw new ArgumentException("no such attribute");
             }
             else
@@ -331,14 +331,14 @@ namespace TinyRadius.Net.Packet
                 throw new ArgumentException("attribute type out of bounds");
 
             var removedInt = new List<int>();
-            for (int i = attributes.Count; i > 0; i--)
+            for (int i = _attributes.Count; i > 0; i--)
             {
-                if (attributes[i].Type == type)
+                if (_attributes[i].Type == type)
                     removedInt.Add(i);
             }
             foreach (int index in removedInt)
             {
-                attributes.RemoveAt(index);
+                _attributes.RemoveAt(index);
             }
         }
 
@@ -405,7 +405,7 @@ namespace TinyRadius.Net.Packet
                 throw new ArgumentException("attribute type out of bounds");
 
             IList<RadiusAttribute> result = new List<RadiusAttribute>();
-            foreach (RadiusAttribute a in attributes)
+            foreach (RadiusAttribute a in _attributes)
             {
                 if (attributeType == a.Type)
                     result.Add(a);
@@ -454,7 +454,7 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public IList<RadiusAttribute> GetAttributes()
         {
-            return attributes;
+            return _attributes;
         }
 
         /// <summary>
@@ -545,7 +545,7 @@ namespace TinyRadius.Net.Packet
         public IList<RadiusAttribute> GetVendorAttributes(int vendorId)
         {
             var result = new List<RadiusAttribute>();
-            foreach (RadiusAttribute a in attributes)
+            foreach (RadiusAttribute a in _attributes)
             {
                 if (typeof(VendorSpecificAttribute).IsInstanceOfType(a))
                 {
@@ -614,7 +614,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public RadiusPacket DecodeRequestPacket(Stream @in, String sharedSecret)
+        public static RadiusPacket DecodeRequestPacket(Stream @in, String sharedSecret)
         {
             return DecodePacket(DefaultDictionary.GetDefaultDictionary(), @in, sharedSecret, null);
         }
@@ -630,7 +630,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException IO error
         ///  @exception RadiusException malformed packet
         /// </summary>
-        public  RadiusPacket DecodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
+        public static RadiusPacket DecodeResponsePacket(Stream @in, String sharedSecret, RadiusPacket request)
         {
             if (request == null)
                 throw new ArgumentNullException("request","request may not be null");
@@ -682,10 +682,10 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public static int GetNextPacketIdentifier()
         {
-            nextPacketId++;
-            if (nextPacketId > 255)
-                nextPacketId = 0;
-            return nextPacketId;
+            _nextPacketId++;
+            if (_nextPacketId > 255)
+                _nextPacketId = 0;
+            return _nextPacketId;
         }
 
         /// <summary>
@@ -729,7 +729,7 @@ namespace TinyRadius.Net.Packet
             s.Append(", ID ");
             s.Append(_identifier);
             //for (Iterator i = attributes.iterator(); i.hasNext(); )
-            foreach (RadiusAttribute attr in attributes)
+            foreach (RadiusAttribute attr in _attributes)
             {
                 //var attr = (RadiusAttribute)i.next();
                 s.Append("\n").Append(attr.ToString());
@@ -748,8 +748,8 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public byte[] Authenticator
         {
-            get { return authenticator; }
-            set { this.authenticator = value; }
+            get { return _authenticator; }
+            set { this._authenticator = value; }
         }
 
         /// <summary>
@@ -777,7 +777,7 @@ namespace TinyRadius.Net.Packet
             {
                 // first create authenticator, then encode attributes
                 // (User-Password attribute needs the authenticator)
-                authenticator = CreateRequestAuthenticator(sharedSecret);
+                _authenticator = CreateRequestAuthenticator(sharedSecret);
                 EncodeRequestAttributes(sharedSecret);
             }
 
@@ -790,13 +790,13 @@ namespace TinyRadius.Net.Packet
             if (request != null)
             {
                 // after encoding attributes, create authenticator
-                authenticator = CreateResponseAuthenticator(sharedSecret, packetLength, attributes,
+                _authenticator = CreateResponseAuthenticator(sharedSecret, packetLength, attributes,
                                                             request.Authenticator);
             }
             else
             {
                 // update authenticator after encoding attributes
-                authenticator = UpdateRequestAuthenticator(sharedSecret, packetLength, attributes);
+                _authenticator = UpdateRequestAuthenticator(sharedSecret, packetLength, attributes);
             }
             outputStream.WriteByte(Convert.ToByte(Type));
             outputStream.WriteByte(Convert.ToByte(Identifier));
@@ -804,13 +804,7 @@ namespace TinyRadius.Net.Packet
             byte[] authen = Authenticator;
             outputStream.Write(authen, 0, authen.Length);
             outputStream.Write(attributes, 0, attributes.Length);
-            /*var dos = new MemoryStream(outputStream);
-            dos.writeByte(Type);
-            dos.writeByte(Identifier);
-            dos.writeShort(packetLength);
-            dos.write(getAuthenticator());
-            dos.write(attributes);
-            dos.flush();*/
+          
         }
 
         /// <summary>
@@ -836,7 +830,7 @@ namespace TinyRadius.Net.Packet
             byte[] secretBytes = RadiusUtil.GetUtf8Bytes(sharedSecret);
 
             var randomBytes = new byte[16];
-            random.NextBytes(randomBytes);
+            Random.NextBytes(randomBytes);
 
             var md5Bytes = new byte[secretBytes.Length + 16];
 
@@ -860,7 +854,7 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         protected virtual byte[] UpdateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes)
         {
-            return authenticator;
+            return _authenticator;
         }
 
         /// <summary>
@@ -911,7 +905,7 @@ namespace TinyRadius.Net.Packet
         ///  @exception IOException if an IO error occurred
         ///  @exception RadiusException if the Radius packet is malformed
         /// </summary>
-        protected virtual RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream,
+        protected static RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream,
                                                    String sharedSecret,
                                                    RadiusPacket request)
         {
@@ -962,7 +956,7 @@ namespace TinyRadius.Net.Packet
             RadiusPacket rp = createRadiusPacket(type);
             rp.Type = type;
             rp.Identifier = identifier;
-            rp.authenticator = authenticator;
+            rp._authenticator = authenticator;
 
             // load attributes
             pos = 0;
@@ -1054,7 +1048,7 @@ namespace TinyRadius.Net.Packet
             var bos = new MemoryStream(MaxPacketLength);
             try
             {
-                foreach (var a in attributes)
+                foreach (var a in _attributes)
                 {
                     byte[] bytes = a.WriteAttribute();
                     bos.Write(bytes, 0, bytes.Length);

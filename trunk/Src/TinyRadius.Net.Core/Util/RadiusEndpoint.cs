@@ -1,51 +1,42 @@
+using System;
+using System.Net;
+
 namespace TinyRadius.Net.Util
 {
-
-
-
-    using System;
-    using TinyRadius.Net.JavaHelper;
-    using TinyRadius.Net.Net.JavaHelper;
-
-    /**
-     * This class stores information about a Radius endpoint.
-     * This includes the address of the remote endpoint and the shared secret
-     * used for securing the communication.
-     */
+    /// <summary>
+    /// This class stores information about a Radius endpoint.
+    /// This includes the address of the remote endpoint and the shared secret
+    /// used for securing the communication.
+    /// </summary>
     public class RadiusEndpoint
     {
-
-        /**
-         * Constructs a RadiusEndpoint object.
-         * @param remoteAddress remote address (ip and port number)
-         * @param sharedSecret shared secret
-         */
-        public RadiusEndpoint(InetSocketAddress remoteAddress, String sharedSecret)
+        /// <summary>
+        /// Constructs a RadiusEndpoint object.
+        /// @param remoteAddress remote address (ip and port number)
+        /// @param sharedSecret shared secret
+        /// </summary>
+        public RadiusEndpoint(string hostName,int port,string shareSecret)
         {
-            this.endpointAddress = remoteAddress;
-            this.sharedSecret = sharedSecret;
+            var ipAddress = Dns.GetHostEntry(hostName).AddressList[0];
+            this.EndpointAddress=new IPEndPoint(ipAddress,port);
+            this.SharedSecret = shareSecret;
+        }
+        public RadiusEndpoint(IPEndPoint remoteAddress, String sharedSecret)
+        {
+            EndpointAddress = remoteAddress;
+            SharedSecret = sharedSecret;
         }
 
-        /**
-         * Returns the remote address.
-         * @return remote address
-         */
-        public InetSocketAddress getEndpointAddress()
-        {
-            return endpointAddress;
-        }
+        /// <summary>
+        /// Returns the remote address.
+        /// @return remote address
+        /// </summary>
+        public IPEndPoint EndpointAddress { get; private set; }
 
-        /**
-         * Returns the shared secret.
-         * @return shared secret
-         */
-        public String getSharedSecret()
-        {
-            return sharedSecret;
-        }
-
-        private InetSocketAddress endpointAddress;
-        private String sharedSecret;
-
+        /// <summary>
+        /// Returns the shared secret.
+        /// @return shared secret
+        /// </summary>
+        public string SharedSecret { get; private set; }
     }
 }

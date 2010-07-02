@@ -1,69 +1,106 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using log4net;
 using TinyRadius.Net.Attributes;
+using TinyRadius.Net.Packet;
+using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Proxy
 {
-    using TinyRadius.Net.Packet;
-    using TinyRadius.Net.Util;
-    using System.Threading;
-    using TinyRadius.Net.JavaHelper;
-    using TinyRadius.Net.Net.JavaHelper;
-    using System;
-    using System.Collections;
-    using log4net;
-
     /**
      * This class implements a Radius Proxy that receives Radius packets
      * and forwards them to a Radius server.
      * You have to override the method getRadiusProxyConnection() which
      * identifies the Radius Proxy connection a Radius packet belongs to.
      */
+
     public abstract class RadiusProxy : RadiusServer
     {
-
         /**
          * Starts the Radius Proxy. Listens on the Proxy port.
          */
-        public void start(bool listenAuth, bool listenAcct, bool listenProxy)
+
+        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusProxy));
+        private readonly Hashtable proxyConnections = new Hashtable();
+        private int proxyIndex = 1;
+        private int proxyPort = 1814;
+        private Socket proxySocket;
+
+        public int ProxyPort
+        {
+            get { return proxyPort; }
+            set
+            {
+                proxyPort = value;
+                proxySocket = null;
+            }
+        }
+
+        /**
+         * Sets the Proxy port this server listens to.
+         * Please call before start().
+         * @param proxyPort Proxy port
+         */
+
+        /**
+         * Sets the socket timeout.
+         * @param socketTimeout socket timeout, >0 ms
+         * @throws SocketException
+         */
+
+        public override int SocketTimeout
+        {
+            get { return base.SocketTimeout; }
+            set
+            {
+                base.SocketTimeout = value;
+                if (proxySocket != null)
+                    proxySocket.ReceiveTimeout = SocketTimeout;
+            }
+        }
+
+        public void Start(bool listenAuth, bool listenAcct, bool listenProxy)
         {
             base.Start(listenAuth, listenAcct);
             if (listenProxy)
             {
-                ThreadPool.QueueUserWorkItem(delegate(object state)
-                {
-                    setName("Radius Proxy Listener");
-                    try
-                    {
-                        logger.Info("starting RadiusProxyListener on port " + getProxyPort());
-                        Listen(getProxySocket());
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-                });
-                /*new Thread() {
-                    public void run() {
-                        setName("Radius Proxy Listener");
-                        try {
-                            logger.Info("starting RadiusProxyListener on port " + getProxyPort());
-                            listen(getProxySocket());
-                        } catch(Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();	*/
+                ThreadPool.QueueUserWorkItem(delegate
+                                                 {
+                                                     //setName("Radius Proxy Listener");
+                                                     try
+                                                     {
+                                                         logger.Info("starting RadiusProxyListener on port " +
+                                                                     ProxyPort);
+                                                         Listen(getProxySocket());
+                                                     }
+                                                     catch (Exception e)
+                                                     {
+                                                         //e.printStackTrace();
+                                                         logger.Fatal(e);
+                                                         throw e;
+                                                     }
+                                                 });
             }
         }
 
         /**
          * Stops the Proxy and closes the socket.
          */
-        public void stop()
+
+        public override void Stop()
         {
             logger.Info("stopping Radius Proxy");
             if (proxySocket != null)
-                proxySocket.close();
-            super.stop();
+                proxySocket.Close();
+
+            ;
+            base.Stop();
         }
 
         /**
@@ -76,55 +113,37 @@ namespace TinyRadius.Net.Proxy
          * @return a RadiusEndpoint or null if the packet should not be
          * proxied
          */
-        public abstract RadiusEndpoint getProxyServer(RadiusPacket packet, RadiusEndpoint client);
+        public abstract RadiusEndpoint GetProxyServer(RadiusPacket packet, RadiusEndpoint client);
 
         /**
          * Returns the Proxy port this server listens to.
          * Defaults to 1814.
          * @return Proxy port
          */
-        public int getProxyPort()
-        {
-            return proxyPort;
-        }
 
-        /**
-         * Sets the Proxy port this server listens to.
-         * Please call before start().
-         * @param proxyPort Proxy port
-         */
-        public void setProxyPort(int proxyPort)
-        {
-            this.proxyPort = proxyPort;
-            this.proxySocket = null;
-        }
-
-        /**
-         * Sets the socket timeout.
-         * @param socketTimeout socket timeout, >0 ms
-         * @throws SocketException
-         */
-        public void setSocketTimeout(int socketTimeout)
-        {
-            base.setSocketTimeout(socketTimeout);
-            if (proxySocket != null)
-                proxySocket.setSoTimeout(socketTimeout);
-        }
 
         /**
          * Returns a socket bound to the Proxy port.
          * @return socket
          * @throws SocketException
          */
-        protected DatagramSocket getProxySocket()
+
+        protected Socket getProxySocket()
         {
             if (proxySocket == null)
             {
-                if (getListenAddress() == null)
-                    proxySocket = new DatagramSocket(getProxyPort());
+                proxySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                IPEndPoint ep;
+                if (ListenAddress == null)
+                {
+                    IPAddress hostIP = (Dns.GetHostEntry(IPAddress.Any.ToString())).AddressList[0];
+                    ep = new IPEndPoint(hostIP, ProxyPort);
+                }
                 else
-                    proxySocket = new DatagramSocket(getProxyPort(), getListenAddress());
-                proxySocket.setSoTimeout(getSocketTimeout());
+                {
+                    ep = new IPEndPoint(ListenAddress, ProxyPort);
+                }
+                proxySocket.Bind(ep);
             }
             return proxySocket;
         }
@@ -133,29 +152,32 @@ namespace TinyRadius.Net.Proxy
          * Handles packets coming in on the Proxy port. Decides whether
          * packets coming in on Auth/Acct ports should be proxied.
          */
-        protected RadiusPacket handlePacket(InetSocketAddress localAddress, InetSocketAddress remoteAddress, RadiusPacket request, String sharedSecret)
+
+        protected override RadiusPacket HandlePacket(IPEndPoint localAddress, IPEndPoint remoteAddress,
+                                                     RadiusPacket request, String sharedSecret)
         {
             // handle incoming Proxy packet
-            if (localAddress.getPort() == getProxyPort())
+            if (localAddress.Port == ProxyPort)
             {
                 proxyPacketReceived(request, remoteAddress);
                 return null;
             }
 
             // handle auth/acct packet
-            RadiusEndpoint radiusClient = new RadiusEndpoint(remoteAddress, sharedSecret);
-            RadiusEndpoint radiusServer = getProxyServer(request, radiusClient);
+            var radiusClient = new RadiusEndpoint(remoteAddress, sharedSecret);
+            RadiusEndpoint radiusServer = GetProxyServer(request, radiusClient);
             if (radiusServer != null)
             {
                 // Proxy incoming packet to other radius server
-                RadiusProxyConnection proxyConnection = new RadiusProxyConnection(radiusServer, radiusClient, request, localAddress.getPort());
+                var proxyConnection = new RadiusProxyConnection(radiusServer, radiusClient, request,
+                                                                localAddress.Port);
                 logger.Info("Proxy packet to " + proxyConnection);
                 proxyPacket(request, proxyConnection);
                 return null;
             }
             else
                 // normal processing
-                return super.handlePacket(localAddress, remoteAddress, request, sharedSecret);
+                return base.HandlePacket(localAddress, remoteAddress, request, sharedSecret);
         }
 
         /**
@@ -166,45 +188,48 @@ namespace TinyRadius.Net.Proxy
          * @param remote the server the packet arrived from
          * @throws IOException
          */
-        protected void proxyPacketReceived(RadiusPacket packet, InetSocketAddress remote)
+
+        protected void proxyPacketReceived(RadiusPacket packet, IPEndPoint remote)
         {
             // retrieve my Proxy-State attribute (the last)
-            ArrayList proxyStates = packet.GetAttributes(33);
-            if (proxyStates == null || proxyStates.size() == 0)
+            IList<RadiusAttribute> proxyStates = packet.GetAttributes(33);
+            if (proxyStates == null || proxyStates.Count == 0)
                 throw new RadiusException("Proxy packet without Proxy-State attribute");
-            RadiusAttribute proxyState = (RadiusAttribute)proxyStates.get(proxyStates.size() - 1);
+            RadiusAttribute proxyState = proxyStates[proxyStates.Count - 1];
 
             // retrieve Proxy connection from cache 
-            String state = new String(proxyState.Data);
-            RadiusProxyConnection proxyConnection = (RadiusProxyConnection)proxyConnections.remove(state);
+            string state = BitConverter.ToString(proxyState.Data);
+            var proxyConnection = (RadiusProxyConnection) proxyConnections[state];
+            proxyConnections.Remove(state);
             if (proxyConnection == null)
             {
-                logger.warn("received packet on Proxy port without saved Proxy connection - duplicate?");
+                logger.Warn("received packet on Proxy port without saved Proxy connection - duplicate?");
                 return;
             }
 
             // retrieve client
             RadiusEndpoint client = proxyConnection.getRadiusClient();
-            if (logger.IsInfoEnabled())
+            if (logger.IsInfoEnabled)
             {
                 logger.Info("received Proxy packet: " + packet);
-                logger.Info("forward packet to " + client.getEndpointAddress().toString() + " with secret " + client.getSharedSecret());
+                logger.Info("forward packet to " + client.EndpointAddress + " with secret " +
+                            client.SharedSecret);
             }
 
             // remove only own Proxy-State (last attribute)
             packet.RemoveLastAttribute(33);
 
             // re-encode answer packet with authenticator of the original packet
-            RadiusPacket answer = new RadiusPacket(packet.Type, packet.Identifier, packet.GetAttributes());
-            DatagramPacket datagram = makeDatagramPacket(answer, client.getSharedSecret(), client.getEndpointAddress().getAddress(), client.getEndpointAddress().getPort(), proxyConnection.getPacket());
+            var answer = new RadiusPacket(packet.Type, packet.Identifier, packet.GetAttributes());
+            byte[] datagram = MakeDatagramPacket(answer, client.SharedSecret, proxyConnection.getPacket());
 
             // send back using correct socket
-            DatagramSocket socket;
-            if (proxyConnection.getPort() == getAuthPort())
-                socket = getAuthSocket();
+            Socket socket;
+            if (proxyConnection.getPort() == AuthPort)
+                socket = GetAuthSocket();
             else
-                socket = getAcctSocket();
-            socket.send(datagram);
+                socket = GetAcctSocket();
+            socket.Send(datagram);
         }
 
         /**
@@ -215,56 +240,48 @@ namespace TinyRadius.Net.Proxy
          * @param proxyCon the RadiusProxyConnection for this packet
          * @throws IOException
          */
+
         protected void proxyPacket(RadiusPacket packet, RadiusProxyConnection proxyConnection)
         {
-            lock (typeof(RadiusProxy))
+            lock (typeof (RadiusProxy))
             {
                 // add Proxy-State attribute
                 proxyIndex++;
-                String proxyIndexStr = Integer.toString(proxyIndex);
-                packet.AddAttribute(new RadiusAttribute(33, proxyIndexStr.getBytes()));
+                String proxyIndexStr = proxyIndex.ToString();
+                packet.AddAttribute(new RadiusAttribute(33, Encoding.UTF8.GetBytes(proxyIndexStr)));
 
                 // store RadiusProxyConnection object
-                proxyConnections.put(proxyIndexStr, proxyConnection);
+                proxyConnections.Add(proxyIndexStr, proxyConnection);
             }
 
             // get server address
-            InetAddress serverAddress = proxyConnection.getRadiusServer().getEndpointAddress().getAddress();
-            int serverPort = proxyConnection.getRadiusServer().getEndpointAddress().getPort();
-            String serverSecret = proxyConnection.getRadiusServer().getSharedSecret();
+            //IPAddress serverAddress = proxyConnection.getRadiusServer().EndpointAddress.Address;
+            //int serverPort = proxyConnection.getRadiusServer().EndpointAddress.Port;
+            String serverSecret = proxyConnection.getRadiusServer().SharedSecret;
 
             // save request authenticator (will be calculated new)
             byte[] auth = packet.Authenticator;
 
             // encode new packet (with new authenticator)
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            var bos = new MemoryStream();
             packet.EncodeRequestPacket(bos, serverSecret);
-            byte[] data = bos.toByteArray();
-            DatagramPacket datagram = new DatagramPacket(data, data.Length, serverAddress, serverPort);
+            byte[] data = bos.ToArray();
+            bos.Dispose();
+
+
+            //var datagram = new DatagramPacket(data, data.Length, serverAddress, serverPort);
 
             // restore original authenticator
             packet.Authenticator = auth;
 
             // send packet
-            DatagramSocket proxySocket = getProxySocket();
-            proxySocket.send(datagram);
+            //Socket proxySocket = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.IP);
+            proxySocket.Send(data);
+            //proxySocket.send(datagram);
         }
 
         /**
          * Index for Proxy-State attribute.
          */
-        private int proxyIndex = 1;
-
-        /**
-         * Cache for Radius Proxy connections belonging to sent packets
-         * without a received response.
-         * Key: Proxy Index (String), Value: RadiusProxyConnection
-         */
-        private Hashtable proxyConnections = new Hashtable();
-
-        private int proxyPort = 1814;
-        private DatagramSocket proxySocket = null;
-        private static ILog logger = log4net.LogManager.GetLogger(typeof(RadiusProxy));
-
     }
 }
