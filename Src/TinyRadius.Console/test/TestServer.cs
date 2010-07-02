@@ -4,7 +4,9 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.6 $
  */
+using System.Net;
 using System.Threading;
+using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
 namespace TinyRadius.Test
@@ -23,7 +25,7 @@ namespace TinyRadius.Test
         public static void main(String[] args)
         {
 
-            RadiusServer server = new RadiusServer();
+            FaileServer server = new FaileServer();
             /* {
                  // Authorize localhost/testing123
                  public String getSharedSecret(InetSocketAddress client) {
@@ -68,6 +70,39 @@ namespace TinyRadius.Test
             Thread.Sleep(1000 * 60 * 30);
             Console.WriteLine("Stop server");
             server.Stop();
+        }
+
+        public class  FaileServer:RadiusServer
+        {
+            public override string GetSharedSecret(IPEndPoint client)
+            {
+                if (client.Address.Equals(IPAddress.Parse("127.0.0.1")))
+                    return "testing123";
+                else
+                    return null;
+            }
+
+            public override string GetUserPassword(string userName)
+            {
+                if (userName.Equals("mw"))
+                    return "test";
+                else
+                    return null;
+            }
+
+            public override TinyRadius.Net.Packet.RadiusPacket AccessRequestReceived(TinyRadius.Net.Packet.AccessRequest accessRequest, IPEndPoint client)
+            {
+
+                Console.WriteLine("Received Access-Request:\n" + accessRequest);
+                RadiusPacket packet = base.AccessRequestReceived(accessRequest, client);
+                if (packet.Type == RadiusPacket.AccessAccept)
+                    packet.AddAttribute("Reply-Message", "Welcome " + accessRequest.UserName + "!");
+                if (packet == null)
+                    Console.WriteLine("Ignore packet.");
+                else
+                    Console.WriteLine("Answer:\n" + packet);
+                return packet;
+            }
         }
 
     }

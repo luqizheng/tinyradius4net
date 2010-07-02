@@ -32,15 +32,15 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         private const int CHAP_CHALLENGE = 60;
 
-        
+
         private static readonly Random random = new Random();
 
         /// <summary>
         ///Logger for logging information about malformed packets
         /// </summary>
-        private static readonly ILog logger = LogManager.GetLogger(typeof(AccessRequest));
+        private static readonly ILog logger = LogManager.GetLogger(typeof (AccessRequest));
 
-        
+
         private byte[] chapChallenge;
         private byte[] chapPassword;
         private String password;
@@ -111,11 +111,7 @@ namespace TinyRadius.Net.Packet
         ///Returns the protocol used for encrypting the passphrase.
         ///@return AUTH_PAP or AUTH_CHAP
         /// </summary>
-        public AuthenticationType AuthProtocol
-        {
-            get;
-            set;
-        }
+        public AuthenticationType AuthProtocol { get; set; }
 
         /// <summary>
         ///Retrieves the plain-text user password.
@@ -139,7 +135,7 @@ namespace TinyRadius.Net.Packet
         {
             if (string.IsNullOrEmpty(plaintext))
                 throw new ArgumentException("password is empty");
-            if (AuthProtocol==AuthenticationType.chap)
+            if (AuthProtocol == AuthenticationType.chap)
                 return VerifyChapPassword(plaintext);
             else
                 return getUserPassword().Equals(plaintext);
@@ -229,7 +225,7 @@ namespace TinyRadius.Net.Packet
             byte[] encryptedPass = null;
             if (userPassBytes.Length < 128)
             {
-                if (userPassBytes.Length % 16 == 0)
+                if (userPassBytes.Length%16 == 0)
                 {
                     // tt is already a multiple of 16 bytes
                     encryptedPass = new byte[userPassBytes.Length];
@@ -237,7 +233,7 @@ namespace TinyRadius.Net.Packet
                 else
                 {
                     // make it a multiple of 16 bytes
-                    encryptedPass = new byte[((userPassBytes.Length / 16) * 16) + 16];
+                    encryptedPass = new byte[((userPassBytes.Length/16)*16) + 16];
                 }
             }
             else
@@ -269,7 +265,7 @@ namespace TinyRadius.Net.Packet
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
             }
 
             return encryptedPass;
@@ -305,7 +301,7 @@ namespace TinyRadius.Net.Packet
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
             }
 
             // remove trailing zeros
@@ -339,7 +335,7 @@ namespace TinyRadius.Net.Packet
         private byte[] EncodeChapPassword(String plaintext, byte[] chapChallenge)
         {
             // see RFC 2865 section 2.2
-            var chapIdentifier = (byte)random.Next(256);
+            var chapIdentifier = (byte) random.Next(256);
             var chapPassword = new byte[17];
             chapPassword[0] = chapIdentifier;
 
@@ -368,7 +364,7 @@ namespace TinyRadius.Net.Packet
 
             byte chapIdentifier = chapPassword[0];
 
-            var byteAry = new List<byte> { chapIdentifier };
+            var byteAry = new List<byte> {chapIdentifier};
             byteAry.AddRange(RadiusUtil.GetUtf8Bytes(plaintext));
             byte[] chapHash = MD5.Create().ComputeHash(chapChallenge);
 
