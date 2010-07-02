@@ -4,21 +4,13 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.6 $
  */
+using System.Threading;
+using TinyRadius.Net.Util;
+
 namespace TinyRadius.Test
 {
 
-    using System.IO;
-    using java.net.InetSocketAddress;
-
-    using TinyRadius.packet.AccessRequest;
-    using TinyRadius.packet.RadiusPacket;
-    using TinyRadius.util.RadiusException;
-    using TinyRadius.util.RadiusServer;
     using System;
-    using TinyRadius.util;
-    using TinyRadius.Packet;
-    using TinyRadius.packet;
-    using TinyRadius.Util;
 
     /**
      * Test server which terminates after 30 s.
@@ -64,18 +56,18 @@ namespace TinyRadius.Test
                      return packet;
                  }
              };*/
-            if (args.length >= 1)
-                server.setAuthPort(Integer.parseInt(args[0]));
-            if (args.length >= 2)
-                server.setAcctPort(Integer.parseInt(args[1]));
+            if (args.Length >= 1)
+                server.AuthPort=Convert.ToInt32(args[0]);
+            if (args.Length >= 2)
+                server.AuthPort=Convert.ToInt32(args[1]);
 
-            server.start(true, true);
+            server.Start(true, true);
 
             Console.WriteLine("Server started.");
 
-            Thread.sleep(1000 * 60 * 30);
+            Thread.Sleep(1000 * 60 * 30);
             Console.WriteLine("Stop server");
-            server.stop();
+            server.Stop();
         }
 
     }

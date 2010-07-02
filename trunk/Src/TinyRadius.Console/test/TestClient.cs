@@ -4,12 +4,14 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.4 $
  */
+using TinyRadius.Net.packet;
+using TinyRadius.Net.Packet;
+using TinyRadius.Net.Util;
+
 namespace TinyRadius.test
 {
 
-    using TinyRadius.Packet;
-    
-    using TinyRadius.Util;
+
     using System;
 
     /**
@@ -26,10 +28,10 @@ namespace TinyRadius.test
          */
         public static void main(String[] args)
         {
-            if (args.length != 4)
+            if (args.Length != 4)
             {
                 Console.WriteLine("Usage: TestClient hostName sharedSecret userName password");
-                System.exit(1);
+                return;
             }
 
             String host = args[0];
@@ -41,12 +43,12 @@ namespace TinyRadius.test
 
             // 1. Send Access-Request
             AccessRequest ar = new AccessRequest(user, pass);
-            ar.setAuthProtocol(AccessRequest.AUTH_PAP); // or AUTH_CHAP
-            ar.addAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
-            ar.addAttribute("NAS-IP-Address", "192.168.0.100");
-            ar.addAttribute("Service-Type", "Login-User");
-            ar.addAttribute("WISPr-Redirection-URL", "http://www.sourceforge.net/");
-            ar.addAttribute("WISPr-Location-ID", "net.sourceforge.ap1");
+            ar.AuthProtocol = AccessRequest.AUTH_PAP; // or AUTH_CHAP
+            ar.AddAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
+            ar.AddAttribute("NAS-IP-Address", "192.168.0.100");
+            ar.AddAttribute("Service-Type", "Login-User");
+            ar.AddAttribute("WISPr-Redirection-URL", "http://www.sourceforge.net/");
+            ar.AddAttribute("WISPr-Location-ID", "net.sourceforge.ap1");
 
             Console.WriteLine("Packet before it is sent\n" + ar + "\n");
             RadiusPacket response = rc.authenticate(ar);
@@ -55,15 +57,15 @@ namespace TinyRadius.test
 
             // 2. Send Accounting-Request
             AccountingRequest acc = new AccountingRequest("mw", AccountingRequest.ACCT_STATUS_TYPE_START);
-            acc.addAttribute("Acct-Session-Id", "1234567890");
-            acc.addAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
-            acc.addAttribute("NAS-Port", "0");
+            acc.AddAttribute("Acct-Session-Id", "1234567890");
+            acc.AddAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
+            acc.AddAttribute("NAS-Port", "0");
 
             Console.WriteLine(acc + "\n");
-            response = rc.account(acc);
+            response = rc.Account(acc);
             Console.WriteLine("Response: " + response);
 
-            rc.close();
+            rc.Close();
         }
 
     }

@@ -4,16 +4,15 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.1 $
  */
+using System;
+using System.Net;
+using TinyRadius.Net.packet;
+using TinyRadius.Net.Packet;
+using TinyRadius.Net.Proxy;
+using TinyRadius.Net.Util;
+
 namespace TinyRadius.test
 {
-
-    /*using java.net.InetAddress;
-    using java.net.InetSocketAddress;
-    using java.net.UnknownHostException;*/
-
-
-    using TinyRadius.Proxy;
-    using TinyRadius.Util;
 
     /**
      * Test proxy server.
@@ -28,45 +27,43 @@ namespace TinyRadius.test
     public class TestProxy : RadiusProxy
     {
 
-        public RadiusEndpoint getProxyServer(RadiusPacket packet,
+        public override RadiusEndpoint GetProxyServer(RadiusPacket packet,
                 RadiusEndpoint client)
         {
             // always proxy
             try
             {
-                InetAddress address = InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 });
+                var address = IPAddress.Parse("127.0. 0. 1 ");
                 int port = 10000;
                 if (typeof(AccountingRequest).IsInstanceOfType(packet))
                     port = 10001;
-                return new RadiusEndpoint(new InetSocketAddress(address, port), "testing123");
+                return new RadiusEndpoint(new IPEndPoint(address, port), "testing123");
             }
-            catch (UnknownHostException uhe)
+            catch
             {
-                uhe.printStackTrace();
                 return null;
             }
         }
 
-        public String getSharedSecret(InetSocketAddress client)
+
+        public static void main(String[] args)
         {
-            if (client.getPort() == 10000 || client.getPort() == 10001)
+            new TestProxy().Start(true, true, true);
+        }
+
+        public override string GetSharedSecret(IPEndPoint client)
+        {
+            if (client.Port == 10000 || client.Port == 10001)
                 return "testing123";
-            else if (client.getAddress().getHostAddress().equals("127.0.0.1"))
+            else if (client.Address.ToString() == "127.0.0.1")
                 return "proxytest";
             else
                 return null;
         }
 
-        public String getUserPassword(String userName)
+        public override string GetUserPassword(string userName)
         {
-            // not used because every request is proxied
             return null;
         }
-
-        public static void main(String[] args)
-        {
-            new TestProxy().start(true, true, true);
-        }
-
     }
 }

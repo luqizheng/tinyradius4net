@@ -32,24 +32,15 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         private const int CHAP_CHALLENGE = 60;
 
-        /// <summary>
-        ///Passphrase Authentication Protocol
-        /// </summary>
-        public static readonly String AUTH_PAP = "pap";
-
-        /// <summary>
-        ///Challenged Handshake Authentication Protocol
-        /// </summary>
-        public static readonly String AUTH_CHAP = "chap";
-
+        
         private static readonly Random random = new Random();
 
         /// <summary>
         ///Logger for logging information about malformed packets
         /// </summary>
-        private static readonly ILog logger = LogManager.GetLogger(typeof (AccessRequest));
+        private static readonly ILog logger = LogManager.GetLogger(typeof(AccessRequest));
 
-        private String authProtocol = AUTH_PAP;
+        
         private byte[] chapChallenge;
         private byte[] chapPassword;
         private String password;
@@ -120,16 +111,10 @@ namespace TinyRadius.Net.Packet
         ///Returns the protocol used for encrypting the passphrase.
         ///@return AUTH_PAP or AUTH_CHAP
         /// </summary>
-        public string AuthProtocol
+        public AuthenticationType AuthProtocol
         {
-            get { return authProtocol; }
-            set
-            {
-                if (value != null && (value.Equals(AUTH_PAP) || value.Equals(AUTH_CHAP)))
-                    authProtocol = value;
-                else
-                    throw new ArgumentException("protocol must be pap or chap");
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -152,9 +137,9 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public bool VerifyPassword(String plaintext)
         {
-            if (plaintext == null || plaintext.Length == 0)
+            if (string.IsNullOrEmpty(plaintext))
                 throw new ArgumentException("password is empty");
-            if (AuthProtocol.Equals(AUTH_CHAP))
+            if (AuthProtocol==AuthenticationType.chap)
                 return VerifyChapPassword(plaintext);
             else
                 return getUserPassword().Equals(plaintext);
@@ -173,14 +158,14 @@ namespace TinyRadius.Net.Packet
 
             if (userPassword != null)
             {
-                AuthProtocol = AUTH_PAP;
+                AuthProtocol = AuthenticationType.pap;
                 password = DecodePapPassword(userPassword.Data, RadiusUtil.GetUtf8Bytes(sharedSecret));
                 // copy truncated data
                 userPassword.Data = RadiusUtil.GetUtf8Bytes(password);
             }
             else if (chapPassword != null && chapChallenge != null)
             {
-                AuthProtocol = AUTH_CHAP;
+                AuthProtocol = AuthenticationType.chap;
                 this.chapPassword = chapPassword.Data;
                 this.chapChallenge = chapChallenge.Data;
             }
@@ -199,13 +184,13 @@ namespace TinyRadius.Net.Packet
             // ok for proxied packets whose CHAP password is already encrypted
             //throw new NotImplementedException("no password set");
 
-            if (AuthProtocol.Equals(AUTH_PAP))
+            if (AuthProtocol.Equals(AuthenticationType.pap))
             {
                 byte[] pass = EncodePapPassword(RadiusUtil.GetUtf8Bytes(password), RadiusUtil.GetUtf8Bytes(sharedSecret));
                 RemoveAttributes(USER_PASSWORD);
                 AddAttribute(new RadiusAttribute(USER_PASSWORD, pass));
             }
-            else if (AuthProtocol.Equals(AUTH_CHAP))
+            else if (AuthProtocol.Equals(AuthenticationType.chap))
             {
                 byte[] challenge = CreateChapChallenge();
                 byte[] pass = EncodeChapPassword(password, challenge);
@@ -244,7 +229,7 @@ namespace TinyRadius.Net.Packet
             byte[] encryptedPass = null;
             if (userPassBytes.Length < 128)
             {
-                if (userPassBytes.Length%16 == 0)
+                if (userPassBytes.Length % 16 == 0)
                 {
                     // tt is already a multiple of 16 bytes
                     encryptedPass = new byte[userPassBytes.Length];
@@ -252,7 +237,7 @@ namespace TinyRadius.Net.Packet
                 else
                 {
                     // make it a multiple of 16 bytes
-                    encryptedPass = new byte[((userPassBytes.Length/16)*16) + 16];
+                    encryptedPass = new byte[((userPassBytes.Length / 16) * 16) + 16];
                 }
             }
             else
@@ -284,7 +269,7 @@ namespace TinyRadius.Net.Packet
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
             }
 
             return encryptedPass;
@@ -320,7 +305,7 @@ namespace TinyRadius.Net.Packet
 
                 // perform the XOR as specified by RFC 2865.
                 for (int j = 0; j < 16; j++)
-                    encryptedPass[i + j] = (byte) (bn[j] ^ encryptedPass[i + j]);
+                    encryptedPass[i + j] = (byte)(bn[j] ^ encryptedPass[i + j]);
             }
 
             // remove trailing zeros
@@ -354,7 +339,7 @@ namespace TinyRadius.Net.Packet
         private byte[] EncodeChapPassword(String plaintext, byte[] chapChallenge)
         {
             // see RFC 2865 section 2.2
-            var chapIdentifier = (byte) random.Next(256);
+            var chapIdentifier = (byte)random.Next(256);
             var chapPassword = new byte[17];
             chapPassword[0] = chapIdentifier;
 
@@ -383,7 +368,7 @@ namespace TinyRadius.Net.Packet
 
             byte chapIdentifier = chapPassword[0];
 
-            var byteAry = new List<byte> {chapIdentifier};
+            var byteAry = new List<byte> { chapIdentifier };
             byteAry.AddRange(RadiusUtil.GetUtf8Bytes(plaintext));
             byte[] chapHash = MD5.Create().ComputeHash(chapChallenge);
 
