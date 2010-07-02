@@ -4,16 +4,16 @@
  * @author mw
  * @version $Revision: 1.1 $
  */
+using System;
+using System.Collections.Generic;
+using TinyRadius.Net.Attributes;
+using TinyRadius.Net.Dictionaries;
+using TinyRadius.Net.Packet;
+
 namespace TinyRadius.test
 {
 
-    /*using java.io.FileInputStream;
-    using java.io.InputStream;*/
-
-    using TinyRadius.attribute.IpAttribute;
-    using TinyRadius.Dictionary;    
-    using TinyRadius.packet.AccessRequest;
-
+    
     /**
      * Shows how to use TinyRadius with a custom dictionary
      * loaded from a dictionary file.
@@ -22,16 +22,16 @@ namespace TinyRadius.test
     public class TestDictionary
     {
 
-        public static void main(String[] args)
-        {
-            InputStream source = new FileInputStream("test.dictionary");
-            Dictionary dictionary = DictionaryParser.parseDictionary(source);
-            AccessRequest ar = new AccessRequest("UserName", "UserPassword");
-            ar.setDictionary(dictionary);
-            ar.addAttribute("WISPr-Location-ID", "LocationID");
-            ar.addAttribute(new IpAttribute(8, 1234567));
-            Console.WriteLine(ar);
-        }
+        //public static void main(String[] args)
+        //{
+        //    InputStream source = new FileInputStream("test.dictionary");
+        //    var dictionary = DictionaryParser.parseDictionary(source);
+        //    AccessRequest ar = new AccessRequest("UserName", "UserPassword");
+        //    ar.Dictionary=dictionary;
+        //    ar.addAttribute("WISPr-Location-ID", "LocationID");
+        //    ar.addAttribute(new IpAttribute(8, 1234567));
+        //    Console.WriteLine(ar);
+        //}
 
     }
 }

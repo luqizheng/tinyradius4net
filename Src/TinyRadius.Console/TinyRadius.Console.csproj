@@ -55,6 +55,12 @@
   <ItemGroup>
     <Content Include="test\package.html" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TinyRadius.Net.Core\TinyRadius.Net.Core.csproj">
+      <Project>{E3577C9B-AA09-4448-9601-F3E240110F52}</Project>
+      <Name>TinyRadius.Net.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
