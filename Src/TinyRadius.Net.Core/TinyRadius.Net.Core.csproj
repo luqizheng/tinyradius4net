@@ -58,6 +58,7 @@
     <Compile Include="Attributes\RadiusAttribute.cs" />
     <Compile Include="Attributes\StringAttribute.cs" />
     <Compile Include="Attributes\VendorSpecificAttribute.cs" />
+    <Compile Include="AuthenticationType.cs" />
     <Compile Include="Dictionaries\AttributeType.cs" />
     <Compile Include="Dictionaries\DefaultDictionary.cs" />
     <Compile Include="Dictionaries\IDictionary.cs" />
@@ -65,11 +66,6 @@
     <Compile Include="Dictionaries\MemoryDictionary.cs" />
     <Content Include="Dictionaries\package.html" />
     <Compile Include="Dictionaries\WritableDictionary.cs" />
-    <Compile Include="JavaHelper\DatagramPacket.cs" />
-    <Compile Include="JavaHelper\DatagramSocket.cs" />
-    <Compile Include="JavaHelper\InetAddress.cs" />
-    <Compile Include="JavaHelper\InetSocketAddress.cs" />
-    <Compile Include="JavaHelper\SecureRandom.cs" />
     <Compile Include="Packet\AccessRequest.cs" />
     <Compile Include="Packet\AccountingRequest.cs" />
     <Compile Include="Packet\CoaRequest.cs" />
