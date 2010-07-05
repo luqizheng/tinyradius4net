@@ -26,11 +26,11 @@ namespace TinyRadius.Net.Proxy
          * Starts the Radius Proxy. Listens on the Proxy port.
          */
 
-        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusProxy));
+        private static readonly ILog logger = LogManager.GetLogger(typeof(RadiusProxy));
         private readonly Hashtable proxyConnections = new Hashtable();
         private int proxyIndex = 1;
         private int proxyPort = 1814;
-        private Socket proxySocket;
+        private UdpClient proxySocket;
 
         public int ProxyPort
         {
@@ -60,8 +60,8 @@ namespace TinyRadius.Net.Proxy
             set
             {
                 base.SocketTimeout = value;
-                if (proxySocket != null)
-                    proxySocket.ReceiveTimeout = SocketTimeout;
+                /*if (proxySocket != null)
+                    proxySocket.ReceiveTimeout = SocketTimeout;*/
             }
         }
 
@@ -128,22 +128,12 @@ namespace TinyRadius.Net.Proxy
          * @throws SocketException
          */
 
-        protected Socket getProxySocket()
+        protected UdpClient getProxySocket()
         {
             if (proxySocket == null)
             {
-                proxySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-                IPEndPoint ep;
-                if (ListenAddress == null)
-                {
-                    IPAddress hostIP = (Dns.GetHostEntry(IPAddress.Any.ToString())).AddressList[0];
-                    ep = new IPEndPoint(hostIP, ProxyPort);
-                }
-                else
-                {
-                    ep = new IPEndPoint(ListenAddress, ProxyPort);
-                }
-                proxySocket.Bind(ep);
+                IPEndPoint ep = ListenAddress == null ? new IPEndPoint(IPAddress.Any, ProxyPort) : new IPEndPoint(ListenAddress, ProxyPort);
+                proxySocket = new UdpClient(ep);
             }
             return proxySocket;
         }
@@ -199,7 +189,7 @@ namespace TinyRadius.Net.Proxy
 
             // retrieve Proxy connection from cache 
             string state = BitConverter.ToString(proxyState.Data);
-            var proxyConnection = (RadiusProxyConnection) proxyConnections[state];
+            var proxyConnection = (RadiusProxyConnection)proxyConnections[state];
             proxyConnections.Remove(state);
             if (proxyConnection == null)
             {
@@ -220,16 +210,12 @@ namespace TinyRadius.Net.Proxy
             packet.RemoveLastAttribute(33);
 
             // re-encode answer packet with authenticator of the original packet
-            var answer = new RadiusPacket(packet.Type, packet.Identifier, packet.GetAttributes());
+            var answer = new RadiusPacket(packet.Type, packet.Identifier, packet.Attributes);
             byte[] datagram = MakeDatagramPacket(answer, client.SharedSecret, proxyConnection.getPacket());
 
             // send back using correct socket
-            Socket socket;
-            if (proxyConnection.getPort() == AuthPort)
-                socket = GetAuthSocket();
-            else
-                socket = GetAcctSocket();
-            socket.Send(datagram);
+            var socket = proxyConnection.getPort() == AuthPort ? GetAuthSocket() : GetAcctSocket();
+            socket.Send(datagram, datagram.Length, remote);
         }
 
         /**
@@ -243,7 +229,7 @@ namespace TinyRadius.Net.Proxy
 
         protected void proxyPacket(RadiusPacket packet, RadiusProxyConnection proxyConnection)
         {
-            lock (typeof (RadiusProxy))
+            lock (typeof(RadiusProxy))
             {
                 // add Proxy-State attribute
                 proxyIndex++;
@@ -276,7 +262,7 @@ namespace TinyRadius.Net.Proxy
 
             // send packet
             //Socket proxySocket = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.IP);
-            proxySocket.Send(data);
+            proxySocket.Send(data, data.Length);
             //proxySocket.send(datagram);
         }
 

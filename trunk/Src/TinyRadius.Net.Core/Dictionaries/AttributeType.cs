@@ -84,8 +84,8 @@ namespace TinyRadius.Net.Dictionaries
             {
                 if (value == null)
                     throw new ArgumentNullException("value", "Class is null");
-                if (typeof(RadiusAttribute) != value)
-                    throw new ArgumentException("type is not a RadiusAttribute descendant");
+                //if (typeof(RadiusAttribute).BaseType != value)
+                //    throw new ArgumentException("type is not a RadiusAttribute descendant");
                 _attributeClass = value;
             }
             get { return _attributeClass; }
@@ -152,6 +152,7 @@ namespace TinyRadius.Net.Dictionaries
             if (_enumeration == null)
                 _enumeration = new Dictionary<int, string>();
             _enumeration.Add(num, name);
+
         }
 
         /// <summary>

@@ -1,30 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 
 namespace TinyRadiusServer
 {
-    public class ClientSets : Dictionary<IPAddress, string>
+    public class ClientSets : Dictionary<string, string>
     {
         public static ClientSets Instance = new ClientSets();
 
-        public void Init(string ips, string shareKey)
+        private ClientSets()
+        {
+            Init(Client.Default.ClientIPs, Client.Default.ShareKey);
+        }
+
+        private void Init(string ips, string shareKey)
         {
             if (String.IsNullOrEmpty(ips))
                 return;
-            var ipset = ips.Split(',');
-            var shareKeySet = shareKey.Split(',');
+            string[] ipset = ips.Split(',');
+            string[] shareKeySet = shareKey.Split(',');
             int i = 0;
             foreach (string ip in ipset)
             {
-                this.Add(IPAddress.Parse(ip), shareKeySet[i]);
+                Add(ip, shareKeySet[i]);
                 i++;
             }
         }
 
 
+        public void Save()
+        {
+            var ips = new List<string>();
+            var shareKeys = new List<string>();
+            foreach (var key in Keys)
+            {
+                ips.Add(key.ToString());
+                shareKeys.Add(this[key]);
+            }
 
+            Client.Default.ShareKey = String.Join(",", shareKeys.ToArray());
+            Client.Default.ClientIPs = String.Join(",", ips.ToArray());
+            Client.Default.Save();
+        }
     }
 }

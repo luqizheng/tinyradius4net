@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace TinyRadius.Net.Dictionaries
 {
-
     /**
      * A dictionary that keeps the values and names in hash maps
      * in the memory. The dictionary has to be filled using the
@@ -14,9 +13,9 @@ namespace TinyRadius.Net.Dictionaries
      * @see TinyRadius.dictionary.Hashtable
      * @see TinyRadius.dictionary.WritableDictionary
      */
+
     public class MemoryDictionary : IWritableDictionary
     {
-
         /**
          * Returns the AttributeType for the vendor -1 from the
          * cache.
@@ -24,6 +23,17 @@ namespace TinyRadius.Net.Dictionaries
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Dictionary#getAttributeTypeByCode(int)
          */
+
+        private readonly Dictionary<int, Dictionary<int, AttributeType>> attributesByCode =
+            new Dictionary<int, Dictionary<int, AttributeType>>(); // <Integer, <Integer, AttributeType>>
+
+        private readonly Dictionary<String, AttributeType> attributesByName = new Dictionary<string, AttributeType>();
+        // <String, AttributeType>
+
+        private readonly Dictionary<int, string> vendorsByCode = new Dictionary<int, string>(); // <Integer, String>
+
+        #region IWritableDictionary Members
+
         public AttributeType GetAttributeTypeByCode(int typeCode)
         {
             return GetAttributeTypeByCode(-1, typeCode);
@@ -36,13 +46,14 @@ namespace TinyRadius.Net.Dictionaries
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Hashtable#getAttributeTypeByCode(int, int)
          */
+
         public AttributeType GetAttributeTypeByCode(int vendorCode, int typeCode)
         {
-            var vendorAttributes = attributesByCode[vendorCode];
+            Dictionary<int, AttributeType> vendorAttributes = attributesByCode[vendorCode];
             if (vendorAttributes == null)
                 return null;
             else
-                return (AttributeType)vendorAttributes[typeCode];
+                return vendorAttributes[typeCode];
         }
 
         /**
@@ -51,9 +62,10 @@ namespace TinyRadius.Net.Dictionaries
          * @return AttributeType or null
          * @see TinyRadius.dictionary.Hashtable#getAttributeTypeByName(java.lang.String)
          */
+
         public AttributeType GetAttributeTypeByName(String typeName)
         {
-            return (AttributeType)attributesByName[typeName];
+            return attributesByName[typeName];
         }
 
         /**
@@ -63,6 +75,7 @@ namespace TinyRadius.Net.Dictionaries
          * @return vendor code or -1
          * @see TinyRadius.dictionary.Hashtable#getVendorId(java.lang.String)
          */
+
         public int GetVendorId(String vendorName)
         {
             foreach (var entry in vendorsByCode)
@@ -71,13 +84,7 @@ namespace TinyRadius.Net.Dictionaries
                     return entry.Key;
             }
             return -1;
-            /*for (Iterator i = vendorsByCode.entrySet().iterator(); i.hasNext(); )
-            {
-                Map.Entry e = (Map.Entry)i.next();
-                if (e.getValue().equals(vendorName))
-                    return ((Integer)e.getKey()).intValue();
-            }
-            return -1;*/
+
         }
 
         /**
@@ -87,9 +94,12 @@ namespace TinyRadius.Net.Dictionaries
          * @return vendor name or null
          * @see TinyRadius.dictionary.Hashtable#getVendorName(int)
          */
+
         public String GetVendorName(int vendorId)
         {
-            return (String) vendorsByCode[vendorId];
+            if (!vendorsByCode.ContainsKey(vendorId))
+                return null;
+            return vendorsByCode[vendorId];
         }
 
         /**
@@ -98,6 +108,7 @@ namespace TinyRadius.Net.Dictionaries
          * @param vendorName name of the vendor
          * @exception ArgumentException empty vendor name, invalid vendor ID
          */
+
         public void AddVendor(int vendorId, String vendorName)
         {
             if (vendorId < 0)
@@ -114,20 +125,21 @@ namespace TinyRadius.Net.Dictionaries
          * @param attributeType AttributeType object
          * @exception ArgumentException duplicate attribute name/type code
          */
+
         public void AddAttributeType(AttributeType attributeType)
         {
             if (attributeType == null)
                 throw new ArgumentException("attribute type must not be null");
 
-            var vendorId = attributeType.VendorId;
-            var typeCode = attributeType.TypeCode;
+            int vendorId = attributeType.VendorId;
+            int typeCode = attributeType.TypeCode;
             String attributeName = attributeType.Name;
 
             if (attributesByName.ContainsKey(attributeName))
                 throw new ArgumentException("duplicate attribute name: " + attributeName);
 
             Dictionary<int, AttributeType> vendorAttributes;
-            if (attributesByCode.ContainsKey(vendorId))
+            if (!attributesByCode.ContainsKey(vendorId))
             {
                 vendorAttributes = new Dictionary<int, AttributeType>();
                 attributesByCode.Add(vendorId, vendorAttributes);
@@ -141,9 +153,6 @@ namespace TinyRadius.Net.Dictionaries
             vendorAttributes.Add(typeCode, attributeType);
         }
 
-        private Dictionary<int, string> vendorsByCode = new Dictionary<int, string>();   // <Integer, String>
-        private Dictionary<int, Dictionary<int, AttributeType>> attributesByCode = new Dictionary<int, Dictionary<int, AttributeType>>();// <Integer, <Integer, AttributeType>>
-        private Dictionary<String, AttributeType> attributesByName = new Dictionary<string, AttributeType>();	// <String, AttributeType>
-
+        #endregion
     }
 }

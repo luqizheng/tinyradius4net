@@ -1,9 +1,15 @@
 E:\TinyRadius.Net\ClassLibrary1\ClassLibrary1\obj\Debug\ResolveAssemblyReference.cache
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
-F:\Radius.net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.dll
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.pdb
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\bin\Debug\log4net.dll
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\bin\Debug\log4net.xml
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.dll
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.pdb
+F:\Radius.net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.dll
+F:\Radius.net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.pdb
+F:\Radius.net\Src\TinyRadius.Net.Core\bin\Debug\log4net.dll
+F:\Radius.net\Src\TinyRadius.Net.Core\bin\Debug\log4net.xml
+F:\Radius.net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
+F:\Radius.net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.dll
+F:\Radius.net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.pdb
