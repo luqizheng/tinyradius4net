@@ -27,19 +27,12 @@ namespace TinyRadius.Net.Dictionaries
          */
         private DefaultDictionary()
         {
-            try
-            {
-                var stream = typeof(DefaultDictionary).Assembly.GetManifestResourceStream(DictionaryResource);
-
-                DictionaryParser.ParseDictionary(stream, Instance);
-            }
-            catch (Exception e)
-            {
-                throw new NotImplementedException("default dictionary unavailable", e);
-            }
+            const string dictionaryResource = "TinyRadius.Net.Dictionaries.default_dictionary";
+            var stream = typeof(DefaultDictionary).Assembly.GetManifestResourceStream(dictionaryResource);
+            DictionaryParser.ParseDictionary(stream, this);
         }
 
-        private const string DictionaryResource = "TinyRadius.Net/Dictionaries/default_dictionary";
+
 
         /**
          * Creates the singleton instance of this object

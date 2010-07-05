@@ -17,12 +17,12 @@ namespace TinyRadius.Net.Dictionaries
         /// @return dictionary object
         /// @throws IOException
         /// </summary>
-        public static IDictionary ParseDictionary(Stream source)
-        {
-            IWritableDictionary d = new MemoryDictionary();
-            ParseDictionary(source, d);
-            return d;
-        }
+        //public static IDictionary ParseDictionary(Stream source)
+        //{
+        //    IWritableDictionary d = new MemoryDictionary();
+        //    ParseDictionary(source, d);
+        //    return d;
+        //}
 
         /// <summary>
         /// Parses the dictionary from the specified InputStream.
@@ -47,7 +47,7 @@ namespace TinyRadius.Net.Dictionaries
                     continue;
 
                 // tokenize line by whitespace
-                string[] tok = line.Split('\t');
+                string[] tok = System.Text.RegularExpressions.Regex.Split(line, "[\\t ]+");
                 String lineType = tok[0].ToUpper();
                 switch (lineType)
                 {
@@ -88,7 +88,7 @@ namespace TinyRadius.Net.Dictionaries
             String typeStr = tok[3];
 
             // translate type to class
-            Type type = code == VendorSpecificAttribute.VENDOR_SPECIFIC ? typeof (VendorSpecificAttribute) : GetAttributeTypeClass(code, typeStr);
+            Type type = code == VendorSpecificAttribute.VENDOR_SPECIFIC ? typeof(VendorSpecificAttribute) : GetAttributeTypeClass(code, typeStr);
 
             // create and cache object
             dictionary.AddAttributeType(new AttributeType(code, name, type));
@@ -99,17 +99,24 @@ namespace TinyRadius.Net.Dictionaries
         /// </summary>
         private static void ParseValueLine(IWritableDictionary dictionary, string[] tok, int lineNum)
         {
-            if (tok.Length != 4)
-                throw new IOException("syntax error on line " + lineNum);
+            try
+            {
+                if (tok.Length != 4)
+                    throw new IOException("expect 4 columns but actual is " + tok.Length);
 
-            String typeName = tok[1].Trim();
-            String enumName = tok[2].Trim();
-            String valStr = tok[3].Trim();
+                String typeName = tok[1].Trim();
+                String enumName = tok[2].Trim();
+                String valStr = tok[3].Trim();
 
-            AttributeType at = dictionary.GetAttributeTypeByName(typeName);
-            if (at == null)
-                throw new IOException("unknown attribute type: " + typeName + ", line: " + lineNum);
-            at.AddEnumerationValue(Convert.ToInt32(valStr), enumName);
+                AttributeType at = dictionary.GetAttributeTypeByName(typeName);
+                if (at == null)
+                    throw new IOException("unknown attribute type: " + typeName + ", line: " + lineNum);
+                at.AddEnumerationValue(Convert.ToInt32(valStr), enumName);
+            }
+            catch (Exception ex)
+            {
+                throw new IOException("syntax error on line" + lineNum, ex);
+            }
         }
 
         /// <summary>
@@ -173,22 +180,22 @@ namespace TinyRadius.Net.Dictionaries
         /// </summary>
         private static Type GetAttributeTypeClass(int attributeType, String typeStr)
         {
-            Type type = typeof (RadiusAttribute);
+            Type type = typeof(RadiusAttribute);
             typeStr = typeStr.ToLower();
             switch (typeStr)
             {
                 case "string":
-                    type = typeof (StringAttribute);
+                    type = typeof(StringAttribute);
                     break;
                 case "octets":
-                    type = typeof (RadiusAttribute);
+                    type = typeof(RadiusAttribute);
                     break;
                 case "date":
                 case "integer":
-                    type = typeof (IntegerAttribute);
+                    type = typeof(IntegerAttribute);
                     break;
                 case "ipaddr":
-                    type = typeof (IpAttribute);
+                    type = typeof(IpAttribute);
                     break;
             }
             return type;

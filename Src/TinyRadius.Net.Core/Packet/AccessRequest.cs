@@ -143,7 +143,6 @@ namespace TinyRadius.Net.Packet
 
         /// <summary>
         ///Decrypts the User-Password attribute.
-        ///@see TinyRadius.packet.RadiusPacket#decodeRequestAttributes(java.lang.String)
         /// </summary>
         protected override void DecodeRequestAttributes(String sharedSecret)
         {

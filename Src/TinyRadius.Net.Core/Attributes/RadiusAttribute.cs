@@ -49,7 +49,7 @@ namespace TinyRadius.Net.Attributes
             {
                 if (value == null)
                     throw new ArgumentNullException("Value", "attribute data is null");
-                this._Data = value;
+                _Data = value;
             }
         }
 
@@ -64,7 +64,7 @@ namespace TinyRadius.Net.Attributes
             {
                 if (value < 0 || value > 255)
                     throw new ArgumentException("attribute type invalid: " + value);
-                this.attributeType = value;
+                attributeType = value;
             }
         }
 
@@ -87,7 +87,7 @@ namespace TinyRadius.Net.Attributes
         public int VendorId
         {
             get { return vendorId; }
-            set { this.vendorId = value; }
+            set { vendorId = value; }
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace TinyRadius.Net.Attributes
         public virtual IWritableDictionary Dictionary
         {
             get { return dictionary; }
-            set { this.dictionary = value; }
+            set { dictionary = value; }
         }
 
         /// <summary>
@@ -108,12 +108,12 @@ namespace TinyRadius.Net.Attributes
         {
             if (Type == -1)
                 throw new ArgumentException("Type type not set");
-            if (this.Data == null)
+            if (Data == null)
                 throw new ArgumentNullException("Data", "attribute data not set");
 
             var attr = new byte[2 + _Data.Length];
-            attr[0] = (byte)Type;
-            attr[1] = (byte)(2 + _Data.Length);
+            attr[0] = (byte) Type;
+            attr[1] = (byte) (2 + _Data.Length);
             Array.Copy(_Data, 0, attr, 2, _Data.Length);
             return attr;
         }
@@ -187,7 +187,7 @@ namespace TinyRadius.Net.Attributes
             {
                 try
                 {
-                    attribute = (RadiusAttribute)Activator.CreateInstance(at.Class);
+                    attribute = (RadiusAttribute) Activator.CreateInstance(at.Class);
                 }
                 catch (Exception e)
                 {
