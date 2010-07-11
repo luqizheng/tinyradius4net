@@ -198,7 +198,7 @@ namespace TinyRadius.Net.Proxy
             }
 
             // retrieve client
-            RadiusEndpoint client = proxyConnection.getRadiusClient();
+            RadiusEndpoint client = proxyConnection.RadiusClient;
             if (logger.IsInfoEnabled)
             {
                 logger.Info("received Proxy packet: " + packet);
@@ -211,10 +211,10 @@ namespace TinyRadius.Net.Proxy
 
             // re-encode answer packet with authenticator of the original packet
             var answer = new RadiusPacket(packet.Type, packet.Identifier, packet.Attributes);
-            byte[] datagram = MakeDatagramPacket(answer, client.SharedSecret, proxyConnection.getPacket());
+            byte[] datagram = MakeDatagramPacket(answer, client.SharedSecret, proxyConnection.Packet);
 
             // send back using correct socket
-            var socket = proxyConnection.getPort() == AuthPort ? GetAuthSocket() : GetAcctSocket();
+            var socket = proxyConnection.Port == AuthPort ? GetAuthSocket() : GetAcctSocket();
             socket.Send(datagram, datagram.Length, remote);
         }
 
@@ -243,7 +243,7 @@ namespace TinyRadius.Net.Proxy
             // get server address
             //IPAddress serverAddress = proxyConnection.getRadiusServer().EndpointAddress.Address;
             //int serverPort = proxyConnection.getRadiusServer().EndpointAddress.Port;
-            String serverSecret = proxyConnection.getRadiusServer().SharedSecret;
+            String serverSecret = proxyConnection.RadiusServer.SharedSecret;
 
             // save request authenticator (will be calculated new)
             byte[] auth = packet.Authenticator;

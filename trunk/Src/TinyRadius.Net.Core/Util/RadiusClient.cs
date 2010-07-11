@@ -26,9 +26,9 @@ namespace TinyRadius.Net.Util
          */
 
         private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusClient));
-        private int acctPort = 1813;
-        private int authPort = 1812;
-        private String hostName;
+        private int _acctPort = 1813;
+        private int _authPort = 1812;
+        private String _hostName;
         private int retryCount = 3;
         private String sharedSecret;
         private Socket socket;
@@ -55,7 +55,7 @@ namespace TinyRadius.Net.Util
             {
                 if (value < 1 || value > 65535)
                     throw new ArgumentException("bad port number");
-                authPort = value;
+                _authPort = value;
             }
         }
 
@@ -66,12 +66,12 @@ namespace TinyRadius.Net.Util
 
         public string HostName
         {
-            get { return hostName; }
+            get { return _hostName; }
             set
             {
                 if (string.IsNullOrEmpty(value))
                     throw new ArgumentException("host name must not be empty");
-                hostName = value;
+                _hostName = value;
             }
         }
 
@@ -98,9 +98,9 @@ namespace TinyRadius.Net.Util
             {
                 if (value < 1 || value > 65535)
                     throw new ArgumentException("bad port number");
-                acctPort = value;
+                _acctPort = value;
             }
-            get { return acctPort; }
+            get { return _acctPort; }
         }
 
         /**
@@ -190,24 +190,14 @@ namespace TinyRadius.Net.Util
 
         public int GetAuthPort()
         {
-            return authPort;
+            return _authPort;
         }
-
-        /**
-         * Sets the auth port of the Radius server.
-         * @param authPort auth port, 1-65535
-         */
-
-        /**
-         * Sets the host name of the Radius server.
-         * @param hostName host name
-         */
+   
 
         /**
          * Returns the retry count for failed transmissions.
          * @return retry count
          */
-
         public int GetRetryCount()
         {
             return retryCount;
@@ -242,7 +232,7 @@ namespace TinyRadius.Net.Util
 
         public void SetSharedSecret(String sharedSecret)
         {
-            if (sharedSecret == null || sharedSecret.Length == 0)
+            if (string.IsNullOrEmpty(sharedSecret))
                 throw new ArgumentException("shared secret must not be empty");
             this.sharedSecret = sharedSecret;
         }
@@ -276,7 +266,7 @@ namespace TinyRadius.Net.Util
         public RadiusPacket Communicate(RadiusPacket request, int port)
         {
             var packetIn = new byte[RadiusPacket.MaxPacketLength];
-            byte[] packetOut = makeDatagramPacket(request);
+            byte[] packetOut = MakeDatagramPacket(request);
 
             Socket socket = Socket;
             for (int i = 1; i <= GetRetryCount(); i++)
@@ -352,7 +342,7 @@ namespace TinyRadius.Net.Util
          * @throws IOException
          */
 
-        protected byte[] makeDatagramPacket(RadiusPacket packet)
+        protected byte[] MakeDatagramPacket(RadiusPacket packet)
         {
             var bos = new MemoryStream();
             packet.EncodeRequestPacket(bos, GetSharedSecret());
@@ -370,14 +360,14 @@ namespace TinyRadius.Net.Util
 
         protected RadiusPacket MakeRadiusPacket(byte[] data, RadiusPacket request)
         {
-            var @in = new MemoryStream(data);
+            var memoryStream = new MemoryStream(data);
             try
             {
-                return RadiusPacket.DecodeResponsePacket(@in, GetSharedSecret(), request);
+                return RadiusPacket.DecodeResponsePacket(memoryStream, GetSharedSecret(), request);
             }
             finally
             {
-                @in.Dispose();
+                memoryStream.Dispose();
             }
         }
     }

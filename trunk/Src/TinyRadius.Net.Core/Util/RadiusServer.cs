@@ -88,7 +88,7 @@ namespace TinyRadius.Net.Util
             set
             {
                 if (value < 1 || value > 65535)
-                    throw new ArgumentException("value", "bad port number");
+                    throw new ArgumentOutOfRangeException("value", "bad port number");
                 _acctPort = value;
                 _acctSocket = null;
             }
@@ -175,55 +175,54 @@ namespace TinyRadius.Net.Util
         /// </summary>
         public virtual void Start(bool listenAuth, bool listenAcct)
         {
-
             if (listenAuth)
             {
                 ThreadPool.QueueUserWorkItem(delegate
-                 {
-                     //setName("Radius Auth Listener");
-                     try
-                     {
-                         Logger.Info("starting RadiusAuthListener on port " +
-                                     AuthPort);
-                         ListenAuth();
-                         Logger.Info("RadiusAuthListener is being terminated");
-                     }
-                     catch (Exception e)
-                     {
-                         Logger.Fatal("auth thread stopped by exception", e);
-                         throw e;
-                     }
-                     finally
-                     {
-                         _authSocket.Close();
-                         Logger.Debug("auth socket closed");
-                     }
-                 });
+                                                 {
+                                                     //setName("Radius Auth Listener");
+                                                     try
+                                                     {
+                                                         Logger.Info("starting RadiusAuthListener on port " +
+                                                                     AuthPort);
+                                                         ListenAuth();
+                                                         Logger.Info("RadiusAuthListener is being terminated");
+                                                     }
+                                                     catch (Exception e)
+                                                     {
+                                                         Logger.Fatal("auth thread stopped by exception", e);
+                                                         throw;
+                                                     }
+                                                     finally
+                                                     {
+                                                         _authSocket.Close();
+                                                         Logger.Debug("auth socket closed");
+                                                     }
+                                                 });
             }
 
             if (listenAcct)
             {
                 ThreadPool.QueueUserWorkItem(delegate
-                     {
-                         //setName("Radius Acct Listener");
-                         try
-                         {
-                             Logger.Info("starting RadiusAcctListener on port " +
-                                         AcctPort);
-                             ListenAcct();
-                             Logger.Info("RadiusAcctListener is being terminated");
-                         }
-                         catch (Exception e)
-                         {
-                             Logger.Fatal("acct thread stopped by exception", e);
-                             throw e;
-                         }
-                         finally
-                         {
-                             _acctSocket.Close();
-                             Logger.Debug("acct socket closed");
-                         }
-                     });
+                                                 {
+                                                     //setName("Radius Acct Listener");
+                                                     try
+                                                     {
+                                                         Logger.Info("starting RadiusAcctListener on port " +
+                                                                     AcctPort);
+                                                         ListenAcct();
+                                                         Logger.Info("RadiusAcctListener is being terminated");
+                                                     }
+                                                     catch (Exception e)
+                                                     {
+                                                         Logger.Fatal("acct thread stopped by exception", e);
+                                                         throw e;
+                                                     }
+                                                     finally
+                                                     {
+                                                         _acctSocket.Close();
+                                                         Logger.Debug("acct socket closed");
+                                                     }
+                                                 });
             }
         }
 
@@ -234,9 +233,16 @@ namespace TinyRadius.Net.Util
         {
             Logger.Info("stopping Radius server");
             if (_authSocket != null)
-                _authSocket.Close();
+            {
+                lock (_authSocket)
+                {
+                    _authSocket.Close();
+                }
+            }
             if (_acctSocket != null)
+            {
                 _acctSocket.Close();
+            }
         }
 
         /// <summary>
@@ -291,15 +297,13 @@ namespace TinyRadius.Net.Util
         /// </summary>
         protected void Listen(UdpClient s)
         {
-
             Logger.Info("about to call socket.receive()");
             while (true)
             {
                 var point = new IPEndPoint(IPAddress.Any, 0);
-                var data = s.Receive(ref point);
-                this.Receive(data, s, point);
+                byte[] data = s.Receive(ref point);
+                Receive(data, s, point);
             }
-
         }
 
         private void Receive(byte[] data, UdpClient socket, IPEndPoint remoteAddress)
@@ -307,7 +311,7 @@ namespace TinyRadius.Net.Util
             if (Logger.IsDebugEnabled)
                 Logger.Debug("receive buffer size = " + data.Length);
 
-            var localAddress = socket.Client.LocalEndPoint;
+            EndPoint localAddress = socket.Client.LocalEndPoint;
             // check client
             String secret = GetSharedSecret(remoteAddress);
             if (secret == null)
@@ -381,6 +385,7 @@ namespace TinyRadius.Net.Util
 
             return response;
         }
+
         /// <summary>
         /// Returns a socket bound to the auth port.
         /// @return socket
@@ -390,12 +395,10 @@ namespace TinyRadius.Net.Util
         {
             if (_authSocket == null)
             {
-
                 IPEndPoint ep = ListenAddress == null
                                     ? new IPEndPoint(IPAddress.Any, AuthPort)
                                     : new IPEndPoint(ListenAddress, AuthPort);
                 _authSocket = new UdpClient(ep);
-
             }
             return _authSocket;
         }
@@ -409,7 +412,9 @@ namespace TinyRadius.Net.Util
         {
             if (_acctSocket == null)
             {
-                IPEndPoint ep = ListenAddress == null ? new IPEndPoint(IPAddress.Any, AcctPort) : new IPEndPoint(ListenAddress, AcctPort);
+                IPEndPoint ep = ListenAddress == null
+                                    ? new IPEndPoint(IPAddress.Any, AcctPort)
+                                    : new IPEndPoint(ListenAddress, AcctPort);
                 _acctSocket = new UdpClient(ep);
             }
             return _acctSocket;
@@ -472,8 +477,8 @@ namespace TinyRadius.Net.Util
 
             lock (_receivedPackets)
             {
-                int length = _receivedPackets.Count;
-                for (int i = length - 1; i >= 0; i++)
+
+                for (int i = _receivedPackets.Count - 1; i >= 0; i--)
                 {
                     ReceivedPacket p = _receivedPackets[i];
                     if (p.ReceiveTime < intervalStart)
@@ -531,6 +536,7 @@ namespace TinyRadius.Net.Util
         /// Authenticator of the received packet.
         /// </summary>
         public byte[] Authenticator;
+
         /// <summary>
         /// 
         /// </summary>
@@ -541,6 +547,4 @@ namespace TinyRadius.Net.Util
         /// </summary>
         public DateTime ReceiveTime;
     }
-
-
 }
