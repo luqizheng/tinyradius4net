@@ -26,24 +26,48 @@ namespace TinyRadiusServer {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0")]
-        public string ListentIP {
+        public string AuthListentIP {
             get {
-                return ((string)(this["ListentIP"]));
+                return ((string)(this["AuthListentIP"]));
             }
             set {
-                this["ListentIP"] = value;
+                this["AuthListentIP"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1812")]
-        public int Port {
+        public int AuthPort {
             get {
-                return ((int)(this["Port"]));
+                return ((int)(this["AuthPort"]));
             }
             set {
-                this["Port"] = value;
+                this["AuthPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.0.0.0")]
+        public string AccountListentIP {
+            get {
+                return ((string)(this["AccountListentIP"]));
+            }
+            set {
+                this["AccountListentIP"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1813")]
+        public int AccountPort {
+            get {
+                return ((int)(this["AccountPort"]));
+            }
+            set {
+                this["AccountPort"] = value;
             }
         }
     }

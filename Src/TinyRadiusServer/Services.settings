@@ -2,11 +2,17 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TinyRadiusServer" GeneratedClassName="Services">
   <Profiles />
   <Settings>
-    <Setting Name="ListentIP" Type="System.String" Scope="User">
+    <Setting Name="AuthListentIP" Type="System.String" Scope="User">
       <Value Profile="(Default)">0.0.0.0</Value>
     </Setting>
-    <Setting Name="Port" Type="System.Int32" Scope="User">
+    <Setting Name="AuthPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1812</Value>
+    </Setting>
+    <Setting Name="AccountListentIP" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0.0.0.0</Value>
+    </Setting>
+    <Setting Name="AccountPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1813</Value>
     </Setting>
   </Settings>
 </SettingsFile>
