@@ -6,7 +6,6 @@ using System.Net.Sockets;
 using System.Threading;
 using log4net;
 using TinyRadius.Net.Attributes;
-using TinyRadius.Net.packet;
 using TinyRadius.Net.Packet;
 
 namespace TinyRadius.Net.Util
@@ -25,7 +24,7 @@ namespace TinyRadius.Net.Util
         /// @param client IP address and port number of client
         /// @return shared secret or null
         /// </summary>
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(RadiusServer));
+        private static readonly ILog Logger = LogManager.GetLogger(typeof (RadiusServer));
 
         private readonly List<ReceivedPacket> _receivedPackets = new List<ReceivedPacket>();
         private int _acctPort = 1813;
@@ -187,11 +186,11 @@ namespace TinyRadius.Net.Util
                                                          ListenAuth();
                                                          Logger.Info("RadiusAuthListener is being terminated");
                                                      }
-                                                     catch (Exception e)
-                                                     {
-                                                         Logger.Fatal("auth thread stopped by exception", e);
-                                                         throw;
-                                                     }
+                                                     //catch (Exception e)
+                                                     //{
+                                                     //    Logger.Fatal("auth thread stopped by exception", e);
+                                                     //    throw;
+                                                     //}
                                                      finally
                                                      {
                                                          _authSocket.Close();
@@ -212,11 +211,11 @@ namespace TinyRadius.Net.Util
                                                          ListenAcct();
                                                          Logger.Info("RadiusAcctListener is being terminated");
                                                      }
-                                                     catch (Exception e)
-                                                     {
-                                                         Logger.Fatal("acct thread stopped by exception", e);
-                                                         throw e;
-                                                     }
+                                                     //catch (Exception e)
+                                                     //{
+                                                     //    Logger.Fatal("acct thread stopped by exception", e);
+                                                     //    throw e;
+                                                     //}
                                                      finally
                                                      {
                                                          _acctSocket.Close();
@@ -329,7 +328,7 @@ namespace TinyRadius.Net.Util
 
             // handle packet
             Logger.Debug("about to call RadiusServer.handlePacket()");
-            RadiusPacket response = HandlePacket((IPEndPoint)localAddress, remoteAddress, request, secret);
+            RadiusPacket response = HandlePacket((IPEndPoint) localAddress, remoteAddress, request, secret);
 
             // send response
             if (response != null)
@@ -362,16 +361,16 @@ namespace TinyRadius.Net.Util
                 if (localAddress.Port == AuthPort)
                 {
                     // handle packets on auth port
-                    if (typeof(AccessRequest).IsInstanceOfType(request))
-                        response = AccessRequestReceived((AccessRequest)request, remoteAddress);
+                    if (typeof (AccessRequest).IsInstanceOfType(request))
+                        response = AccessRequestReceived((AccessRequest) request, remoteAddress);
                     else
                         Logger.Error("unknown Radius packet type: " + request.Type);
                 }
                 else if (localAddress.Port == AcctPort)
                 {
                     // handle packets on acct port
-                    if (typeof(AccountingRequest).IsInstanceOfType(request))
-                        response = AccountingRequestReceived((AccountingRequest)request, remoteAddress);
+                    if (typeof (AccountingRequest).IsInstanceOfType(request))
+                        response = AccountingRequestReceived((AccountingRequest) request, remoteAddress);
                     else
                         Logger.Error("unknown Radius packet type: " + request.Type);
                 }
@@ -477,7 +476,6 @@ namespace TinyRadius.Net.Util
 
             lock (_receivedPackets)
             {
-
                 for (int i = _receivedPackets.Count - 1; i >= 0; i--)
                 {
                     ReceivedPacket p = _receivedPackets[i];

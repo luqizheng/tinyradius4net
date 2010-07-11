@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using TinyRadius.Net.Attributes;
 using TinyRadius.Net.Dictionaries;
-using TinyRadius.Net.packet;
+using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Packet
@@ -332,7 +332,7 @@ namespace TinyRadius.Net.Packet
                 throw new ArgumentException("attribute type out of bounds");
 
             var removedInt = new List<int>();
-            for (int i = _attributes.Count; i > 0; i--)
+            for (int i = _attributes.Count - 1; i > 0; i--)
             {
                 if (_attributes[i].Type == type)
                     removedInt.Add(i);
@@ -748,7 +748,9 @@ namespace TinyRadius.Net.Packet
 
             outputStream.WriteByte(Convert.ToByte(Type));
             outputStream.WriteByte(Convert.ToByte(Identifier));
-            outputStream.WriteByte(Convert.ToByte(packetLength));
+            var lengthBytes = BitConverter.GetBytes(Convert.ToInt16(packetLength));
+            Array.Reverse(lengthBytes);
+            outputStream.Write(lengthBytes, 0, lengthBytes.Length);
             byte[] authen = Authenticator;
             outputStream.Write(authen, 0, authen.Length);
             outputStream.Write(attributes, 0, attributes.Length);
@@ -828,14 +830,15 @@ namespace TinyRadius.Net.Packet
         ///  creates an appropiate RadiusPacket descendant object.
         ///  Reads in all attributes and returns the object. 
         ///  Decodes the encrypted fields and attributes of the packet.
-        ///  @param dictionary dictionary to use for attributes
-        ///  @param sharedSecret shared secret to be used to decode this packet
-        ///  @param request Radius request packet if this is a response packet to be 
-        ///  decoded, null if this is a request packet to be decoded
-        ///  @return new RadiusPacket object
         ///  @exception IOException if an IO error occurred
         ///  @exception RadiusException if the Radius packet is malformed
         /// </summary>
+        /// <param name="dictionary">dictionary to use for attributes</param>
+        /// <param name="inputStream"></param>
+        /// <param name="request">Radius request packet if this is a response packet to be 
+        ///  decoded, null if this is a request packet to be decoded</param>
+        /// <param name="sharedSecret">shared secret to be used to decode this packet</param>
+        /// <returns>RadiusPacket object</returns>
         protected static RadiusPacket DecodePacket(IWritableDictionary dictionary, Stream inputStream,
                                                    String sharedSecret,
                                                    RadiusPacket request)

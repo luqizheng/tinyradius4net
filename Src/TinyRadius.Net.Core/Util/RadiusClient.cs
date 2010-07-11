@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using log4net;
-using TinyRadius.Net.packet;
 using TinyRadius.Net.Packet;
 
 namespace TinyRadius.Net.Util
@@ -25,28 +25,19 @@ namespace TinyRadius.Net.Util
          * @param sharedSecret shared secret used to secure the communication
          */
 
-        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusClient));
+        private static readonly ILog logger = LogManager.GetLogger(typeof(RadiusClient));
         private int _acctPort = 1813;
         private int _authPort = 1812;
         private String _hostName;
-        private int retryCount = 3;
-        private String sharedSecret;
-        private Socket socket;
+        private int _retryCount = 3;
+        private String _sharedSecret;
+        private Socket _socket;
         private int socketTimeout = 3000;
 
-        public RadiusClient(String hostName, String sharedSecret)
+        public RadiusClient(IPAddress hostName, String sharedSecret)
         {
-            HostName = hostName;
-            SetSharedSecret(sharedSecret);
-        }
-
-        /**
-         * Constructs a Radius client for the given Radius endpoint.
-         * @param client Radius endpoint
-         */
-
-        public RadiusClient(RadiusEndpoint client)
-        {
+            Ip = hostName;
+            SharedSecret = sharedSecret;
         }
 
         public int AuthPort
@@ -57,6 +48,7 @@ namespace TinyRadius.Net.Util
                     throw new ArgumentException("bad port number");
                 _authPort = value;
             }
+            get { return _authPort; }
         }
 
         /**
@@ -64,16 +56,7 @@ namespace TinyRadius.Net.Util
          * @return host name
          */
 
-        public string HostName
-        {
-            get { return _hostName; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("host name must not be empty");
-                _hostName = value;
-            }
-        }
+        public IPAddress Ip { get; set; }
 
         public int SocketTimeout
         {
@@ -82,9 +65,10 @@ namespace TinyRadius.Net.Util
                 if (value < 1)
                     throw new ArgumentException("socket tiemout must be positive");
                 socketTimeout = value;
-                if (socket != null)
-                    socket.ReceiveTimeout = value;
+                if (_socket != null)
+                    _socket.ReceiveTimeout = value;
             }
+            get { return socketTimeout; }
         }
 
         /**
@@ -101,6 +85,43 @@ namespace TinyRadius.Net.Util
                 _acctPort = value;
             }
             get { return _acctPort; }
+        }
+
+        public int RetryCount
+        {
+            set
+            {
+                if (value < 1)
+                    throw new ArgumentException("retry count must be positive");
+                _retryCount = value;
+            }
+            get { return _retryCount; }
+        }
+
+        /**
+         * Returns the secret shared between server and client.
+         * @return shared secret
+         */
+
+        public string SharedSecret
+        {
+            get { return _sharedSecret; }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw new ArgumentException("shared secret must not be empty");
+                _sharedSecret = value;
+            }
+        }
+
+        protected Socket Socket
+        {
+            get
+            {
+                return _socket ??
+                       (_socket =
+                        new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp) { ReceiveTimeout = SocketTimeout });
+            }
         }
 
         /**
@@ -140,7 +161,7 @@ namespace TinyRadius.Net.Util
                 if (logger.IsInfoEnabled)
                     logger.Info("send Access-Request packet: " + request);
 
-                RadiusPacket response = Communicate(request, GetAuthPort());
+                RadiusPacket response = Communicate(request, AuthPort);
                 if (logger.IsInfoEnabled)
                     logger.Info("received packet: " + response);
 
@@ -179,79 +200,16 @@ namespace TinyRadius.Net.Util
 
         public void Close()
         {
-            if (socket != null)
-                socket.Close();
+            if (_socket != null)
+                _socket.Close();
         }
 
-        /**
-         * Returns the Radius server auth port.
-         * @return auth port
-         */
-
-        public int GetAuthPort()
-        {
-            return _authPort;
-        }
-   
-
-        /**
-         * Returns the retry count for failed transmissions.
-         * @return retry count
-         */
-        public int GetRetryCount()
-        {
-            return retryCount;
-        }
 
         /**
          * Sets the retry count for failed transmissions.
          * @param retryCount retry count, >0
          */
 
-        public void SetRetryCount(int retryCount)
-        {
-            if (retryCount < 1)
-                throw new ArgumentException("retry count must be positive");
-            this.retryCount = retryCount;
-        }
-
-        /**
-         * Returns the secret shared between server and client.
-         * @return shared secret
-         */
-
-        public String GetSharedSecret()
-        {
-            return sharedSecret;
-        }
-
-        /**
-         * Sets the secret shared between server and client.
-         * @param sharedSecret shared secret
-         */
-
-        public void SetSharedSecret(String sharedSecret)
-        {
-            if (string.IsNullOrEmpty(sharedSecret))
-                throw new ArgumentException("shared secret must not be empty");
-            this.sharedSecret = sharedSecret;
-        }
-
-        /**
-         * Returns the socket timeout.
-         * @return socket timeout, ms
-         */
-
-        public int GetSocketTimeout()
-        {
-            return socketTimeout;
-        }
-
-        /**
-         * Sets the socket timeout
-         * @param socketTimeout timeout, ms, >0
-         * @throws SocketException
-         */
 
         /**
          * Sends a Radius packet to the server and awaits an answer.
@@ -269,17 +227,19 @@ namespace TinyRadius.Net.Util
             byte[] packetOut = MakeDatagramPacket(request);
 
             Socket socket = Socket;
-            for (int i = 1; i <= GetRetryCount(); i++)
+            for (int i = 1; i <= RetryCount; i++)
             {
                 try
                 {
-                    socket.Send(packetOut);
+                    var endPoint = new IPEndPoint(Ip, port);
+
+                    socket.SendTo(packetOut, endPoint);
                     socket.Receive(packetIn);
                     return MakeRadiusPacket(packetIn, request);
                 }
                 catch (IOException ioex)
                 {
-                    if (i == GetRetryCount())
+                    if (i == RetryCount)
                     {
                         if (logger.IsErrorEnabled)
                         {
@@ -310,7 +270,7 @@ namespace TinyRadius.Net.Util
 
         public static RadiusPacket Communicate(RadiusEndpoint remoteServer, RadiusPacket request)
         {
-            var rc = new RadiusClient(remoteServer);
+            var rc = new RadiusClient(remoteServer.EndpointAddress.Address, remoteServer.SharedSecret);
             return rc.Communicate(request, remoteServer.EndpointAddress.Port);
         }
 
@@ -320,19 +280,6 @@ namespace TinyRadius.Net.Util
          * @return local socket
          * @throws SocketException
          */
-
-        protected Socket Socket
-        {
-            get
-            {
-                if (socket == null)
-                {
-                    socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP)
-                                 {ReceiveTimeout = GetSocketTimeout()};
-                }
-                return socket;
-            }
-        }
 
         /**
          * Creates a datagram packet from a RadiusPacket to be send. 
@@ -344,11 +291,15 @@ namespace TinyRadius.Net.Util
 
         protected byte[] MakeDatagramPacket(RadiusPacket packet)
         {
-            var bos = new MemoryStream();
-            packet.EncodeRequestPacket(bos, GetSharedSecret());
-            byte[] data = bos.ToArray();
-            bos.Dispose();
-            return data;
+            using (var bos = new MemoryStream())
+            {
+
+                packet.EncodeRequestPacket(bos, SharedSecret);
+                byte[] data = bos.ToArray();
+                bos.Close();
+                bos.Dispose();
+                return data;
+            }
         }
 
         /**
@@ -363,7 +314,7 @@ namespace TinyRadius.Net.Util
             var memoryStream = new MemoryStream(data);
             try
             {
-                return RadiusPacket.DecodeResponsePacket(memoryStream, GetSharedSecret(), request);
+                return RadiusPacket.DecodeResponsePacket(memoryStream, SharedSecret, request);
             }
             finally
             {

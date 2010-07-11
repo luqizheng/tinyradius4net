@@ -36,6 +36,8 @@ namespace TinyRadius.Net.Attributes
             Value = value;
         }
 
+        string _value;
+
         /// <summary>
         /// Returns the string value of this attribute.
         /// @return a string
@@ -49,7 +51,7 @@ namespace TinyRadius.Net.Attributes
                     throw new ArgumentNullException("value", "Value not set");
                 Data = Encoding.UTF8.GetBytes(value);
 
-                base.Value = value;
+                _value = value;
             }
         }
     }

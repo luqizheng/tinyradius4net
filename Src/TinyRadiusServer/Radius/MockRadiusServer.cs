@@ -20,9 +20,9 @@ namespace TinyRadiusServer.Radius
             switch (userName)
             {
                 case "a":
-                    return "A";
+                    return "a";
                 default:
-                    return "A";
+                    return "a";
 
             }
 
