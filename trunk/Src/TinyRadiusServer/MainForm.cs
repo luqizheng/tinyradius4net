@@ -38,6 +38,11 @@ namespace TinyRadiusServer
 
         private void SaveServerSetting_Click(object sender, EventArgs e)
         {
+            SaveListentSetting();
+        }
+
+        private void SaveListentSetting()
+        {
             try
             {
                 //check IP formatter;
@@ -86,6 +91,7 @@ namespace TinyRadiusServer
 
         private void Start_Server(object sender, EventArgs e)
         {
+            SaveListentSetting();
             var btn = (Button)sender;
             if (btn.Tag.ToString() == "Stoped")
             {

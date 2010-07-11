@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
-namespace TinyRadius.Net.packet
+namespace TinyRadius.Net.Packet
 {
     /**
      * CoA packet. Thanks to Michael Krastev.

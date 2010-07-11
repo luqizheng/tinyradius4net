@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using TinyRadius.Net.Attributes;
-using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
-namespace TinyRadius.Net.packet
+namespace TinyRadius.Net.Packet
 {
     /// <summary>
     /// This class represents a Radius packet of the type
@@ -51,7 +50,7 @@ namespace TinyRadius.Net.packet
         /// <summary>
         /// Constructs an Accounting-Request packet to be sent to a Radius server.
         /// @param userName user name
-        /// @param acctStatusType ACCT_STATUS_TYPE_///
+        /// @param acctStatusType ACCT_STATUS_TYPE_
         /// </summary>
         public AccountingRequest(String userName, int acctStatusType)
             : base(AccountingRequest, GetNextPacketIdentifier())
@@ -111,10 +110,7 @@ namespace TinyRadius.Net.packet
             get
             {
                 RadiusAttribute ra = GetAttribute(ACCT_STATUS_TYPE);
-                if (ra == null)
-                    return -1;
-                else
-                    return ((IntegerAttribute)ra).ValueInt;
+                return ra == null ? -1 : ((IntegerAttribute) ra).ValueInt;
             }
         }
 
