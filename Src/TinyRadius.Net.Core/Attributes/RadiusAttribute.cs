@@ -13,17 +13,18 @@ namespace TinyRadius.Net.Attributes
         /// <summary>
         ///  Constructs an empty Radius attribute.
         /// </summary>
-        private byte[] _Data;
+        private byte[] _data;
 
-        private int attributeType = -1;
-        private IWritableDictionary dictionary = DefaultDictionary.GetDefaultDictionary();
-        private int vendorId = -1;
+        private int _attributeType = -1;
+
 
         /// <summary>
         /// 
         /// </summary>
         public RadiusAttribute()
         {
+            VendorId = -1;
+            this.Dictionary = DefaultDictionary.GetDefaultDictionary();
         }
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public RadiusAttribute(int type, byte[] data)
         {
+            VendorId = -1;
             Type = type;
             Data = data;
         }
@@ -44,12 +46,12 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public byte[] Data
         {
-            get { return _Data; }
+            get { return _data; }
             set
             {
                 if (value == null)
                     throw new ArgumentNullException("Value", "attribute data is null");
-                _Data = value;
+                _data = value;
             }
         }
 
@@ -59,12 +61,12 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public int Type
         {
-            get { return attributeType; }
+            get { return _attributeType; }
             set
             {
                 if (value < 0 || value > 255)
                     throw new ArgumentException("attribute type invalid: " + value);
-                attributeType = value;
+                _attributeType = value;
             }
         }
 
@@ -74,7 +76,7 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public virtual string Value
         {
-            set { throw new NotImplementedException("cannot set the value of attribute " + attributeType + " as a string"); }
+            set { throw new NotImplementedException("cannot set the value of attribute " + _attributeType + " as a string"); }
             get { return RadiusUtil.GetHexString(Data); }
         }
 
@@ -84,11 +86,7 @@ namespace TinyRadius.Net.Attributes
         ///  a sub attribute of a Vendor-Specific attribute.
         ///  @return vendor ID
         /// </summary>
-        public int VendorId
-        {
-            get { return vendorId; }
-            set { vendorId = value; }
-        }
+        public int VendorId { get; set; }
 
         /// <summary>
         ///  Returns the dictionary this Radius attribute uses.
@@ -96,8 +94,8 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public virtual IWritableDictionary Dictionary
         {
-            get { return dictionary; }
-            set { dictionary = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -109,12 +107,12 @@ namespace TinyRadius.Net.Attributes
             if (Type == -1)
                 throw new ArgumentException("Type type not set");
             if (Data == null)
-                throw new ArgumentNullException("Data", "attribute data not set");
+                throw new ArgumentException("attribute data not set");
 
-            var attr = new byte[2 + _Data.Length];
-            attr[0] = (byte) Type;
-            attr[1] = (byte) (2 + _Data.Length);
-            Array.Copy(_Data, 0, attr, 2, _Data.Length);
+            var attr = new byte[2 + _data.Length];
+            attr[0] = (byte)Type;
+            attr[1] = (byte)(2 + _data.Length);
+            Array.Copy(_data, 0, attr, 2, _data.Length);
             return attr;
         }
 
@@ -122,10 +120,10 @@ namespace TinyRadius.Net.Attributes
         ///  Reads in this attribute from the passed byte array.
         ///  @param data
         /// </summary>
-        public virtual void ReadAttribute(byte[] data, int offset, int Length)
+        public virtual void ReadAttribute(byte[] data, int offset, int length)
         {
-            if (Length < 2)
-                throw new RadiusException("attribute Length too small: " + Length);
+            if (length < 2)
+                throw new RadiusException("attribute Length too small: " + length);
             int attrType = data[offset] & 0x0ff;
             int attrLen = data[offset + 1] & 0x0ff;
             var attrData = new byte[attrLen - 2];
@@ -164,10 +162,7 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public AttributeType GetAttributeTypeObject()
         {
-            if (VendorId != -1)
-                return dictionary.GetAttributeTypeByCode(VendorId, Type);
-            else
-                return dictionary.GetAttributeTypeByCode(Type);
+            return VendorId != -1 ? Dictionary.GetAttributeTypeByCode(VendorId, Type) : Dictionary.GetAttributeTypeByCode(Type);
         }
 
         /// <summary>
@@ -187,7 +182,7 @@ namespace TinyRadius.Net.Attributes
             {
                 try
                 {
-                    attribute = (RadiusAttribute) Activator.CreateInstance(at.Class);
+                    attribute = (RadiusAttribute)Activator.CreateInstance(at.Class);
                 }
                 catch (Exception e)
                 {

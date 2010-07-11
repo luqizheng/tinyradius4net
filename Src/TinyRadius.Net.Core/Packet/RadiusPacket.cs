@@ -88,10 +88,10 @@ namespace TinyRadius.Net.Packet
         /// <summary>
         ///  Builds a Radius packet with the given type, identifier and
         ///  attributes. 
-        ///  @param type packet type
-        ///  @param identifier packet identifier
-        ///  @param attributes list of RadiusAttribute objects
         /// </summary>
+        /// <param name="attributes">list of RadiusAttribute objects</param>
+        /// <param name="identifier">packet identifier</param>
+        /// <param name="type"> type packet type</param>
         public RadiusPacket(int type, int identifier, IList<RadiusAttribute> attributes)
         {
             Type = type;
@@ -280,7 +280,7 @@ namespace TinyRadius.Net.Packet
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            AttributeType type = Dictionary.GetAttributeTypeByName(typeName);
+            var type = Dictionary.GetAttributeTypeByName(typeName);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '" + typeName + "'");
 
@@ -372,7 +372,7 @@ namespace TinyRadius.Net.Packet
                 RemoveAttributes(typeCode);
                 return;
             }
-          
+
             IList<RadiusAttribute> vendorList = GetVendorAttributes(vendorId);
             int lengthOfVendor = GetVendorAttributes(vendorId).Count;
             for (int i = 0; i < lengthOfVendor; i++)
@@ -427,18 +427,6 @@ namespace TinyRadius.Net.Packet
                          where
                              radius.Type == attributeType && radius.VendorId == vendorId
                          select radius;
-            /*for (Iterator i = vsas.iterator(); i.hasNext(); )
-            {
-                var vsa = (VendorSpecificAttribute)i.next();
-                List sas = vsa.SubAttributes;
-                for (Iterator j = sas.iterator(); j.hasNext(); )
-                {
-                    var attr = (RadiusAttribute)j.next();
-                    if (attr.Type == attributeType &&
-                        attr.VendorId == vendorId)
-                        result.add(attr);
-                }
-            }*/
 
             return result.ToList();
         }
@@ -555,12 +543,7 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public VendorSpecificAttribute GetVendorAttribute(int vendorId)
         {
-            foreach (VendorSpecificAttribute vsa in GetAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC))
-            {
-                if (vsa.ChildVendorId == vendorId)
-                    return vsa;
-            }
-            return null;
+            return GetAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC).Cast<VendorSpecificAttribute>().FirstOrDefault(vsa => vsa.ChildVendorId == vendorId);
         }
 
         /// <summary>
@@ -681,7 +664,7 @@ namespace TinyRadius.Net.Packet
         ///  @param type packet type
         ///  @return RadiusPacket object
         /// </summary>
-        public static RadiusPacket createRadiusPacket(int type)
+        public static RadiusPacket CreateRadiusPacket(int type)
         {
             RadiusPacket rp;
             switch (type)
@@ -901,7 +884,7 @@ namespace TinyRadius.Net.Packet
                 throw new RadiusException("bad packet: attribute Length mismatch");
 
             // create RadiusPacket object; set properties
-            RadiusPacket rp = createRadiusPacket(type);
+            RadiusPacket rp = CreateRadiusPacket(type);
             rp.Type = type;
             rp.Identifier = identifier;
             rp.Authenticator = authenticator;
@@ -976,16 +959,6 @@ namespace TinyRadius.Net.Packet
                 if (authenticator[i] != receivedAuth[i])
                     throw new RadiusException("response authenticator invalid");
         }
-
-        ///// <summary>
-        /////  Returns a MD5 digest.
-        /////  @return MessageDigest object
-        ///// </summary>
-        //protected virtual MD5 GetMd5Digest()
-        //{
-        //    return _md5Digest ?? (_md5Digest = MD5.Create());
-        //}
-
         /// <summary>
         ///  Encodes the attributes of this Radius packet to a byte array.
         ///  @return byte array with encoded attributes
