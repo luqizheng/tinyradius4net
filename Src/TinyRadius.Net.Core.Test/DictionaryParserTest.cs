@@ -1,39 +1,24 @@
-﻿using TinyRadius.Net.Dictionaries;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
+using TinyRadius.Net.Dictionaries;
 
 namespace TinyRadius.Net.Net.Core.Test
 {
-
-
     /// <summary>
     ///This is a test class for DictionaryParserTest and is intended
     ///to contain all DictionaryParserTest Unit Tests
     ///</summary>
-    [TestClass()]
+    [TestClass]
     public class DictionaryParserTest
     {
-
-
-        private TestContext testContextInstance;
-
         /// <summary>
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
+        public TestContext TestContext { get; set; }
 
         #region Additional test attributes
+
         // 
         //You can use the following additional attributes as you write your tests:
         //
@@ -61,23 +46,21 @@ namespace TinyRadius.Net.Net.Core.Test
         //{
         //}
         //
-        #endregion
 
+        #endregion
 
         /// <summary>
         ///A test for ParseDictionary
         ///</summary>
-        [TestMethod()]
+        [TestMethod]
         public void ParseDictionaryTest()
         {
-            
             const string DictionaryResource = "TinyRadius.Net.Dictionaries.default_dictionary";
-            var stream = typeof(DefaultDictionary).Assembly.GetManifestResourceStream(DictionaryResource);
+            Stream stream = typeof (DefaultDictionary).Assembly.GetManifestResourceStream(DictionaryResource);
 
             IWritableDictionary dictionary = new MemoryDictionary();
 
             DictionaryParser.ParseDictionary(stream, dictionary);
-          
         }
     }
 }
