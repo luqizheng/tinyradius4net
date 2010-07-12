@@ -94,7 +94,7 @@ namespace TinyRadius.Net.Attributes
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            AttributeType type = this.Dictionary.GetAttributeTypeByName(name);
+            AttributeType type = Dictionary.GetAttributeTypeByName(name);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '"
                                             + name + "'");

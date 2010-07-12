@@ -20,6 +20,8 @@ namespace TinyRadius.Net.Attributes
          * Constructs an empty string attribute.
          */
 
+        private string _value;
+
         public StringAttribute()
         {
         }
@@ -35,8 +37,6 @@ namespace TinyRadius.Net.Attributes
             Type = type;
             Value = value;
         }
-
-        string _value;
 
         /// <summary>
         /// Returns the string value of this attribute.

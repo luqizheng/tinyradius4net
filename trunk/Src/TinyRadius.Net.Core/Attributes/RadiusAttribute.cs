@@ -10,12 +10,12 @@ namespace TinyRadius.Net.Attributes
     /// </summary>
     public class RadiusAttribute
     {
+        private int _attributeType = -1;
+
         /// <summary>
         ///  Constructs an empty Radius attribute.
         /// </summary>
         private byte[] _data;
-
-        private int _attributeType = -1;
 
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace TinyRadius.Net.Attributes
         public RadiusAttribute()
         {
             VendorId = -1;
-            this.Dictionary = DefaultDictionary.GetDefaultDictionary();
+            Dictionary = DefaultDictionary.GetDefaultDictionary();
         }
 
         /// <summary>
@@ -92,11 +92,7 @@ namespace TinyRadius.Net.Attributes
         ///  Returns the dictionary this Radius attribute uses.
         ///  @return Hashtable instance
         /// </summary>
-        public virtual IWritableDictionary Dictionary
-        {
-            get;
-            set;
-        }
+        public virtual IWritableDictionary Dictionary { get; set; }
 
         /// <summary>
         ///  Returns this attribute encoded as a byte array.
@@ -110,8 +106,8 @@ namespace TinyRadius.Net.Attributes
                 throw new ArgumentException("attribute data not set");
 
             var attr = new byte[2 + _data.Length];
-            attr[0] = (byte)Type;
-            attr[1] = (byte)(2 + _data.Length);
+            attr[0] = (byte) Type;
+            attr[1] = (byte) (2 + _data.Length);
             Array.Copy(_data, 0, attr, 2, _data.Length);
             return attr;
         }
@@ -162,7 +158,9 @@ namespace TinyRadius.Net.Attributes
         /// </summary>
         public AttributeType GetAttributeTypeObject()
         {
-            return VendorId != -1 ? Dictionary.GetAttributeTypeByCode(VendorId, Type) : Dictionary.GetAttributeTypeByCode(Type);
+            return VendorId != -1
+                       ? Dictionary.GetAttributeTypeByCode(VendorId, Type)
+                       : Dictionary.GetAttributeTypeByCode(Type);
         }
 
         /// <summary>
@@ -182,7 +180,7 @@ namespace TinyRadius.Net.Attributes
             {
                 try
                 {
-                    attribute = (RadiusAttribute)Activator.CreateInstance(at.Class);
+                    attribute = (RadiusAttribute) Activator.CreateInstance(at.Class);
                 }
                 catch (Exception e)
                 {

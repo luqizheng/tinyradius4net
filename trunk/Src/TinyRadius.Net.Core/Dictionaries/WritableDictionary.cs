@@ -2,14 +2,13 @@ using System;
 
 namespace TinyRadius.Net.Dictionaries
 {
-
     /**
      * A dictionary that is not read-only. Provides methods
      * to add entries to the dictionary.
      */
+
     public interface IWritableDictionary : IDictionary
     {
-
         /**
          * Adds the given vendor to the dictionary.
          * @param vendorId vendor ID
@@ -22,7 +21,5 @@ namespace TinyRadius.Net.Dictionaries
          * @param attributeType AttributeType object
          */
         void AddAttributeType(AttributeType attributeType);
-
     }
-
 }

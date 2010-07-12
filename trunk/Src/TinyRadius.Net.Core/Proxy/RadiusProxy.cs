@@ -26,7 +26,7 @@ namespace TinyRadius.Net.Proxy
          * Starts the Radius Proxy. Listens on the Proxy port.
          */
 
-        private static readonly ILog logger = LogManager.GetLogger(typeof(RadiusProxy));
+        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusProxy));
         private readonly Hashtable proxyConnections = new Hashtable();
         private int proxyIndex = 1;
         private int proxyPort = 1814;
@@ -132,7 +132,9 @@ namespace TinyRadius.Net.Proxy
         {
             if (proxySocket == null)
             {
-                IPEndPoint ep = ListenAddress == null ? new IPEndPoint(IPAddress.Any, ProxyPort) : new IPEndPoint(ListenAddress, ProxyPort);
+                IPEndPoint ep = ListenAddress == null
+                                    ? new IPEndPoint(IPAddress.Any, ProxyPort)
+                                    : new IPEndPoint(ListenAddress, ProxyPort);
                 proxySocket = new UdpClient(ep);
             }
             return proxySocket;
@@ -189,7 +191,7 @@ namespace TinyRadius.Net.Proxy
 
             // retrieve Proxy connection from cache 
             string state = BitConverter.ToString(proxyState.Data);
-            var proxyConnection = (RadiusProxyConnection)proxyConnections[state];
+            var proxyConnection = (RadiusProxyConnection) proxyConnections[state];
             proxyConnections.Remove(state);
             if (proxyConnection == null)
             {
@@ -214,7 +216,7 @@ namespace TinyRadius.Net.Proxy
             byte[] datagram = MakeDatagramPacket(answer, client.SharedSecret, proxyConnection.Packet);
 
             // send back using correct socket
-            var socket = proxyConnection.Port == AuthPort ? GetAuthSocket() : GetAcctSocket();
+            UdpClient socket = proxyConnection.Port == AuthPort ? GetAuthSocket() : GetAcctSocket();
             socket.Send(datagram, datagram.Length, remote);
         }
 
@@ -229,7 +231,7 @@ namespace TinyRadius.Net.Proxy
 
         protected void proxyPacket(RadiusPacket packet, RadiusProxyConnection proxyConnection)
         {
-            lock (typeof(RadiusProxy))
+            lock (typeof (RadiusProxy))
             {
                 // add Proxy-State attribute
                 proxyIndex++;
