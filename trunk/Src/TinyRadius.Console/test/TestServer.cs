@@ -4,6 +4,7 @@
  * @author Matthias Wuttke
  * @version $Revision: 1.6 $
  */
+using System;
 using System.Net;
 using System.Threading;
 using TinyRadius.Net.Packet;
@@ -11,21 +12,17 @@ using TinyRadius.Net.Util;
 
 namespace TinyRadius.Test
 {
-
-    using System;
-
     /**
      * Test server which terminates after 30 s.
      * Knows only the client "localhost" with secret "testing123" and
      * the user "mw" with the password "test".
      */
+
     public class TestServer
     {
-
         public static void main(String[] args)
         {
-
-            FaileServer server = new FaileServer();
+            var server = new FaileServer();
             /* {
                  // Authorize localhost/testing123
                  public String getSharedSecret(InetSocketAddress client) {
@@ -59,20 +56,22 @@ namespace TinyRadius.Test
                  }
              };*/
             if (args.Length >= 1)
-                server.AuthPort=Convert.ToInt32(args[0]);
+                server.AuthPort = Convert.ToInt32(args[0]);
             if (args.Length >= 2)
-                server.AuthPort=Convert.ToInt32(args[1]);
+                server.AuthPort = Convert.ToInt32(args[1]);
 
             server.Start(true, true);
 
-            Console.WriteLine("Server started.");
+            System.Console.WriteLine("Server started.");
 
-            Thread.Sleep(1000 * 60 * 30);
-            Console.WriteLine("Stop server");
+            Thread.Sleep(1000*60*30);
+            System.Console.WriteLine("Stop server");
             server.Stop();
         }
 
-        public class  FaileServer:RadiusServer
+        #region Nested type: FaileServer
+
+        public class FaileServer : RadiusServer
         {
             public override string GetSharedSecret(IPEndPoint client)
             {
@@ -90,20 +89,20 @@ namespace TinyRadius.Test
                     return null;
             }
 
-            public override TinyRadius.Net.Packet.RadiusPacket AccessRequestReceived(TinyRadius.Net.Packet.AccessRequest accessRequest, IPEndPoint client)
+            public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
             {
-
-                Console.WriteLine("Received Access-Request:\n" + accessRequest);
+                System.Console.WriteLine("Received Access-Request:\n" + accessRequest);
                 RadiusPacket packet = base.AccessRequestReceived(accessRequest, client);
                 if (packet.Type == RadiusPacket.AccessAccept)
                     packet.AddAttribute("Reply-Message", "Welcome " + accessRequest.UserName + "!");
                 if (packet == null)
-                    Console.WriteLine("Ignore packet.");
+                    System.Console.WriteLine("Ignore packet.");
                 else
-                    Console.WriteLine("Answer:\n" + packet);
+                    System.Console.WriteLine("Answer:\n" + packet);
                 return packet;
             }
         }
 
+        #endregion
     }
 }

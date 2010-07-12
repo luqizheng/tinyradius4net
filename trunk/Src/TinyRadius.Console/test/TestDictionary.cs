@@ -4,24 +4,16 @@
  * @author mw
  * @version $Revision: 1.1 $
  */
-using System;
-using System.Collections.Generic;
-using TinyRadius.Net.Attributes;
-using TinyRadius.Net.Dictionaries;
-using TinyRadius.Net.Packet;
-
 namespace TinyRadius.test
 {
-
-    
     /**
      * Shows how to use TinyRadius with a custom dictionary
      * loaded from a dictionary file.
      * Requires a file "test.dictionary" in the current directory.
      */
+
     public class TestDictionary
     {
-
         //public static void main(String[] args)
         //{
         //    InputStream source = new FileInputStream("test.dictionary");
@@ -32,6 +24,5 @@ namespace TinyRadius.test
         //    ar.addAttribute(new IpAttribute(8, 1234567));
         //    Console.WriteLine(ar);
         //}
-
     }
 }
