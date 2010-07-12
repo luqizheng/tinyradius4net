@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 
 namespace TinyRadiusServer
 {
@@ -32,9 +31,9 @@ namespace TinyRadiusServer
         {
             var ips = new List<string>();
             var shareKeys = new List<string>();
-            foreach (var key in Keys)
+            foreach (string key in Keys)
             {
-                ips.Add(key.ToString());
+                ips.Add(key);
                 shareKeys.Add(this[key]);
             }
 

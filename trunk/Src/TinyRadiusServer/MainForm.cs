@@ -16,6 +16,9 @@ namespace TinyRadiusServer
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            IPHostEntry ipHost = Dns.Resolve(Dns.GetHostName());
+            AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
+            AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
             //Service Setting;
             AccountListentIPTextBox.Text = Services.Default.AccountListentIP;
             AccountListentPort.Text = Services.Default.AccountPort.ToString();
@@ -23,7 +26,12 @@ namespace TinyRadiusServer
             AuthPortTextBox.Text = Services.Default.AuthPort.ToString();
             AuthListentIPTextBox.Text = Services.Default.AuthListentIP;
 
-            //Client Settings
+
+
+            IPAddress ipAddr = ipHost.AddressList[0];
+
+
+            //Client Settings)
             foreach (var entry in ClientSets.Instance)
             {
                 var item = new ListViewItem(new[]
@@ -96,7 +104,7 @@ namespace TinyRadiusServer
             if (btn.Tag.ToString() == "Stoped")
             {
                 _server.ListenAddress = IPAddress.Parse(Services.Default.AuthListentIP);
-                _server.Start(this.enableAuthenticationCheckBox.Checked, this.EnableAccountCheckBox.Checked);
+                _server.Start(enableAuthenticationCheckBox.Checked, EnableAccountCheckBox.Checked);
                 btn.Tag = "Started";
                 btn.Text = "Stop";
             }
@@ -105,9 +113,7 @@ namespace TinyRadiusServer
                 btn.Tag = null;
                 btn.Text = "Start";
                 _server.Stop();
-
             }
-
         }
     }
 }
