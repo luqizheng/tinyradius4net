@@ -33,16 +33,12 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.AccountListentIPTextBox = new System.Windows.Forms.TextBox();
-            this.button5 = new System.Windows.Forms.Button();
             this.EnableAccountCheckBox = new System.Windows.Forms.CheckBox();
             this.AccountListentPort = new System.Windows.Forms.TextBox();
             this.AccountPortTextBox = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.AuthListentIPTextBox = new System.Windows.Forms.TextBox();
             this.enableAuthenticationCheckBox = new System.Windows.Forms.CheckBox();
-            this.button4 = new System.Windows.Forms.Button();
             this.PortLabel = new System.Windows.Forms.Label();
             this.AuthPortTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -60,6 +56,8 @@
             this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.AuthListentIPTextBox = new System.Windows.Forms.ComboBox();
+            this.AccountListentIPTextBox = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -108,7 +106,6 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.AccountListentIPTextBox);
-            this.groupBox2.Controls.Add(this.button5);
             this.groupBox2.Controls.Add(this.EnableAccountCheckBox);
             this.groupBox2.Controls.Add(this.AccountListentPort);
             this.groupBox2.Controls.Add(this.AccountPortTextBox);
@@ -120,22 +117,6 @@
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Account";
-            // 
-            // AccountListentIPTextBox
-            // 
-            this.AccountListentIPTextBox.Location = new System.Drawing.Point(87, 12);
-            this.AccountListentIPTextBox.Name = "AccountListentIPTextBox";
-            this.AccountListentIPTextBox.Size = new System.Drawing.Size(100, 21);
-            this.AccountListentIPTextBox.TabIndex = 5;
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(202, 12);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 6;
-            this.button5.Text = "Get IP";
-            this.button5.UseVisualStyleBackColor = true;
             // 
             // EnableAccountCheckBox
             // 
@@ -153,7 +134,7 @@
             // 
             this.AccountListentPort.Location = new System.Drawing.Point(87, 41);
             this.AccountListentPort.Name = "AccountListentPort";
-            this.AccountListentPort.Size = new System.Drawing.Size(100, 21);
+            this.AccountListentPort.Size = new System.Drawing.Size(121, 21);
             this.AccountListentPort.TabIndex = 7;
             // 
             // AccountPortTextBox
@@ -178,7 +159,6 @@
             // 
             this.groupBox1.Controls.Add(this.AuthListentIPTextBox);
             this.groupBox1.Controls.Add(this.enableAuthenticationCheckBox);
-            this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.PortLabel);
             this.groupBox1.Controls.Add(this.AuthPortTextBox);
             this.groupBox1.Controls.Add(this.label1);
@@ -189,13 +169,6 @@
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Authentication ";
-            // 
-            // AuthListentIPTextBox
-            // 
-            this.AuthListentIPTextBox.Location = new System.Drawing.Point(87, 25);
-            this.AuthListentIPTextBox.Name = "AuthListentIPTextBox";
-            this.AuthListentIPTextBox.Size = new System.Drawing.Size(100, 21);
-            this.AuthListentIPTextBox.TabIndex = 1;
             // 
             // enableAuthenticationCheckBox
             // 
@@ -208,15 +181,6 @@
             this.enableAuthenticationCheckBox.TabIndex = 4;
             this.enableAuthenticationCheckBox.Text = "Enable";
             this.enableAuthenticationCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(202, 23);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 2;
-            this.button4.Text = "Get IP";
-            this.button4.UseVisualStyleBackColor = true;
             // 
             // PortLabel
             // 
@@ -231,7 +195,7 @@
             // 
             this.AuthPortTextBox.Location = new System.Drawing.Point(87, 54);
             this.AuthPortTextBox.Name = "AuthPortTextBox";
-            this.AuthPortTextBox.Size = new System.Drawing.Size(100, 21);
+            this.AuthPortTextBox.Size = new System.Drawing.Size(121, 21);
             this.AuthPortTextBox.TabIndex = 3;
             // 
             // label1
@@ -370,6 +334,22 @@
             this.panel1.Size = new System.Drawing.Size(742, 38);
             this.panel1.TabIndex = 3;
             // 
+            // AuthListentIPTextBox
+            // 
+            this.AuthListentIPTextBox.FormattingEnabled = true;
+            this.AuthListentIPTextBox.Location = new System.Drawing.Point(87, 25);
+            this.AuthListentIPTextBox.Name = "AuthListentIPTextBox";
+            this.AuthListentIPTextBox.Size = new System.Drawing.Size(121, 20);
+            this.AuthListentIPTextBox.TabIndex = 9;
+            // 
+            // AccountListentIPTextBox
+            // 
+            this.AccountListentIPTextBox.FormattingEnabled = true;
+            this.AccountListentIPTextBox.Location = new System.Drawing.Point(87, 17);
+            this.AccountListentIPTextBox.Name = "AccountListentIPTextBox";
+            this.AccountListentIPTextBox.Size = new System.Drawing.Size(121, 20);
+            this.AccountListentIPTextBox.TabIndex = 9;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -418,10 +398,8 @@
         private System.Windows.Forms.Label AccountPortTextBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox AccountListentPort;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.CheckBox enableAuthenticationCheckBox;
         private System.Windows.Forms.CheckBox EnableAccountCheckBox;
-        private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
@@ -429,8 +407,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBoxShareKey;
         private System.Windows.Forms.TextBox textBoxClientIp;
-        private System.Windows.Forms.TextBox AccountListentIPTextBox;
-        private System.Windows.Forms.TextBox AuthListentIPTextBox;
+        private System.Windows.Forms.ComboBox AuthListentIPTextBox;
+        private System.Windows.Forms.ComboBox AccountListentIPTextBox;
     }
 }
 

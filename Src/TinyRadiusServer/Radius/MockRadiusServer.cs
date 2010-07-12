@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 using TinyRadius.Net.Util;
 
 namespace TinyRadiusServer.Radius
 {
-    class MockRadiusServer : RadiusServer
+    internal class MockRadiusServer : RadiusServer
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
@@ -23,9 +19,7 @@ namespace TinyRadiusServer.Radius
                     return "a";
                 default:
                     return "a";
-
             }
-
         }
     }
 }
