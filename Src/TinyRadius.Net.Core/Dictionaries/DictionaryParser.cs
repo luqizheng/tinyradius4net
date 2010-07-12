@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using TinyRadius.Net.Attributes;
 
 namespace TinyRadius.Net.Dictionaries
@@ -23,7 +24,6 @@ namespace TinyRadius.Net.Dictionaries
         //    ParseDictionary(source, d);
         //    return d;
         //}
-
         /// <summary>
         /// Parses the dictionary from the specified InputStream.
         /// @param source input stream
@@ -47,7 +47,7 @@ namespace TinyRadius.Net.Dictionaries
                     continue;
 
                 // tokenize line by whitespace
-                string[] tok = System.Text.RegularExpressions.Regex.Split(line, "[\\t ]+");
+                string[] tok = Regex.Split(line, "[\\t ]+");
                 String lineType = tok[0].ToUpper();
                 switch (lineType)
                 {
@@ -88,7 +88,9 @@ namespace TinyRadius.Net.Dictionaries
             String typeStr = tok[3];
 
             // translate type to class
-            Type type = code == VendorSpecificAttribute.VENDOR_SPECIFIC ? typeof(VendorSpecificAttribute) : GetAttributeTypeClass(code, typeStr);
+            Type type = code == VendorSpecificAttribute.VENDOR_SPECIFIC
+                            ? typeof (VendorSpecificAttribute)
+                            : GetAttributeTypeClass(code, typeStr);
 
             // create and cache object
             dictionary.AddAttributeType(new AttributeType(code, name, type));
@@ -180,22 +182,22 @@ namespace TinyRadius.Net.Dictionaries
         /// </summary>
         private static Type GetAttributeTypeClass(int attributeType, String typeStr)
         {
-            Type type = typeof(RadiusAttribute);
+            Type type = typeof (RadiusAttribute);
             typeStr = typeStr.ToLower();
             switch (typeStr)
             {
                 case "string":
-                    type = typeof(StringAttribute);
+                    type = typeof (StringAttribute);
                     break;
                 case "octets":
-                    type = typeof(RadiusAttribute);
+                    type = typeof (RadiusAttribute);
                     break;
                 case "date":
                 case "integer":
-                    type = typeof(IntegerAttribute);
+                    type = typeof (IntegerAttribute);
                     break;
                 case "ipaddr":
-                    type = typeof(IpAttribute);
+                    type = typeof (IpAttribute);
                     break;
             }
             return type;

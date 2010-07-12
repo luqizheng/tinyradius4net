@@ -3,7 +3,6 @@ using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Proxy
 {
-
     ///<summary>
     ///This class stores information about a proxied packet.
     ///It contains two RadiusEndpoint objects representing the Radius client

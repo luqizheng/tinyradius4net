@@ -1,4 +1,4 @@
-using System;
+using System.IO;
 
 namespace TinyRadius.Net.Dictionaries
 {
@@ -9,29 +9,13 @@ namespace TinyRadius.Net.Dictionaries
      * classpath resource
      * <code>TinyRadius.dictionary.default_dictionary</code>.
      */
+
     public class DefaultDictionary : MemoryDictionary
     {
-
         /**
          * Returns the singleton instance of this object.
          * @return DefaultDictionary instance
          */
-        public static IWritableDictionary GetDefaultDictionary()
-        {
-            return Instance;
-        }
-
-        /**
-         * Make constructor private so that a DefaultDictionary
-         * cannot be constructed by other classes. 
-         */
-        private DefaultDictionary()
-        {
-            const string dictionaryResource = "TinyRadius.Net.Dictionaries.default_dictionary";
-            var stream = typeof(DefaultDictionary).Assembly.GetManifestResourceStream(dictionaryResource);
-            DictionaryParser.ParseDictionary(stream, this);
-        }
-
 
 
         /**
@@ -40,9 +24,16 @@ namespace TinyRadius.Net.Dictionaries
          */
         public static readonly DefaultDictionary Instance = new DefaultDictionary();
 
+        private DefaultDictionary()
+        {
+            const string dictionaryResource = "TinyRadius.Net.Dictionaries.default_dictionary";
+            Stream stream = typeof (DefaultDictionary).Assembly.GetManifestResourceStream(dictionaryResource);
+            DictionaryParser.ParseDictionary(stream, this);
+        }
+
+        public static IWritableDictionary GetDefaultDictionary()
+        {
+            return Instance;
+        }
     }
-
-
-
-
 }

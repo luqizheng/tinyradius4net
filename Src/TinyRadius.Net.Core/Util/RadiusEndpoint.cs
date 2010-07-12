@@ -15,12 +15,13 @@ namespace TinyRadius.Net.Util
         /// @param remoteAddress remote address (ip and port number)
         /// @param sharedSecret shared secret
         /// </summary>
-        public RadiusEndpoint(string hostName,int port,string shareSecret)
+        public RadiusEndpoint(string hostName, int port, string shareSecret)
         {
-            var ipAddress = Dns.GetHostEntry(hostName).AddressList[0];
-            this.EndpointAddress=new IPEndPoint(ipAddress,port);
-            this.SharedSecret = shareSecret;
+            IPAddress ipAddress = Dns.GetHostEntry(hostName).AddressList[0];
+            EndpointAddress = new IPEndPoint(ipAddress, port);
+            SharedSecret = shareSecret;
         }
+
         public RadiusEndpoint(IPEndPoint remoteAddress, String sharedSecret)
         {
             EndpointAddress = remoteAddress;

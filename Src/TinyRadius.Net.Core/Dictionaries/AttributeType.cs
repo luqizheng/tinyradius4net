@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TinyRadius.Net.Attributes;
 
 namespace TinyRadius.Net.Dictionaries
 {
@@ -69,7 +68,7 @@ namespace TinyRadius.Net.Dictionaries
             {
                 if (string.IsNullOrEmpty(value))
                     throw new ArgumentException("name is empty");
-                this._name = value;
+                _name = value;
             }
             get { return _name; }
         }
@@ -152,7 +151,6 @@ namespace TinyRadius.Net.Dictionaries
             if (_enumeration == null)
                 _enumeration = new Dictionary<int, string>();
             _enumeration.Add(num, name);
-
         }
 
         /// <summary>

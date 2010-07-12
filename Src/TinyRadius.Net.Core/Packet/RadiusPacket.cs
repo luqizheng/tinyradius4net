@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using TinyRadius.Net.Attributes;
 using TinyRadius.Net.Dictionaries;
-using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Packet
@@ -171,7 +170,7 @@ namespace TinyRadius.Net.Packet
                         return "Status-Server";
                     case 13:
                         return "Status-Client";
-                    // RFC 2882
+                        // RFC 2882
                     case 40:
                         return "Disconnect-Request";
                     case 41:
@@ -280,7 +279,7 @@ namespace TinyRadius.Net.Packet
             if (string.IsNullOrEmpty(value))
                 throw new ArgumentException("value is empty");
 
-            var type = Dictionary.GetAttributeTypeByName(typeName);
+            AttributeType type = Dictionary.GetAttributeTypeByName(typeName);
             if (type == null)
                 throw new ArgumentException("unknown attribute type '" + typeName + "'");
 
@@ -404,9 +403,8 @@ namespace TinyRadius.Net.Packet
         {
             if (attributeType < 1 || attributeType > 255)
                 throw new ArgumentException("attribute type out of bounds");
-            var result = from a in _attributes where a.Type == attributeType select a;
+            IEnumerable<RadiusAttribute> result = from a in _attributes where a.Type == attributeType select a;
             return result.ToList();
-
         }
 
         /// <summary>
@@ -422,11 +420,11 @@ namespace TinyRadius.Net.Packet
             if (vendorId == -1)
                 return GetAttributes(attributeType);
 
-            var vsas = GetVendorAttributes(vendorId);
-            var result = from radius in vsas
-                         where
-                             radius.Type == attributeType && radius.VendorId == vendorId
-                         select radius;
+            IList<RadiusAttribute> vsas = GetVendorAttributes(vendorId);
+            IEnumerable<RadiusAttribute> result = from radius in vsas
+                                                  where
+                                                      radius.Type == attributeType && radius.VendorId == vendorId
+                                                  select radius;
 
             return result.ToList();
         }
@@ -519,11 +517,11 @@ namespace TinyRadius.Net.Packet
         public IList<RadiusAttribute> GetVendorAttributes(int vendorId)
         {
             var result = new List<RadiusAttribute>();
-            foreach (var a in _attributes)
+            foreach (RadiusAttribute a in _attributes)
             {
-                if (typeof(VendorSpecificAttribute).IsInstanceOfType(a))
+                if (typeof (VendorSpecificAttribute).IsInstanceOfType(a))
                 {
-                    var vsa = (VendorSpecificAttribute)a;
+                    var vsa = (VendorSpecificAttribute) a;
                     if (vsa.ChildVendorId == vendorId)
                         result.Add(vsa);
                 }
@@ -543,7 +541,9 @@ namespace TinyRadius.Net.Packet
         /// </summary>
         public VendorSpecificAttribute GetVendorAttribute(int vendorId)
         {
-            return GetAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC).Cast<VendorSpecificAttribute>().FirstOrDefault(vsa => vsa.ChildVendorId == vendorId);
+            return
+                GetAttributes(VendorSpecificAttribute.VENDOR_SPECIFIC).Cast<VendorSpecificAttribute>().FirstOrDefault(
+                    vsa => vsa.ChildVendorId == vendorId);
         }
 
         /// <summary>
@@ -748,7 +748,7 @@ namespace TinyRadius.Net.Packet
 
             outputStream.WriteByte(Convert.ToByte(Type));
             outputStream.WriteByte(Convert.ToByte(Identifier));
-            var lengthBytes = BitConverter.GetBytes(Convert.ToInt16(packetLength));
+            byte[] lengthBytes = BitConverter.GetBytes(Convert.ToInt16(packetLength));
             Array.Reverse(lengthBytes);
             outputStream.Write(lengthBytes, 0, lengthBytes.Length);
             byte[] authen = Authenticator;
@@ -811,7 +811,6 @@ namespace TinyRadius.Net.Packet
         protected virtual byte[] CreateResponseAuthenticator(String sharedSecret, int packetLength, byte[] attributes,
                                                              byte[] requestAuthenticator)
         {
-
             var bytes = new List<byte>
                             {
                                 Convert.ToByte(Type),
@@ -881,7 +880,6 @@ namespace TinyRadius.Net.Packet
                 if (attributeLength < 2)
                     throw new RadiusException("bad packet: invalid attribute Length");
                 pos += attributeLength;
-
             }
             if (pos != attributeData.Length)
                 throw new RadiusException("bad packet: attribute Length mismatch");
@@ -962,6 +960,7 @@ namespace TinyRadius.Net.Packet
                 if (authenticator[i] != receivedAuth[i])
                     throw new RadiusException("response authenticator invalid");
         }
+
         /// <summary>
         ///  Encodes the attributes of this Radius packet to a byte array.
         ///  @return byte array with encoded attributes

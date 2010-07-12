@@ -25,7 +25,7 @@ namespace TinyRadius.Net.Util
          * @param sharedSecret shared secret used to secure the communication
          */
 
-        private static readonly ILog logger = LogManager.GetLogger(typeof(RadiusClient));
+        private static readonly ILog logger = LogManager.GetLogger(typeof (RadiusClient));
         private int _acctPort = 1813;
         private int _authPort = 1812;
         private String _hostName;
@@ -120,7 +120,8 @@ namespace TinyRadius.Net.Util
             {
                 return _socket ??
                        (_socket =
-                        new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp) { ReceiveTimeout = SocketTimeout });
+                        new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
+                            {ReceiveTimeout = SocketTimeout});
             }
         }
 
@@ -293,7 +294,6 @@ namespace TinyRadius.Net.Util
         {
             using (var bos = new MemoryStream())
             {
-
                 packet.EncodeRequestPacket(bos, SharedSecret);
                 byte[] data = bos.ToArray();
                 bos.Close();

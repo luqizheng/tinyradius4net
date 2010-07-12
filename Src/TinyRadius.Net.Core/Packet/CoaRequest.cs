@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using TinyRadius.Net.Packet;
 using TinyRadius.Net.Util;
 
 namespace TinyRadius.Net.Packet

@@ -2,14 +2,13 @@ using System;
 
 namespace TinyRadius.Net.Dictionaries
 {
-
     /**
      * A dictionary retrieves AttributeType objects by name or
      * type code. 
      */
+
     public interface IDictionary
     {
-
         /**
          * Retrieves an attribute type by name. This includes
          * vendor-specific attribute types whose name is prefixed
@@ -51,6 +50,5 @@ namespace TinyRadius.Net.Dictionaries
          * @return vendor ID or -1
          */
         int GetVendorId(String vendorName);
-
     }
 }

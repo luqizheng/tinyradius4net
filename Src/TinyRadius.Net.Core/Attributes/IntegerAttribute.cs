@@ -8,13 +8,11 @@ namespace TinyRadius.Net.Attributes
     ///  This class represents a Radius attribute which only
     ///  contains a 32 bit integer.
     /// </summary>
-
     public class IntegerAttribute : RadiusAttribute
     {
         /// <summary>
         ///  Constructs an empty integer attribute.
         /// </summary>
-
         public IntegerAttribute()
         {
         }
@@ -24,7 +22,6 @@ namespace TinyRadius.Net.Attributes
         ///  @param type attribute type
         ///  @param value attribute value
         /// </summary>
-
         public IntegerAttribute(int type, int value)
         {
             Type = type;
@@ -35,7 +32,6 @@ namespace TinyRadius.Net.Attributes
         ///  Returns the string value of this attribute.
         ///  @return a string
         /// </summary>
-
         public int ValueInt
         {
             get
@@ -47,10 +43,10 @@ namespace TinyRadius.Net.Attributes
             set
             {
                 var data = new byte[4];
-                data[0] = (byte)(value >> 24 & 0x0ff);
-                data[1] = (byte)(value >> 16 & 0x0ff);
-                data[2] = (byte)(value >> 8 & 0x0ff);
-                data[3] = (byte)(value & 0x0ff);
+                data[0] = (byte) (value >> 24 & 0x0ff);
+                data[1] = (byte) (value >> 16 & 0x0ff);
+                data[2] = (byte) (value >> 8 & 0x0ff);
+                data[3] = (byte) (value & 0x0ff);
                 Data = data;
             }
         }
@@ -60,7 +56,6 @@ namespace TinyRadius.Net.Attributes
         ///  Tries to resolve enumerations.
         ///  @see TinyRadius.attribute.RadiusAttribute#getAttributeValue()
         /// </summary>
-
         public override string Value
         {
             get
@@ -93,12 +88,10 @@ namespace TinyRadius.Net.Attributes
         }
 
 
-
         /// <summary>
         ///  Check attribute Length.
         ///  @see TinyRadius.attribute.RadiusAttribute#readAttribute(byte[], int, int)
         /// </summary>
-
         public override void ReadAttribute(byte[] data, int offset, int length)
         {
             if (length != 6)
