@@ -19,9 +19,9 @@ namespace TinyRadius.Net.Attributes
 
         /// <summary>
         ///  Constructs an integer attribute with the given value.
-        ///  @param type attribute type
-        ///  @param value attribute value
         /// </summary>
+        /// <param name="type">attribute value</param>
+        /// <param name="value">attribute type</param>
         public IntegerAttribute(int type, int value)
         {
             Type = type;
@@ -64,7 +64,7 @@ namespace TinyRadius.Net.Attributes
                 AttributeType at = GetAttributeTypeObject();
                 if (at != null)
                 {
-                    String name = at.GetEnumeration(value);
+                    string name = at.GetEnumeration(value);
                     if (name != null)
                         return name;
                 }
