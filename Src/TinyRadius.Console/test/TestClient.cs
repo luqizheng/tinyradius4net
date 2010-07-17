@@ -1,9 +1,3 @@
-/**
- * $Id: TestClient.java,v 1.4 2006/02/17 18:14:54 wuttke Exp $
- * Created on 08.04.2005
- * @author Matthias Wuttke
- * @version $Revision: 1.4 $
- */
 using System;
 using System.Net;
 using TinyRadius.Net;
@@ -42,7 +36,7 @@ namespace TinyRadius.Console.test
 
             // 1. Send Access-Request
             var ar = new AccessRequest(user, pass);
-            ar.AuthProtocol = AuthenticationType.pap; // or AUTH_CHAP
+            ar.AuthProtocol = AuthenticationType.PAP; // or AUTH_CHAP
             ar.AddAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
             ar.AddAttribute("NAS-IP-Address", "192.168.0.100");
             ar.AddAttribute("Service-Type", "Login-User");

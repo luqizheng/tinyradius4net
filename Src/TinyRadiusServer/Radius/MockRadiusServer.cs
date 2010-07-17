@@ -7,8 +7,7 @@ namespace TinyRadiusServer.Radius
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
-            return "123";
-            //return ClientSets.Instance[client.Address.ToString()];
+            return ClientSets.Instance[client.Address.ToString()];
         }
 
         public override string GetUserPassword(string userName)
