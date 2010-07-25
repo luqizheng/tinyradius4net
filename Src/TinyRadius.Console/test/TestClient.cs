@@ -36,7 +36,7 @@ namespace TinyRadius.Console.test
 
             // 1. Send Access-Request
             var ar = new AccessRequest(user, pass);
-            ar.AuthProtocol = AuthenticationType.PAP; // or AUTH_CHAP
+            ar.AuthProtocol = AuthenticationType.pap; // or AUTH_CHAP
             ar.AddAttribute("NAS-Identifier", "this.is.my.nas-identifier.de");
             ar.AddAttribute("NAS-IP-Address", "192.168.0.100");
             ar.AddAttribute("Service-Type", "Login-User");

@@ -1,4 +1,5 @@
-﻿namespace TinyRadius.Net
+﻿[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+namespace TinyRadius.Net
 {
     public enum AuthenticationType
     {

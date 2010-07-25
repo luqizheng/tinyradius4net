@@ -132,9 +132,9 @@ namespace TinyRadius.Net.Proxy
         {
             if (proxySocket == null)
             {
-                IPEndPoint ep = ListenAddress == null
+                IPEndPoint ep = ListenAuthIp == null
                                     ? new IPEndPoint(IPAddress.Any, ProxyPort)
-                                    : new IPEndPoint(ListenAddress, ProxyPort);
+                                    : new IPEndPoint(ListenAuthIp, ProxyPort);
                 proxySocket = new UdpClient(ep);
             }
             return proxySocket;

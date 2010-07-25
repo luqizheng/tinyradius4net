@@ -94,7 +94,7 @@ namespace TinyRadius.Net.Packet
         }
 
         /// <summary>
-        ///Sets the plain-text user password.
+        ///Gets or sets the plain-text user password.
         ///@param userPassword user password to set
         /// </summary>
         public string Password
@@ -105,6 +105,7 @@ namespace TinyRadius.Net.Packet
                     throw new ArgumentException("password is empty");
                 password = value;
             }
+            get { return password; }
         }
 
         /// <summary>
@@ -112,17 +113,6 @@ namespace TinyRadius.Net.Packet
         ///@return AUTH_PAP or AUTH_CHAP
         /// </summary>
         public AuthenticationType AuthProtocol { get; set; }
-
-        /// <summary>
-        ///Retrieves the plain-text user password.
-        ///Returns null for CHAP - use verifyPassword().
-        ///@see #verifyPassword(String)
-        ///@return user password
-        /// </summary>
-        public String getUserPassword()
-        {
-            return password;
-        }
 
         /// <summary>
         ///Verifies that the passed plain-text password matches the password
@@ -138,9 +128,9 @@ namespace TinyRadius.Net.Packet
             if (AuthProtocol == AuthenticationType.chap)
                 return VerifyChapPassword(plaintext);
             else
-                return getUserPassword().Equals(plaintext);
+                return Password.Equals(plaintext);
         }
-
+        
         /// <summary>
         ///Decrypts the User-Password attribute.
         /// </summary>
@@ -368,7 +358,7 @@ namespace TinyRadius.Net.Packet
             byte[] chapHash = MD5.Create().ComputeHash(chapChallenge);
 
             // compar
-            for (int i = 0; i < 16; i++)
+            for (var i = 0; i < 16; i++)
                 if (chapHash[i] != chapPassword[i + 1])
                     return false;
             return true;

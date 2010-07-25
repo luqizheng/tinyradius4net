@@ -39,6 +39,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -59,6 +62,7 @@
     <Compile Include="Attributes\StringAttribute.cs" />
     <Compile Include="Attributes\VendorSpecificAttribute.cs" />
     <Compile Include="AuthenticationType.cs" />
+    <Compile Include="Cfg\Config.cs" />
     <Compile Include="Dictionaries\AttributeType.cs" />
     <Compile Include="Dictionaries\DefaultDictionary.cs" />
     <Compile Include="Dictionaries\IDictionary.cs" />
