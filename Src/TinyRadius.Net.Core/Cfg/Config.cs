@@ -1,29 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using Microsoft.Win32;
 
 namespace TinyRadius.Net.Cfg
 {
     [DataContract]
     public class Config
     {
-        private const string fileName = "TinyServerSetting.xml";
-        public static readonly Config Instance = new Config();
+        private const string FileName = "TinyServerSetting.xml";
         private Dictionary<string, string> _nasSettings = new Dictionary<string, string>();
-
-        public Config()
+        private readonly string filePath;
+        public Config(string path)
         {
             AuthListentIp = "192.168.1.123";
             AccountListentIp = "192.168.1.123";
             AcctPort = 1813;
             AuthPort = 1812;
-            if (File.Exists(fileName))
+            filePath = Path.Combine(path, FileName);
+            if (File.Exists(filePath))
             {
-                var mySerializer = new DataContractSerializer(typeof (Config));
-                FileStream stream = File.OpenRead(fileName);
+                var mySerializer = new DataContractSerializer(typeof(Config));
+                FileStream stream = File.OpenRead(FileName);
                 try
                 {
-                    var config = (Config) mySerializer.ReadObject(stream);
+                    var config = (Config)mySerializer.ReadObject(stream);
                     InitBy(config);
                 }
                 finally
@@ -32,6 +33,7 @@ namespace TinyRadius.Net.Cfg
                 }
             }
         }
+
 
         [DataMember]
         public string AuthListentIp { get; set; }
@@ -73,9 +75,9 @@ namespace TinyRadius.Net.Cfg
 
         public void Save()
         {
-            var mySerializer = new DataContractSerializer(typeof (Config));
+            var mySerializer = new DataContractSerializer(typeof(Config));
 
-            var myWriter = new FileStream(fileName, FileMode.Create);
+            var myWriter = new FileStream(FileName, FileMode.Create);
             mySerializer.WriteObject(myWriter, this);
             myWriter.Close();
         }

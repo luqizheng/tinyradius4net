@@ -1,4 +1,4 @@
-﻿namespace TinyRadiusServer
+﻿namespace TinyRadiusAdmin
 {
     partial class MainForm
     {

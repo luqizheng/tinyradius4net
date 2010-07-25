@@ -4,12 +4,13 @@ using TinyRadius.Net.Util;
 
 namespace TinyRadiusService
 {
-    internal class MockRadiusServer : RadiusServer
+    internal class RadiusServer : TinyRadius.Net.Util.RadiusServer
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
             //return ClientSets.Instance[client.Address.ToString()];
-            return Config.Instance.NasSettings[client.Address.ToString()].ToString();
+            var cfg = new Config("");
+            return cfg.NasSettings[client.Address.ToString()].ToString();
         }
 
         public override string GetUserPassword(string userName)

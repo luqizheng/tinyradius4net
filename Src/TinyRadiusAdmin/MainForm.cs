@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Net;
 using System.Windows.Forms;
+using Microsoft.Win32;
 using TinyRadius.Net.Cfg;
+using TinyRadiusAdmin.Configurations;
 
 //using TinyRadiusServer.Radius;
 
-namespace TinyRadiusServer
+namespace TinyRadiusAdmin
 {
     public partial class MainForm : Form
     {
@@ -17,22 +19,24 @@ namespace TinyRadiusServer
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
+
             IPHostEntry ipHost = Dns.Resolve(Dns.GetHostName());
             AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
 
 
             //Service Setting;
-            AccountListentIPTextBox.Text = Config.Instance.AccountListentIp;
-            AccountListentPort.Text = Config.Instance.AcctPort.ToString();
-            EnableAccountCheckBox.Checked = Config.Instance.EnableAccount;
+            AccountListentIPTextBox.Text = Cfg.Instance.TinyConfig.AccountListentIp;
+            AccountListentPort.Text = Cfg.Instance.TinyConfig.AcctPort.ToString();
+            EnableAccountCheckBox.Checked = Cfg.Instance.TinyConfig.EnableAccount;
 
-            AuthPortTextBox.Text = Config.Instance.AuthPort.ToString();
-            AuthListentIPTextBox.Text = Config.Instance.AuthListentIp;
-            enableAuthenticationCheckBox.Checked = Config.Instance.EnableAuthentication;
+            AuthPortTextBox.Text = Cfg.Instance.TinyConfig.AuthPort.ToString();
+            AuthListentIPTextBox.Text = Cfg.Instance.TinyConfig.AuthListentIp;
+            enableAuthenticationCheckBox.Checked = Cfg.Instance.TinyConfig.EnableAuthentication;
 
             //Client Settings
-            foreach (var entry in Config.Instance.NasSettings)
+            foreach (var entry in Cfg.Instance.TinyConfig.NasSettings)
             {
                 var item = new ListViewItem(new[]
                                                 {
@@ -51,31 +55,32 @@ namespace TinyRadiusServer
 
         private void SaveSetting()
         {
+
             //check IP formatter;
             IPAddress ip1;
             if (AuthListentIPTextBox.SelectedIndex != -1)
             {
-                Config.Instance.AuthListentIp = AuthListentIPTextBox.Text;
+                Cfg.Instance.TinyConfig.AuthListentIp = AuthListentIPTextBox.Text;
             }
             else
             {
                 MessageBox.Show("请选择验证监听IP");
             }
-            Config.Instance.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
-            Config.Instance.EnableAuthentication = enableAuthenticationCheckBox.Checked;
+            Cfg.Instance.TinyConfig.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
+            Cfg.Instance.TinyConfig.EnableAuthentication = enableAuthenticationCheckBox.Checked;
 
             if (AuthListentIPTextBox.SelectedIndex != -1)
             {
-                Config.Instance.AccountListentIp = AccountListentIPTextBox.Text;
+                Cfg.Instance.TinyConfig.AccountListentIp = AccountListentIPTextBox.Text;
             }
             else
             {
                 MessageBox.Show("请选择计费监听IP");
             }
-            Config.Instance.AcctPort = Convert.ToInt32(AccountListentPort.Text);
-            Config.Instance.EnableAccount = EnableAccountCheckBox.Checked;
+            Cfg.Instance.TinyConfig.AcctPort = Convert.ToInt32(AccountListentPort.Text);
+            Cfg.Instance.TinyConfig.EnableAccount = EnableAccountCheckBox.Checked;
 
-            Config.Instance.Save();
+            Cfg.Instance.TinyConfig.Save();
         }
 
         private void Save_ClientItem(object sender, EventArgs e)
@@ -91,7 +96,7 @@ namespace TinyRadiusServer
                     clientListView.Items.Add(item);
                 }
 
-                Config.Instance.NasSettings.Add(ip.ToString(), sharekey);
+                Cfg.Instance.TinyConfig.NasSettings.Add(ip.ToString(), sharekey);
             }
             catch (FormatException)
             {
@@ -116,7 +121,7 @@ namespace TinyRadiusServer
             else
             {
                 trs.Stop();
-                btn.Tag = "Started";
+                btn.Tag = "Stoped";
                 btn.Text = "开始";
             }
         }

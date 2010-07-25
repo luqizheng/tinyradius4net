@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceProcess;
-using System.Text;
+﻿using System.ServiceProcess;
+using log4net.Config;
+
+[assembly: XmlConfigurator(Watch = true)]
 
 namespace TinyRadiusService
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        private static void Main()
         {
-            ServiceBase[] servicesToRun = new ServiceBase[] 
-                                              { 
-                                                  new TinyRadiusService() 
-                                              };
+            var servicesToRun = new ServiceBase[]
+                                    {
+                                        new TinyRadiusService()
+                                    };
             ServiceBase.Run(servicesToRun);
         }
     }

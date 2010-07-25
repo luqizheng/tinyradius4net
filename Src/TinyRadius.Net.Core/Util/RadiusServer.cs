@@ -119,6 +119,7 @@ namespace TinyRadius.Net.Util
         /// @return listen address or null
         /// </summary>
         public IPAddress ListenAuthIp { get; set; }
+
         public IPAddress ListenAccountIp { get; set; }
 
         public abstract String GetSharedSecret(IPEndPoint client);
@@ -187,11 +188,11 @@ namespace TinyRadius.Net.Util
                                                          ListenAuth();
                                                          Logger.Info("RadiusAuthListener is being terminated");
                                                      }
-                                                         //catch (Exception e)
-                                                         //{
-                                                         //    Logger.Fatal("auth thread stopped by exception", e);
-                                                         //    throw;
-                                                         //}
+                                                     catch (Exception e)
+                                                     {
+                                                         Logger.Fatal("auth thread stopped by exception", e);
+                                                         throw;
+                                                     }
                                                      finally
                                                      {
                                                          _authSocket.Close();
@@ -212,11 +213,11 @@ namespace TinyRadius.Net.Util
                                                          ListenAcct();
                                                          Logger.Info("RadiusAcctListener is being terminated");
                                                      }
-                                                         //catch (Exception e)
-                                                         //{
-                                                         //    Logger.Fatal("acct thread stopped by exception", e);
-                                                         //    throw e;
-                                                         //}
+                                                     catch (Exception e)
+                                                     {
+                                                         Logger.Fatal("acct thread stopped by exception", e);
+                                                         throw e;
+                                                     }
                                                      finally
                                                      {
                                                          _acctSocket.Close();
