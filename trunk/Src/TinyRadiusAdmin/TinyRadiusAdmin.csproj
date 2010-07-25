@@ -8,8 +8,8 @@
     <ProjectGuid>{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TinyRadiusServer</RootNamespace>
-    <AssemblyName>TinyRadiusServer</AssemblyName>
+    <RootNamespace>TinyRadiusAdmin</RootNamespace>
+    <AssemblyName>TinyRadiusAdmin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkSubset>
@@ -68,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configurations\Cfg.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +88,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config">
     </None>

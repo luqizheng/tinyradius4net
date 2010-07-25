@@ -2,18 +2,19 @@
 using System.ServiceProcess;
 using log4net;
 
-namespace TinyRadiusServer
+namespace TinyRadiusAdmin
 {
     public class TinyRadiusService
     {
         private readonly ILog _log;
-        private readonly ServiceController serviceController;
+        private readonly ServiceController _serviceController;
 
         public TinyRadiusService(string serverName)
         {
             ServiceName = serverName;
             _log = LogManager.GetLogger(typeof(TinyRadiusService));
-            serviceController = new ServiceController(ServiceName);
+            _serviceController = new ServiceController(ServiceName);
+
         }
 
         public string ServiceName { get; set; }
@@ -22,9 +23,17 @@ namespace TinyRadiusServer
         {
             try
             {
-                if (serviceController.Status == ServiceControllerStatus.Stopped)
-                    serviceController.Start();
-                return true;
+                if (_serviceController.Status == ServiceControllerStatus.Stopped)
+                {
+                    _serviceController.Start();
+                    _log.Debug("Start success success");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -37,8 +46,16 @@ namespace TinyRadiusServer
         {
             try
             {
-                serviceController.Stop();
-                return true;
+                if (_serviceController.Status == ServiceControllerStatus.Running)
+                {
+                    _serviceController.Stop();
+                    _log.Debug("Stop Servce success");
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch (Exception ex)
             {

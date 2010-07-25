@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Console", "TinyR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadiusService", "TinyRadiusService\TinyRadiusService.csproj", "{734D2978-F5BC-41BB-93ED-A32CCD11A597}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadiusAdmin", "TinyRadiusAdmin\TinyRadiusAdmin.csproj", "{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = TinyRadius.Net.vsmdi
@@ -40,6 +42,10 @@ Global
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
