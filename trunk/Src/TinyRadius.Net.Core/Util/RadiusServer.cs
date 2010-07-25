@@ -118,7 +118,8 @@ namespace TinyRadius.Net.Util
         /// Returns null if listening on the wildcard address.
         /// @return listen address or null
         /// </summary>
-        public IPAddress ListenAddress { get; set; }
+        public IPAddress ListenAuthIp { get; set; }
+        public IPAddress ListenAccountIp { get; set; }
 
         public abstract String GetSharedSecret(IPEndPoint client);
 
@@ -394,9 +395,9 @@ namespace TinyRadius.Net.Util
         {
             if (_authSocket == null)
             {
-                IPEndPoint ep = ListenAddress == null
+                IPEndPoint ep = ListenAuthIp == null
                                     ? new IPEndPoint(IPAddress.Any, AuthPort)
-                                    : new IPEndPoint(ListenAddress, AuthPort);
+                                    : new IPEndPoint(ListenAuthIp, AuthPort);
                 _authSocket = new UdpClient(ep);
             }
             return _authSocket;
@@ -411,9 +412,9 @@ namespace TinyRadius.Net.Util
         {
             if (_acctSocket == null)
             {
-                IPEndPoint ep = ListenAddress == null
+                IPEndPoint ep = ListenAccountIp == null
                                     ? new IPEndPoint(IPAddress.Any, AcctPort)
-                                    : new IPEndPoint(ListenAddress, AcctPort);
+                                    : new IPEndPoint(ListenAccountIp, AcctPort);
                 _acctSocket = new UdpClient(ep);
             }
             return _acctSocket;
@@ -487,17 +488,8 @@ namespace TinyRadius.Net.Util
                     {
                         if (p.Address.Equals(address) && p.PacketIdentifier == packet.Identifier)
                         {
-                            if (authenticator != null && p.Authenticator != null)
-                            {
-                                // packet is duplicate if stored authenticator is equal
-                                // to the packet authenticator
-                                return Equals(p.Authenticator, authenticator);
-                            }
-                            else
-                            {
-                                // should not happen, packet is duplicate
-                                return true;
-                            }
+                            return authenticator == null || p.Authenticator == null ||
+                                   Equals(p.Authenticator, authenticator);
                         }
                     }
                 }

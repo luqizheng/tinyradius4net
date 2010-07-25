@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Net;
 using System.Windows.Forms;
-using TinyRadiusServer.Radius;
+using TinyRadius.Net.Cfg;
+
+//using TinyRadiusServer.Radius;
 
 namespace TinyRadiusServer
 {
     public partial class MainForm : Form
     {
-        private readonly MockRadiusServer _server = new MockRadiusServer();
-
+        ///private readonly MockRadiusServer _server = new MockRadiusServer();
         public MainForm()
         {
             InitializeComponent();
@@ -19,20 +20,19 @@ namespace TinyRadiusServer
             IPHostEntry ipHost = Dns.Resolve(Dns.GetHostName());
             AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
+
+
             //Service Setting;
-            AccountListentIPTextBox.Text = Services.Default.AccountListentIP;
-            AccountListentPort.Text = Services.Default.AccountPort.ToString();
+            AccountListentIPTextBox.Text = Config.Instance.AccountListentIp;
+            AccountListentPort.Text = Config.Instance.AcctPort.ToString();
+            EnableAccountCheckBox.Checked = Config.Instance.EnableAccount;
 
-            AuthPortTextBox.Text = Services.Default.AuthPort.ToString();
-            AuthListentIPTextBox.Text = Services.Default.AuthListentIP;
+            AuthPortTextBox.Text = Config.Instance.AuthPort.ToString();
+            AuthListentIPTextBox.Text = Config.Instance.AuthListentIp;
+            enableAuthenticationCheckBox.Checked = Config.Instance.EnableAuthentication;
 
-
-
-            IPAddress ipAddr = ipHost.AddressList[0];
-
-
-            //Client Settings)
-            foreach (var entry in ClientSets.Instance)
+            //Client Settings
+            foreach (var entry in Config.Instance.NasSettings)
             {
                 var item = new ListViewItem(new[]
                                                 {
@@ -46,73 +46,78 @@ namespace TinyRadiusServer
 
         private void SaveServerSetting_Click(object sender, EventArgs e)
         {
-            SaveListentSetting();
+            SaveSetting();
         }
 
-        private void SaveListentSetting()
+        private void SaveSetting()
         {
-            try
+            //check IP formatter;
+            IPAddress ip1;
+            if (AuthListentIPTextBox.SelectedIndex != -1)
             {
-                //check IP formatter;
-                IPAddress ip1;
-                if (IPAddress.TryParse(AuthListentIPTextBox.Text, out ip1))
-                {
-                    Services.Default.AuthListentIP = AuthListentIPTextBox.Text;
-                }
-                else
-                {
-                    MessageBox.Show("Auth listent IP fomat isn't correct.");
-                }
-                Services.Default.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
-
-                if (IPAddress.TryParse(AuthListentIPTextBox.Text, out ip1))
-                {
-                    Services.Default.AccountListentIP = AccountListentIPTextBox.Text;
-                }
-                else
-                {
-                    MessageBox.Show("Account listent IP fomat isn't correct.");
-                }
-                Services.Default.AccountPort = Convert.ToInt32(AccountListentPort.Text);
-
-                Services.Default.Save();
+                Config.Instance.AuthListentIp = AuthListentIPTextBox.Text;
             }
-            catch (InvalidCastException error)
+            else
             {
-                MessageBox.Show(error.Message);
+                MessageBox.Show("请选择验证监听IP");
             }
+            Config.Instance.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
+            Config.Instance.EnableAuthentication = enableAuthenticationCheckBox.Checked;
+
+            if (AuthListentIPTextBox.SelectedIndex != -1)
+            {
+                Config.Instance.AccountListentIp = AccountListentIPTextBox.Text;
+            }
+            else
+            {
+                MessageBox.Show("请选择计费监听IP");
+            }
+            Config.Instance.AcctPort = Convert.ToInt32(AccountListentPort.Text);
+            Config.Instance.EnableAccount = EnableAccountCheckBox.Checked;
+
+            Config.Instance.Save();
         }
 
         private void Save_ClientItem(object sender, EventArgs e)
         {
-            IPAddress ip = IPAddress.Parse(textBoxClientIp.Text);
-            string sharekey = textBoxShareKey.Text;
-            if (ip != null)
+            try
             {
-                var item = new ListViewItem(new[] { ip.ToString(), sharekey });
-                clientListView.Items.Add(item);
-            }
+                IPAddress ip = IPAddress.Parse(textBoxClientIp.Text);
 
-            ClientSets.Instance.Add(ip.ToString(), sharekey);
-            ClientSets.Instance.Save();
+                string sharekey = textBoxShareKey.Text;
+                if (ip != null)
+                {
+                    var item = new ListViewItem(new[] { ip.ToString(), sharekey });
+                    clientListView.Items.Add(item);
+                }
+
+                Config.Instance.NasSettings.Add(ip.ToString(), sharekey);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("请输入正确的IP地址格式,如:10.169.1.123");
+            }
         }
 
         private void Start_Server(object sender, EventArgs e)
         {
-            SaveListentSetting();
+            const string ServiceName = "TinyRadius.Net Server";
+            TinyRadiusService trs = new TinyRadiusService(ServiceName);
+
+            SaveSetting();
+
             var btn = (Button)sender;
             if (btn.Tag.ToString() == "Stoped")
             {
-                _server.ListenAddress = IPAddress.Parse(Services.Default.AuthListentIP);
-                _server.Start(enableAuthenticationCheckBox.Checked, EnableAccountCheckBox.Checked);
+                trs.Start();
                 btn.Tag = "Started";
-                btn.Text = "Stop";
+                btn.Text = "停止";
             }
             else
             {
-                btn.Tag = null;
-                btn.Text = "Start";
-                _server.Stop();
+                trs.Stop();
+                btn.Tag = "Started";
+                btn.Text = "开始";
             }
         }
     }
