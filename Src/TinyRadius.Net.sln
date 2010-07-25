@@ -13,8 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Console", "TinyRadius.Console\TinyRadius.Console.csproj", "{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadiusServer", "TinyRadiusServer\TinyRadiusServer.csproj", "{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadiusService", "TinyRadiusService\TinyRadiusService.csproj", "{734D2978-F5BC-41BB-93ED-A32CCD11A597}"
 EndProject
 Global
@@ -38,10 +36,6 @@ Global
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A742A9BC-1D6D-40B3-82DA-0379C7094D5B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{734D2978-F5BC-41BB-93ED-A32CCD11A597}.Release|Any CPU.ActiveCfg = Release|Any CPU
