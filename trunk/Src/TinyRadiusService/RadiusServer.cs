@@ -1,6 +1,7 @@
-﻿using System.Net;
-using TinyRadius.Net.Cfg;
-using TinyRadius.Net.Util;
+﻿using System;
+using System.Data.SqlClient;
+using System.Net;
+using TinyRadius.Net.Packet;
 
 namespace TinyRadiusService
 {
@@ -8,47 +9,60 @@ namespace TinyRadiusService
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
-            //return ClientSets.Instance[client.Address.ToString()];
-            var cfg = new Config("");
-            return cfg.NasSettings[client.Address.ToString()].ToString();
+            return Cfg.Instance.TinyConfig.NasSettings[client.Address.ToString()];
         }
 
         public override string GetUserPassword(string userName)
         {
-            switch (userName)
+            if (Cfg.Instance.TinyConfig.ValidateByDatabase)
             {
-                case "a":
-                    return "a";
-                default:
-                    return "a";
+                using (var conn = new SqlConnection(Cfg.Instance.TinyConfig.DatabaseSetting.Connection))
+                {
+                    conn.Open();
+                    SqlCommand comm = conn.CreateCommand();
+                    comm.CommandText = Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql;
+                    SqlParameter param = comm.CreateParameter();
+                    param.ParameterName = "@userName";
+                    param.Value = userName;
+                    comm.Parameters.Add(param);
+                    comm.ExecuteScalar().ToString();
+                }
             }
+            throw new ApplicationException("Please enable Ldap validation or database validation");
         }
 
-        //public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
-        //{
-        //    string struser = accessRequest.UserName;
-        //    string strpwd = accessRequest.Password;
-        //    string str = "LDAP://yourserver/CN=username,CN=users,DC=yourdnsname,DC=CN ";
-        //    DirectoryEntry de = new DirectoryEntry(str, "yourdnsname\\ " + struser, strpwd,
-        //                                           AuthenticationTypes.ServerBind);
+        public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
+        {
+            if (Cfg.Instance.TinyConfig.ValidateByLdap)
+            {
+                string struser = accessRequest.UserName;
+                string strpwd = accessRequest.Password;
+                string path = Cfg.Instance.TinyConfig.LdapSetting.Path;
 
-        //    int type = RadiusPacket.AccessReject;
+                int type = RadiusPacket.AccessReject;
 
-        //    try
-        //    {
-        //        string guid = de.Guid.ToString();
-        //        type = RadiusPacket.AccessAccept;
-        //    }
-        //    catch (System.Exception ex)
-        //    {
-
-        //    }
-
-        //    var answer = new RadiusPacket(type, accessRequest.Identifier);
-        //    CopyProxyState(accessRequest, answer);
-        //    return answer;
+                var auth = new LdapAuthentication(path);
+                if (auth.IsAuthenticated(Cfg.Instance.TinyConfig.LdapSetting.DomainName, struser, strpwd))
+                {
+                    type = RadiusPacket.AccessAccept;
+                }
 
 
-        //}
+                if (type == RadiusPacket.AccessAccept)
+                {
+                    var answer = new RadiusPacket(type, accessRequest.Identifier);
+                    CopyProxyState(accessRequest, answer);
+                    return answer;
+                }
+                else
+                {
+                    return base.AccessRequestReceived(accessRequest, client);
+                }
+            }
+            else
+            {
+                return base.AccessRequestReceived(accessRequest, client);
+            }
+        }
     }
 }

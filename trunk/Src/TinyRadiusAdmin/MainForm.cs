@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Net;
+using System.ServiceProcess;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using TinyRadius.Net.Cfg;
 using TinyRadiusAdmin.Configurations;
 
 //using TinyRadiusServer.Radius;
@@ -11,7 +10,7 @@ namespace TinyRadiusAdmin
 {
     public partial class MainForm : Form
     {
-        ///private readonly MockRadiusServer _server = new MockRadiusServer();
+        TinyRadiusService tinyRadiusService = new TinyRadiusService();
         public MainForm()
         {
             InitializeComponent();
@@ -19,8 +18,6 @@ namespace TinyRadiusAdmin
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
-
             IPHostEntry ipHost = Dns.Resolve(Dns.GetHostName());
             AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
@@ -45,42 +42,95 @@ namespace TinyRadiusAdmin
                                                 });
                 clientListView.Items.Add(item);
             }
+            //Start button stats;
         }
 
 
         private void SaveServerSetting_Click(object sender, EventArgs e)
         {
-            SaveSetting();
+            if (SaveSetting())
+            {
+                var result = MessageBox.Show("发现有关键数据更改，必须从其服务，是现在重启服务吗？", "", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    tinyRadiusService.Restart();
+                }
+            }
         }
 
-        private void SaveSetting()
+        private bool SaveSetting()
         {
+            var autoRestart = SaveAuthSetting();
 
-            //check IP formatter;
-            IPAddress ip1;
+            if (!SaveAccountSetting(ref autoRestart)) return false;
+
+            Cfg.Instance.TinyConfig.ValidateByDatabase = this.enableDataBase.Checked;
+            Cfg.Instance.TinyConfig.DatabaseSetting.Connection = this.TextBoxConnectionString.Text;
+            Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = this.TextBoxSQL.Text;
+
+            Cfg.Instance.TinyConfig.ValidateByLdap = this.enableLDAP.Checked;
+            Cfg.Instance.TinyConfig.LdapSetting.Path = this.TextBoxLdapPath.Text;
+            Cfg.Instance.TinyConfig.LdapSetting.DomainName = textBoxDomain.Text;
+
+            Cfg.Instance.TinyConfig.Save();
+            return autoRestart;
+        }
+
+        private bool SaveAccountSetting(ref bool autoRestart)
+        {
             if (AuthListentIPTextBox.SelectedIndex != -1)
             {
-                Cfg.Instance.TinyConfig.AuthListentIp = AuthListentIPTextBox.Text;
-            }
-            else
-            {
-                MessageBox.Show("请选择验证监听IP");
-            }
-            Cfg.Instance.TinyConfig.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
-            Cfg.Instance.TinyConfig.EnableAuthentication = enableAuthenticationCheckBox.Checked;
-
-            if (AuthListentIPTextBox.SelectedIndex != -1)
-            {
+                if (!autoRestart)
+                {
+                    autoRestart = Cfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
+                }
                 Cfg.Instance.TinyConfig.AccountListentIp = AccountListentIPTextBox.Text;
             }
             else
             {
                 MessageBox.Show("请选择计费监听IP");
+                return false;
+            }
+            if (!autoRestart)
+            {
+                autoRestart = Cfg.Instance.TinyConfig.AcctPort != Convert.ToInt32(AccountListentPort.Text);
             }
             Cfg.Instance.TinyConfig.AcctPort = Convert.ToInt32(AccountListentPort.Text);
+            if (!autoRestart)
+            {
+                autoRestart = Cfg.Instance.TinyConfig.EnableAccount != EnableAccountCheckBox.Checked;
+            }
             Cfg.Instance.TinyConfig.EnableAccount = EnableAccountCheckBox.Checked;
+            return autoRestart;
+        }
 
-            Cfg.Instance.TinyConfig.Save();
+        private bool SaveAuthSetting()
+        {
+            var autoRestart = false;
+            IPAddress ip1;
+            if (AuthListentIPTextBox.SelectedIndex != -1)
+            {
+                autoRestart = Cfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
+                Cfg.Instance.TinyConfig.AuthListentIp = AuthListentIPTextBox.Text;
+            }
+            else
+            {
+                MessageBox.Show("请选择验证监听IP");
+                return false;
+            }
+
+            if (!autoRestart)
+            {
+                autoRestart = Cfg.Instance.TinyConfig.AuthPort != Convert.ToInt32(AuthPortTextBox.Text);
+            }
+            Cfg.Instance.TinyConfig.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
+
+            if (!autoRestart)
+            {
+                autoRestart = Cfg.Instance.TinyConfig.EnableAuthentication != enableAuthenticationCheckBox.Checked;
+            }
+            Cfg.Instance.TinyConfig.EnableAuthentication = enableAuthenticationCheckBox.Checked;
+            return autoRestart;
         }
 
         private void Save_ClientItem(object sender, EventArgs e)
@@ -106,24 +156,19 @@ namespace TinyRadiusAdmin
 
         private void Start_Server(object sender, EventArgs e)
         {
-            const string ServiceName = "TinyRadius.Net Server";
-            TinyRadiusService trs = new TinyRadiusService(ServiceName);
-
-            SaveSetting();
-
             var btn = (Button)sender;
-            if (btn.Tag.ToString() == "Stoped")
+            var status = (ServiceControllerStatus) btn.Tag;
+            if (status==ServiceControllerStatus.Running)
             {
-                trs.Start();
-                btn.Tag = "Started";
+                tinyRadiusService.Start();
                 btn.Text = "停止";
             }
             else
             {
-                trs.Stop();
-                btn.Tag = "Stoped";
+                tinyRadiusService.Stop();
                 btn.Text = "开始";
             }
+            btn.Tag = tinyRadiusService.Status;
         }
     }
 }

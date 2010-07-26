@@ -8,13 +8,27 @@ namespace TinyRadiusAdmin
     {
         private readonly ILog _log;
         private readonly ServiceController _serviceController;
-
-        public TinyRadiusService(string serverName)
+        public ServiceControllerStatus Status
         {
-            ServiceName = serverName;
+            get
+            {
+                return _serviceController.Status;
+            }
+        }
+        public TinyRadiusService()
+        {
+            ServiceName = "TinyRadius.Net Server";
+
             _log = LogManager.GetLogger(typeof(TinyRadiusService));
             _serviceController = new ServiceController(ServiceName);
 
+        }
+
+        public void Restart()
+        {
+            if (_serviceController.Status == ServiceControllerStatus.Running)
+                _serviceController.Stop();
+            _serviceController.Start();
         }
 
         public string ServiceName { get; set; }
@@ -33,7 +47,7 @@ namespace TinyRadiusAdmin
                 {
                     return true;
                 }
-                
+
             }
             catch (Exception ex)
             {

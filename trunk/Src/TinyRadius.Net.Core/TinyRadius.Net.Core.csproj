@@ -63,6 +63,8 @@
     <Compile Include="Attributes\VendorSpecificAttribute.cs" />
     <Compile Include="AuthenticationType.cs" />
     <Compile Include="Cfg\Config.cs" />
+    <Compile Include="Cfg\DatabaseSetting.cs" />
+    <Compile Include="Cfg\LdapSetting.cs" />
     <Compile Include="Dictionaries\AttributeType.cs" />
     <Compile Include="Dictionaries\DefaultDictionary.cs" />
     <Compile Include="Dictionaries\IDictionary.cs" />

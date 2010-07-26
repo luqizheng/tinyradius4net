@@ -15,10 +15,10 @@ namespace TinyRadius.Net.Dictionaries
 
         /// <summary>
         /// Create a new attribute type.
-        /// @param code Radius attribute type code
-        /// @param name Attribute type name
-        /// @param type RadiusAttribute descendant who handles
-        /// attributes of this type
+        /// <param name="code"> Radius attribute type code</param>
+        /// <param name="name"> Attribute type name</param>
+        /// <param name="type"> RadiusAttribute descendant who handles
+        /// attributes of this type</param>
         /// </summary>
         public AttributeType(int code, String name, Type type)
         {
