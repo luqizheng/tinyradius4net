@@ -42,8 +42,38 @@ namespace TinyRadiusAdmin
                                                 });
                 clientListView.Items.Add(item);
             }
-            //Start button stats;
+
+            SetServiceStatus(tinyRadiusService.Status == ServiceControllerStatus.Running);
+            tinyRadiusService.StatusChangingEvent += new EventHandler(tinyRadiusService_StatusChangingEvent);
+
         }
+
+        void tinyRadiusService_StatusChangingEvent(object sender, EventArgs e)
+        {
+            if (!InvokeRequired)
+            {
+                this.labelStatus.Text = ((TinyRadiusService)sender).Status.ToString();
+            }
+            else
+            {
+                this.Invoke(new Action<object, EventArgs>(tinyRadiusService_StatusChangingEvent), sender, e);
+            }
+        }
+
+
+        private void SetServiceStatus(bool isRuning)
+        {
+            if (!InvokeRequired)
+            {
+                this.button1.Text = isRuning ? "停止" : "启动";
+                this.button1.Tag = isRuning;
+            }
+            else
+            {
+                Invoke(new Action<bool>(SetServiceStatus), isRuning);
+            }
+        }
+
 
 
         private void SaveServerSetting_Click(object sender, EventArgs e)
@@ -60,20 +90,29 @@ namespace TinyRadiusAdmin
 
         private bool SaveSetting()
         {
-            var autoRestart = SaveAuthSetting();
+            try
+            {
+                var autoRestart = SaveAuthSetting();
 
-            if (!SaveAccountSetting(ref autoRestart)) return false;
+                SaveAccountSetting(ref autoRestart);
 
-            Cfg.Instance.TinyConfig.ValidateByDatabase = this.enableDataBase.Checked;
-            Cfg.Instance.TinyConfig.DatabaseSetting.Connection = this.TextBoxConnectionString.Text;
-            Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = this.TextBoxSQL.Text;
+                Cfg.Instance.TinyConfig.ValidateByDatabase = this.enableDataBase.Checked;
+                Cfg.Instance.TinyConfig.DatabaseSetting.Connection = this.TextBoxConnectionString.Text;
+                Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = this.TextBoxSQL.Text;
 
-            Cfg.Instance.TinyConfig.ValidateByLdap = this.enableLDAP.Checked;
-            Cfg.Instance.TinyConfig.LdapSetting.Path = this.TextBoxLdapPath.Text;
-            Cfg.Instance.TinyConfig.LdapSetting.DomainName = textBoxDomain.Text;
+                Cfg.Instance.TinyConfig.ValidateByLdap = this.enableLDAP.Checked;
+                Cfg.Instance.TinyConfig.LdapSetting.Path = this.TextBoxLdapPath.Text;
+                Cfg.Instance.TinyConfig.LdapSetting.DomainName = textBoxDomain.Text;
 
-            Cfg.Instance.TinyConfig.Save();
-            return autoRestart;
+                Cfg.Instance.TinyConfig.Save();
+                return autoRestart;
+            }
+            catch(ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message);
+                return false;
+            }
+           
         }
 
         private bool SaveAccountSetting(ref bool autoRestart)
@@ -157,18 +196,17 @@ namespace TinyRadiusAdmin
         private void Start_Server(object sender, EventArgs e)
         {
             var btn = (Button)sender;
-            var status = (ServiceControllerStatus) btn.Tag;
-            if (status==ServiceControllerStatus.Running)
+            if (Convert.ToBoolean(btn.Tag))
             {
-                tinyRadiusService.Start();
-                btn.Text = "停止";
+                tinyRadiusService.Stop();
+                SetServiceStatus(false);
             }
             else
             {
-                tinyRadiusService.Stop();
-                btn.Text = "开始";
+                tinyRadiusService.Start();
+                SetServiceStatus(true);
             }
-            btn.Tag = tinyRadiusService.Status;
+
         }
     }
 }
