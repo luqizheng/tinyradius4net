@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Win32;
@@ -10,15 +11,19 @@ namespace TinyRadius.Net.Cfg
     {
         private const string FileName = "TinyServerSetting.xml";
         private Dictionary<string, string> _nasSettings = new Dictionary<string, string>();
-        private readonly string filePath;
+        private readonly string _filePath;
         public Config(string path)
         {
+            this.DatabaseSetting = new DatabaseSetting();
+            LdapSetting = new LdapSetting();
             AuthListentIp = "192.168.1.123";
             AccountListentIp = "192.168.1.123";
             AcctPort = 1813;
             AuthPort = 1812;
-            filePath = Path.Combine(path, FileName);
-            if (File.Exists(filePath))
+            EnableAccount = true;
+            EnableAuthentication = true;
+            _filePath = Path.Combine(path, FileName);
+            if (File.Exists(_filePath))
             {
                 var mySerializer = new DataContractSerializer(typeof(Config));
                 FileStream stream = File.OpenRead(FileName);
@@ -60,6 +65,16 @@ namespace TinyRadius.Net.Cfg
             set { _nasSettings = value; }
         }
 
+
+        [DataMember]
+        public bool ValidateByDatabase { get; set; }
+        [DataMember]
+        public bool ValidateByLdap { get; set; }
+        [DataMember]
+        public DatabaseSetting DatabaseSetting { get; set; }
+        [DataMember]
+        public LdapSetting LdapSetting { get; set; }
+
         private void InitBy(Config config)
         {
             AccountListentIp = config.AccountListentIp;
@@ -71,13 +86,27 @@ namespace TinyRadius.Net.Cfg
             EnableAuthentication = config.EnableAuthentication;
 
             _nasSettings = config._nasSettings;
+
+            ValidateByDatabase = config.ValidateByDatabase;
+            ValidateByLdap = config.ValidateByLdap;
+
+            DatabaseSetting = config.DatabaseSetting;
+            LdapSetting = config.LdapSetting;
         }
 
         public void Save()
         {
-            var mySerializer = new DataContractSerializer(typeof(Config));
+            if (String.IsNullOrEmpty(DatabaseSetting.Connection) && ValidateByDatabase)
+                throw new ArgumentException("使用Database验证用户，但是链接字符串为空");
+            if (String.IsNullOrEmpty(DatabaseSetting.PasswordSql) && ValidateByDatabase)
+                throw new ArgumentException("使用Database验证用户，但是获取密码的SQL为空");
 
-            var myWriter = new FileStream(FileName, FileMode.Create);
+            if (String.IsNullOrEmpty(this.LdapSetting.Path) && ValidateByLdap)
+                throw new ArgumentException("使用Ldap验证用户，但是Ldap路径为空");
+
+
+            var mySerializer = new DataContractSerializer(typeof(Config));
+            var myWriter = new FileStream(_filePath, FileMode.Create);
             mySerializer.WriteObject(myWriter, this);
             myWriter.Close();
         }

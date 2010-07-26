@@ -40,6 +40,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Management" />
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
@@ -55,6 +56,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LdapAuthentication.cs" />
+    <Compile Include="Cfg.cs" />
     <Compile Include="RadiusServer.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
