@@ -26,7 +26,7 @@ namespace TinyRadius.Net.Cfg
             if (File.Exists(_filePath))
             {
                 var mySerializer = new DataContractSerializer(typeof(Config));
-                FileStream stream = File.OpenRead(FileName);
+                FileStream stream = File.OpenRead(_filePath);
                 try
                 {
                     var config = (Config)mySerializer.ReadObject(stream);
@@ -90,8 +90,8 @@ namespace TinyRadius.Net.Cfg
             ValidateByDatabase = config.ValidateByDatabase;
             ValidateByLdap = config.ValidateByLdap;
 
-            DatabaseSetting = config.DatabaseSetting;
-            LdapSetting = config.LdapSetting;
+            DatabaseSetting = config.DatabaseSetting ?? new DatabaseSetting();
+            LdapSetting = config.LdapSetting ?? new LdapSetting();
         }
 
         public void Save()

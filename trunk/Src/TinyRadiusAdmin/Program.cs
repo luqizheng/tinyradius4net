@@ -23,7 +23,7 @@ namespace TinyRadiusAdmin
             {
                 var log = LogManager.GetLogger(typeof(Program));
                 log.Error("Application Error", ex);
-                MessageBox.Show(ex.Message);
+                throw ex;
             }
         }
     }
