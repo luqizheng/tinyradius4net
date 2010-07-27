@@ -399,7 +399,7 @@ namespace TinyRadius.Net.Util
                 IPEndPoint ep = ListenAuthIp == null
                                     ? new IPEndPoint(IPAddress.Any, AuthPort)
                                     : new IPEndPoint(ListenAuthIp, AuthPort);
-                Logger.Info("Create AuthSocket UdpClient with" + ep.Address.ToString() + ":" + ep.Port);
+                Logger.Info("Create AuthSocket UdpClient with " + ep.Address.ToString() + ":" + ep.Port);
                 _authSocket = new UdpClient(ep);
             }
             return _authSocket;

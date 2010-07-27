@@ -20,7 +20,7 @@ namespace TinyRadiusService
         {
             try
             {
-                var config = new Config("");
+                var config = ServiceCfg.Instance.TinyConfig;
 
                 _server = new RadiusServer
                               {
@@ -34,7 +34,8 @@ namespace TinyRadiusService
             catch (Exception ex)
             {
                 Log.Error(ex);
-                throw ex;
+                throw;
+
             }
         }
 
@@ -47,7 +48,8 @@ namespace TinyRadiusService
             catch (Exception ex)
             {
                 Log.Error(ex);
-                throw ex;
+                throw;
+
             }
         }
     }

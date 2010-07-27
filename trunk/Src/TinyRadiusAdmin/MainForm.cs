@@ -2,6 +2,7 @@
 using System.Net;
 using System.ServiceProcess;
 using System.Windows.Forms;
+using Microsoft.Win32;
 using TinyRadiusAdmin.Configurations;
 
 //using TinyRadiusServer.Radius;
@@ -11,9 +12,41 @@ namespace TinyRadiusAdmin
     public partial class MainForm : Form
     {
         TinyRadiusService tinyRadiusService = new TinyRadiusService();
+        private const string RegistryPath = @"SYSTEM\CurrentControlSet\services\TinyRadius.Net Server";
         public MainForm()
         {
             InitializeComponent();
+        }
+        public string GetServicePath()
+        {
+           
+            RegistryKey registry =
+                Registry.LocalMachine.OpenSubKey(RegistryPath);
+            try
+            {
+                if (registry == null)
+                {
+                    throw new ApplicationException("TinyRadius Server没有安装");
+                }
+                var path = registry.GetValue("ImagePath").ToString();
+                
+                if (path.StartsWith("\""))
+                {
+                    path = path.Substring(1);
+                }
+                if (path.EndsWith("\""))
+                {
+                    path = path.Substring(0, path.Length - 1);
+                }
+
+                int lastBackslash = path.LastIndexOf('\\');
+                return path.Substring(0, lastBackslash);
+            }
+            finally
+            {
+                if (registry != null)
+                    registry.Close();
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -22,7 +55,7 @@ namespace TinyRadiusAdmin
             AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
 
-
+            MessageBox.Show(GetServicePath());
             //Service Setting;
             AccountListentIPTextBox.Text = Cfg.Instance.TinyConfig.AccountListentIp;
             AccountListentPort.Text = Cfg.Instance.TinyConfig.AcctPort.ToString();
@@ -107,12 +140,12 @@ namespace TinyRadiusAdmin
                 Cfg.Instance.TinyConfig.Save();
                 return autoRestart;
             }
-            catch(ArgumentException ex)
+            catch (ArgumentException ex)
             {
                 MessageBox.Show(ex.Message);
                 return false;
             }
-           
+
         }
 
         private bool SaveAccountSetting(ref bool autoRestart)
@@ -207,6 +240,11 @@ namespace TinyRadiusAdmin
                 SetServiceStatus(true);
             }
 
+        }
+
+        private void ReStart_Click(object sender, EventArgs e)
+        {
+            tinyRadiusService.Restart();
         }
     }
 }
