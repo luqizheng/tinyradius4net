@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LdapAuthentication.cs" />
-    <Compile Include="Cfg.cs" />
+    <Compile Include="ServiceCfg.cs" />
     <Compile Include="RadiusServer.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>

@@ -19,7 +19,7 @@ namespace TinyRadiusService
         public bool IsAuthenticated(string domain, string username, string pwd)
         {
             string domainAndUsername = (String.IsNullOrEmpty(domain) ? "" : @"\") + username;
-            DirectoryEntry entry = new DirectoryEntry(_path, domainAndUsername, pwd);
+            var entry = new DirectoryEntry(_path, domainAndUsername, pwd);
 
             try
             {

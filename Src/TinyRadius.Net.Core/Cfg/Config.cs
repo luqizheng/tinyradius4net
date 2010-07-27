@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using log4net;
 using Microsoft.Win32;
 
 namespace TinyRadius.Net.Cfg
@@ -12,19 +13,27 @@ namespace TinyRadius.Net.Cfg
         private const string FileName = "TinyServerSetting.xml";
         private Dictionary<string, string> _nasSettings = new Dictionary<string, string>();
         private readonly string _filePath;
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Config));
         public Config(string path)
         {
+            if (String.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException("path");
+            }
             this.DatabaseSetting = new DatabaseSetting();
             LdapSetting = new LdapSetting();
-            AuthListentIp = "192.168.1.123";
-            AccountListentIp = "192.168.1.123";
+            AuthListentIp = "127.0.0.1";
+            AccountListentIp = "127.0.0.1";
             AcctPort = 1813;
             AuthPort = 1812;
             EnableAccount = true;
             EnableAuthentication = true;
+            Log.Debug("try to find setting file's path " + path);
             _filePath = Path.Combine(path, FileName);
+            Log.Debug("try to find setting file " + _filePath);
             if (File.Exists(_filePath))
             {
+                Log.Debug("Read setting from filePath:" + _filePath);
                 var mySerializer = new DataContractSerializer(typeof(Config));
                 FileStream stream = File.OpenRead(_filePath);
                 try
@@ -36,6 +45,10 @@ namespace TinyRadius.Net.Cfg
                 {
                     stream.Close();
                 }
+            }
+            else
+            {
+                Log.Debug("setting file not find, use default value.");
             }
         }
 
