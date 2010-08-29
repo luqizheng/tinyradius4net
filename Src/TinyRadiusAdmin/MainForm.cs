@@ -1,61 +1,34 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Net;
 using System.ServiceProcess;
+using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Win32;
+using TinyRadius.Net.Cfg;
 using TinyRadiusAdmin.Configurations;
-
-//using TinyRadiusServer.Radius;
 
 namespace TinyRadiusAdmin
 {
     public partial class MainForm : Form
     {
-        TinyRadiusService tinyRadiusService = new TinyRadiusService();
-        private const string RegistryPath = @"SYSTEM\CurrentControlSet\services\TinyRadius.Net Server";
+        public TinyRadiusService TinyRadiusService
+        { get; set; }
+
+
         public MainForm()
         {
             InitializeComponent();
         }
-        public string GetServicePath()
-        {
-           
-            RegistryKey registry =
-                Registry.LocalMachine.OpenSubKey(RegistryPath);
-            try
-            {
-                if (registry == null)
-                {
-                    throw new ApplicationException("TinyRadius Server没有安装");
-                }
-                var path = registry.GetValue("ImagePath").ToString();
-                
-                if (path.StartsWith("\""))
-                {
-                    path = path.Substring(1);
-                }
-                if (path.EndsWith("\""))
-                {
-                    path = path.Substring(0, path.Length - 1);
-                }
 
-                int lastBackslash = path.LastIndexOf('\\');
-                return path.Substring(0, lastBackslash);
-            }
-            finally
-            {
-                if (registry != null)
-                    registry.Close();
-            }
-        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
+
             IPHostEntry ipHost = Dns.Resolve(Dns.GetHostName());
             AuthListentIPTextBox.Items.AddRange(ipHost.AddressList);
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
 
-            MessageBox.Show(GetServicePath());
             //Service Setting;
             AccountListentIPTextBox.Text = Cfg.Instance.TinyConfig.AccountListentIp;
             AccountListentPort.Text = Cfg.Instance.TinyConfig.AcctPort.ToString();
@@ -66,30 +39,45 @@ namespace TinyRadiusAdmin
             enableAuthenticationCheckBox.Checked = Cfg.Instance.TinyConfig.EnableAuthentication;
 
             //Client Settings
-            foreach (var entry in Cfg.Instance.TinyConfig.NasSettings)
-            {
-                var item = new ListViewItem(new[]
-                                                {
-                                                    entry.Key,
-                                                    entry.Value
-                                                });
-                clientListView.Items.Add(item);
-            }
-
-            SetServiceStatus(tinyRadiusService.Status == ServiceControllerStatus.Running);
-            tinyRadiusService.StatusChangingEvent += new EventHandler(tinyRadiusService_StatusChangingEvent);
-
+            this.nasClientSetting1.DataSource = Cfg.Instance.TinyConfig.NasSettings;
+            labelStatus.Text = TinyRadiusService.Status.ToString();
+            SetServiceStatus(TinyRadiusService.Status == ServiceControllerStatus.Running);
+            //Validation
+            //databaseSetting
+            TextBoxSQL.Text = Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql;
+            TextBoxConnectionString.Text = Cfg.Instance.TinyConfig.DatabaseSetting.Connection;
+            enableDataBase.Checked = Cfg.Instance.TinyConfig.ValidateByDatabase;
+            //ldap
+            TextBoxLdapPath.Text = Cfg.Instance.TinyConfig.LdapSetting.Path;
+            textBoxDomain.Text = Cfg.Instance.TinyConfig.LdapSetting.DomainName;
+            enableLDAP.Checked = Cfg.Instance.TinyConfig.ValidateByLdap;
+            TinyRadiusService.StatusChangingEvent += TinyRadiusServiceStatusChangingEvent;
         }
 
-        void tinyRadiusService_StatusChangingEvent(object sender, EventArgs e)
+        private void TinyRadiusServiceStatusChangingEvent(object sender, EventArgs e)
         {
+            var service = ((TinyRadiusService)sender);
             if (!InvokeRequired)
             {
-                this.labelStatus.Text = ((TinyRadiusService)sender).Status.ToString();
+                labelStatus.Text = service.Status.ToString();
+                switch (service.Status)
+                {
+                    case ServiceControllerStatus.Running:
+                        SetServiceStatus(true);
+                        button1.Enabled = true;
+                        break;
+                    case ServiceControllerStatus.Stopped:
+                        SetServiceStatus(false);
+                        button1.Enabled = true;
+                        break;
+                    default:
+                        button1.Enabled = false;
+                        break;
+                }
             }
             else
             {
-                this.Invoke(new Action<object, EventArgs>(tinyRadiusService_StatusChangingEvent), sender, e);
+                Invoke(new Action<object, EventArgs>(TinyRadiusServiceStatusChangingEvent), sender, e);
             }
         }
 
@@ -98,8 +86,8 @@ namespace TinyRadiusAdmin
         {
             if (!InvokeRequired)
             {
-                this.button1.Text = isRuning ? "停止" : "启动";
-                this.button1.Tag = isRuning;
+                button1.Text = isRuning ? "停止" : "启动";
+                button1.Tag = isRuning;
             }
             else
             {
@@ -108,15 +96,14 @@ namespace TinyRadiusAdmin
         }
 
 
-
         private void SaveServerSetting_Click(object sender, EventArgs e)
         {
             if (SaveSetting())
             {
-                var result = MessageBox.Show("发现有关键数据更改，必须从其服务，是现在重启服务吗？", "", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBox.Show("有关键数据更改,只有重新启动服务才会生效，现在重启吗?", "信息", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
-                    tinyRadiusService.Restart();
+                    TinyRadiusService.Restart();
                 }
             }
         }
@@ -125,16 +112,16 @@ namespace TinyRadiusAdmin
         {
             try
             {
-                var autoRestart = SaveAuthSetting();
+                bool autoRestart = SaveAuthSetting();
 
                 SaveAccountSetting(ref autoRestart);
 
-                Cfg.Instance.TinyConfig.ValidateByDatabase = this.enableDataBase.Checked;
-                Cfg.Instance.TinyConfig.DatabaseSetting.Connection = this.TextBoxConnectionString.Text;
-                Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = this.TextBoxSQL.Text;
+                Cfg.Instance.TinyConfig.ValidateByDatabase = enableDataBase.Checked;
+                Cfg.Instance.TinyConfig.DatabaseSetting.Connection = TextBoxConnectionString.Text;
+                Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = TextBoxSQL.Text;
 
-                Cfg.Instance.TinyConfig.ValidateByLdap = this.enableLDAP.Checked;
-                Cfg.Instance.TinyConfig.LdapSetting.Path = this.TextBoxLdapPath.Text;
+                Cfg.Instance.TinyConfig.ValidateByLdap = enableLDAP.Checked;
+                Cfg.Instance.TinyConfig.LdapSetting.Path = TextBoxLdapPath.Text;
                 Cfg.Instance.TinyConfig.LdapSetting.DomainName = textBoxDomain.Text;
 
                 Cfg.Instance.TinyConfig.Save();
@@ -145,7 +132,6 @@ namespace TinyRadiusAdmin
                 MessageBox.Show(ex.Message);
                 return false;
             }
-
         }
 
         private bool SaveAccountSetting(ref bool autoRestart)
@@ -178,7 +164,7 @@ namespace TinyRadiusAdmin
 
         private bool SaveAuthSetting()
         {
-            var autoRestart = false;
+            bool autoRestart = false;
             IPAddress ip1;
             if (AuthListentIPTextBox.SelectedIndex != -1)
             {
@@ -205,46 +191,62 @@ namespace TinyRadiusAdmin
             return autoRestart;
         }
 
-        private void Save_ClientItem(object sender, EventArgs e)
-        {
-            try
-            {
-                IPAddress ip = IPAddress.Parse(textBoxClientIp.Text);
-
-                string sharekey = textBoxShareKey.Text;
-                if (ip != null)
-                {
-                    var item = new ListViewItem(new[] { ip.ToString(), sharekey });
-                    clientListView.Items.Add(item);
-                }
-
-                Cfg.Instance.TinyConfig.NasSettings.Add(ip.ToString(), sharekey);
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show("请输入正确的IP地址格式,如:10.169.1.123");
-            }
-        }
-
         private void Start_Server(object sender, EventArgs e)
         {
             var btn = (Button)sender;
             if (Convert.ToBoolean(btn.Tag))
             {
-                tinyRadiusService.Stop();
+                TinyRadiusService.Stop();
                 SetServiceStatus(false);
             }
             else
             {
-                tinyRadiusService.Start();
+                TinyRadiusService.Start();
                 SetServiceStatus(true);
             }
-
         }
 
         private void ReStart_Click(object sender, EventArgs e)
         {
-            tinyRadiusService.Restart();
+            TinyRadiusService.Restart();
         }
+
+        private void TestConnection(object sender, EventArgs e)
+        {
+            var btn = (Button)sender;
+            btn.Enabled = false;
+            ThreadPool.QueueUserWorkItem(delegate(object state)
+                                             {
+                                                 SqlConnection conn = null;
+                                                 try
+                                                 {
+                                                     conn = new SqlConnection(TextBoxConnectionString.Text);
+                                                     conn.Open();
+                                                     if (conn.State == System.Data.ConnectionState.Open)
+                                                     {
+                                                         MessageBox.Show("连接成功");
+                                                     }
+                                                     else
+                                                     {
+                                                         MessageBox.Show("连接失败,状态为" + conn.State);
+                                                     }
+                                                 }
+                                                 catch (Exception ex)
+                                                 {
+                                                     MessageBox.Show("连接失败,信息如下:" + ex.Message);
+                                                 }
+                                                 finally
+                                                 {
+                                                     if (conn != null)
+                                                         conn.Dispose();
+                                                 }
+                                                 this.Invoke(
+                                                     new Action<Button>(delegate(Button btn1) { btn1.Enabled = true; }), (Button)state);
+                                             }, sender);
+        }
+
+
+
+
     }
 }

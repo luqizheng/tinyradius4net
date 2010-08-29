@@ -24,7 +24,7 @@ namespace TinyRadius.Net.Util
         /// @param client IP address and port number of client
         /// @return shared secret or null
         /// </summary>
-        private static readonly ILog Logger = LogManager.GetLogger(typeof (RadiusServer));
+        protected static readonly ILog Logger = LogManager.GetLogger(typeof (RadiusServer));
 
         private readonly List<ReceivedPacket> _receivedPackets = new List<ReceivedPacket>();
         private int _acctPort = 1813;
@@ -191,7 +191,6 @@ namespace TinyRadius.Net.Util
                                                      catch (Exception e)
                                                      {
                                                          Logger.Fatal("auth thread stopped by exception", e);
-                                                         throw;
                                                      }
                                                      finally
                                                      {
@@ -216,7 +215,7 @@ namespace TinyRadius.Net.Util
                                                      catch (Exception e)
                                                      {
                                                          Logger.Fatal("acct thread stopped by exception", e);
-                                                         throw e;
+                                                         
                                                      }
                                                      finally
                                                      {

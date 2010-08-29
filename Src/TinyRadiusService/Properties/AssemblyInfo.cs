@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("TinyRadiusService")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("珠海科蓝电子有限公司平台")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("珠海科蓝电子有限公司")]
 [assembly: AssemblyProduct("TinyRadiusService")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCopyright("Copyright ©  珠海科蓝电子有限公司2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

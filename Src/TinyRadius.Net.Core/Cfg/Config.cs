@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using log4net;
-using Microsoft.Win32;
 
 namespace TinyRadius.Net.Cfg
 {
@@ -11,16 +10,17 @@ namespace TinyRadius.Net.Cfg
     public class Config
     {
         private const string FileName = "TinyServerSetting.xml";
-        private Dictionary<string, string> _nasSettings = new Dictionary<string, string>();
+        private static readonly ILog Log = LogManager.GetLogger(typeof (Config));
         private readonly string _filePath;
-        private static readonly ILog Log = LogManager.GetLogger(typeof(Config));
+        private Dictionary<string, NasSetting> _nasSettings = new Dictionary<string, NasSetting>();
+
         public Config(string path)
         {
             if (String.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException("path");
             }
-            this.DatabaseSetting = new DatabaseSetting();
+            DatabaseSetting = new DatabaseSetting();
             LdapSetting = new LdapSetting();
             AuthListentIp = "127.0.0.1";
             AccountListentIp = "127.0.0.1";
@@ -34,11 +34,11 @@ namespace TinyRadius.Net.Cfg
             if (File.Exists(_filePath))
             {
                 Log.Debug("Read setting from filePath:" + _filePath);
-                var mySerializer = new DataContractSerializer(typeof(Config));
+                var mySerializer = new DataContractSerializer(typeof (Config));
                 FileStream stream = File.OpenRead(_filePath);
                 try
                 {
-                    var config = (Config)mySerializer.ReadObject(stream);
+                    var config = (Config) mySerializer.ReadObject(stream);
                     InitBy(config);
                 }
                 finally
@@ -72,7 +72,7 @@ namespace TinyRadius.Net.Cfg
         public bool EnableAccount { get; set; }
 
         [DataMember]
-        public Dictionary<string, string> NasSettings
+        public Dictionary<string, NasSetting> NasSettings
         {
             get { return _nasSettings; }
             set { _nasSettings = value; }
@@ -81,10 +81,13 @@ namespace TinyRadius.Net.Cfg
 
         [DataMember]
         public bool ValidateByDatabase { get; set; }
+
         [DataMember]
         public bool ValidateByLdap { get; set; }
+
         [DataMember]
         public DatabaseSetting DatabaseSetting { get; set; }
+
         [DataMember]
         public LdapSetting LdapSetting { get; set; }
 
@@ -114,11 +117,11 @@ namespace TinyRadius.Net.Cfg
             if (String.IsNullOrEmpty(DatabaseSetting.PasswordSql) && ValidateByDatabase)
                 throw new ArgumentException("使用Database验证用户，但是获取密码的SQL为空");
 
-            if (String.IsNullOrEmpty(this.LdapSetting.Path) && ValidateByLdap)
+            if (String.IsNullOrEmpty(LdapSetting.Path) && ValidateByLdap)
                 throw new ArgumentException("使用Ldap验证用户，但是Ldap路径为空");
 
 
-            var mySerializer = new DataContractSerializer(typeof(Config));
+            var mySerializer = new DataContractSerializer(typeof (Config));
             var myWriter = new FileStream(_filePath, FileMode.Create);
             mySerializer.WriteObject(myWriter, this);
             myWriter.Close();

@@ -5,15 +5,22 @@ using TinyRadius.Net.Packet;
 
 namespace TinyRadiusService
 {
-    internal class RadiusServer : TinyRadius.Net.Util.RadiusServer
+    public class RadiusServer : TinyRadius.Net.Util.RadiusServer
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
-            return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()];
+            return "123";
+            if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
+            {
+                return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
+            }
+            Logger.Error("Can't find shareKey with " + client.Address);
+            return " ";
         }
 
         public override string GetUserPassword(string userName)
         {
+            return "123456";
             if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
             {
                 using (var conn = new SqlConnection(ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection))
@@ -28,12 +35,12 @@ namespace TinyRadiusService
                     comm.ExecuteScalar().ToString();
                 }
             }
-            throw new ApplicationException("Please enable Ldap validation or database validation");
+            throw new ApplicationException("Please enable LDAP validation or database validation");
         }
 
         public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
         {
-        if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
+            /*if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
             {
                 string struser = accessRequest.UserName;
                 string strpwd = accessRequest.Password;
@@ -54,15 +61,8 @@ namespace TinyRadiusService
                     CopyProxyState(accessRequest, answer);
                     return answer;
                 }
-                else
-                {
-                    return base.AccessRequestReceived(accessRequest, client);
-                }
-            }
-            else
-            {
-                return base.AccessRequestReceived(accessRequest, client);
-            }
+            }*/
+            return base.AccessRequestReceived(accessRequest, client);
         }
     }
 }
