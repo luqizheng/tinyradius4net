@@ -21,14 +21,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
-        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmKey" = "8:_31D0484C33DE4F429645569571C4858E"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
         "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
+        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -46,13 +52,19 @@
         "Entry"
         {
         "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
-        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
+        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
-        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -63,38 +75,32 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -115,6 +121,27 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -131,12 +158,61 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
     }
     "Deployable"
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_2C75F53E47FB4DA1B7FD2DF0173E832D"
+            {
+            "Name" = "8:Primary output from TinyRadiusService (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_87627BA9_89D8_4EC1_8983_D77F38FBF4C6"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_4416021F085F468BB244921C6322C16D"
+            {
+            "Name" = "8:Primary output from TinyRadiusService (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_9DEB92A6_CDE9_4443_AA47_F4F340658078"
+            "InstallerClass" = "11:TRUE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -160,6 +236,26 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_31D0484C33DE4F429645569571C4858E"
+            {
+            "SourcePath" = "8:..\\..\\Lib\\key.ico"
+            "TargetName" = "8:key.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_71FCD9BCDA8BD7B00B651D82B1AF5902"
             {
             "AssemblyRegister" = "3:1"
@@ -232,7 +328,7 @@
             {
             "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:TARGETDIR"
@@ -243,7 +339,7 @@
             "{1525181F-901A-416C-8A58-119130FE478E}:_9511837C746A4091B3ED1FDD96F88FD3"
             {
             "Name" = "8:#1916"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:DesktopFolder"
@@ -277,21 +373,21 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:RadiusSetup"
+        "ProductName" = "8:RadiusServer"
         "ProductCode" = "8:{04C5AA5F-96F2-40B3-B540-4F021FE0836D}"
-        "PackageCode" = "8:{88B7C009-5520-4739-9AD8-713F747B3EBF}"
+        "PackageCode" = "8:{A136C4B9-9FB4-4160-84E0-50691271973F}"
         "UpgradeCode" = "8:{1AC0A99B-15E5-44F6-BDD9-446150BDF76A}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:TinyRadius"
+        "Manufacturer" = "8:珠海科蓝电子有限公司"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:RadiusSetup"
+        "Title" = "8:Radius服务器"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Default Company Name"
+        "ARPCONTACT" = "8:珠海科蓝电子有限公司"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
@@ -400,16 +496,44 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_001CCFAF969941D4BA1B1A73C22A98AA"
             {
-            "Name" = "8:TinyRadius"
+            "Name" = "8:TinyRadiusAdmin.exe"
+            "Arguments" = "8:TinyRadiusAdmin.exe"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "WorkingFolder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_221A6E0BE930400FAF2D107EFCBACEC2"
+            {
+            "Name" = "8:TinyRadiusServiceAdmin.exe"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_9511837C746A4091B3ED1FDD96F88FD3"
-            "Folder" = "8:_9511837C746A4091B3ED1FDD96F88FD3"
-            "WorkingFolder" = "8:_9511837C746A4091B3ED1FDD96F88FD3"
+            "Target" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "WorkingFolder" = "8:_21F0669526F442DFAC30BC3524D937A3"
             "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_8AC5D74138194B10B710E35146F3AE69"
+            {
+            "Name" = "8:Radius控制台"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+            "Folder" = "8:_9511837C746A4091B3ED1FDD96F88FD3"
+            "WorkingFolder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Icon" = "8:_31D0484C33DE4F429645569571C4858E"
             "Feature" = "8:"
             }
         }
@@ -629,8 +753,8 @@
                             "Type" = "3:3"
                             "ContextData" = "8:"
                             "Attributes" = "3:0"
-                            "Setting" = "3:1"
-                            "Value" = "8:#1203"
+                            "Setting" = "3:2"
+                            "Value" = "8:测试版。任何用户的登录密码是123456，shareKey是123"
                             "DefaultValue" = "8:#1203"
                             "UsePlugInResources" = "11:TRUE"
                             }
@@ -869,7 +993,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_EE129C02390B4200BD9D998ADE596B0C"
             {
-            "SourcePath" = "8:..\\TinyRadiusServer\\obj\\Debug\\TinyRadiusServer.exe"
+            "SourcePath" = "8:..\\TinyRadiusAdmin\\obj\\Debug\\TinyRadiusAdmin.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"

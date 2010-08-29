@@ -69,6 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configurations\Cfg.cs" />
+    <Compile Include="FormSetting\NasClientSetting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FormSetting\NasClientSetting.Designer.cs">
+      <DependentUpon>NasClientSetting.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +83,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FormSetting\NasClientSetting.resx">
+      <DependentUpon>NasClientSetting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

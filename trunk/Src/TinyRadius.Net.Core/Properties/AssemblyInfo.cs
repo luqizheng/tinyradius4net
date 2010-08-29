@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 
 [assembly: AssemblyTitle("TinyRadius.Net.Core")]
-[assembly: AssemblyDescription("TinyRadius Protocol")]
+[assembly: AssemblyDescription("Radius Protocol")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("TinyRadius.Net")]
+[assembly: AssemblyCompany("珠海科蓝电子有限公司")]
 [assembly: AssemblyProduct("TinyRadius.Net")]
-[assembly: AssemblyCopyright("Copyright © TinyRadius.Net 2010")]
+[assembly: AssemblyCopyright("Copyright © 珠海科蓝电子有限公司 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
