@@ -4,6 +4,7 @@ using System.Net;
 using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
+using log4net;
 using TinyRadius.Net.Cfg;
 using TinyRadiusAdmin.Configurations;
 
@@ -98,13 +99,21 @@ namespace TinyRadiusAdmin
 
         private void SaveServerSetting_Click(object sender, EventArgs e)
         {
-            if (SaveSetting())
+            try
             {
-                DialogResult result = MessageBox.Show("有关键数据更改,只有重新启动服务才会生效，现在重启吗?", "信息", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes)
+                if (SaveSetting())
                 {
-                    TinyRadiusService.Restart();
+                    DialogResult result = MessageBox.Show("有关键数据更改,只有重新启动服务才会生效，现在重启吗?", "信息", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        TinyRadiusService.Restart();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                LogManager.GetLogger(this.GetType()).Error(ex.Message, ex);
+                MessageBox.Show(ex.Message);
             }
         }
 

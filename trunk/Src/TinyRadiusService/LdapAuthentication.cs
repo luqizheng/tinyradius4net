@@ -26,9 +26,8 @@ namespace TinyRadiusService
                 //Bind to the native AdsObject to force authentication.
                 object obj = entry.NativeObject;
 
-                DirectorySearcher search = new DirectorySearcher(entry);
+                var search = new DirectorySearcher(entry) {Filter = "(SAMAccountName=" + username + ")"};
 
-                search.Filter = "(SAMAccountName=" + username + ")";
                 search.PropertiesToLoad.Add("cn");
                 SearchResult result = search.FindOne();
 

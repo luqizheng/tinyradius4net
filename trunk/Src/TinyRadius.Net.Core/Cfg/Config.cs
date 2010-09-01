@@ -10,7 +10,7 @@ namespace TinyRadius.Net.Cfg
     public class Config
     {
         private const string FileName = "TinyServerSetting.xml";
-        private static readonly ILog Log = LogManager.GetLogger(typeof (Config));
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Config));
         private readonly string _filePath;
         private Dictionary<string, NasSetting> _nasSettings = new Dictionary<string, NasSetting>();
 
@@ -34,11 +34,11 @@ namespace TinyRadius.Net.Cfg
             if (File.Exists(_filePath))
             {
                 Log.Debug("Read setting from filePath:" + _filePath);
-                var mySerializer = new DataContractSerializer(typeof (Config));
+                var mySerializer = new DataContractSerializer(typeof(Config));
                 FileStream stream = File.OpenRead(_filePath);
                 try
                 {
-                    var config = (Config) mySerializer.ReadObject(stream);
+                    var config = (Config)mySerializer.ReadObject(stream);
                     InitBy(config);
                 }
                 finally
@@ -120,11 +120,18 @@ namespace TinyRadius.Net.Cfg
             if (String.IsNullOrEmpty(LdapSetting.Path) && ValidateByLdap)
                 throw new ArgumentException("使用Ldap验证用户，但是Ldap路径为空");
 
+            if (!File.Exists(_filePath))
+            {
+                var a = File.Create(_filePath);
+                a.Dispose();
+            }
 
-            var mySerializer = new DataContractSerializer(typeof (Config));
-            var myWriter = new FileStream(_filePath, FileMode.Create);
-            mySerializer.WriteObject(myWriter, this);
-            myWriter.Close();
+            var mySerializer = new DataContractSerializer(typeof(Config));
+            using (var myWriter = new FileStream(_filePath, FileMode.Create))
+            {
+                mySerializer.WriteObject(myWriter, this);
+                myWriter.Close();
+            }
         }
     }
 }
