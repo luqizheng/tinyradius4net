@@ -30,8 +30,8 @@ namespace TinyRadiusAdmin
         public void Restart()
         {
             if (_serviceController.Status == ServiceControllerStatus.Running)
-                _serviceController.Stop();
-            _serviceController.Start();
+                Stop();
+            Start();
         }
 
         public bool Start()

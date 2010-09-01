@@ -51,7 +51,6 @@
             this.AuthPortTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.textBoxDomain = new System.Windows.Forms.TextBox();
@@ -72,6 +71,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
+            this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -314,15 +314,6 @@
             this.tabPage2.Text = "客户端设定";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // nasClientSetting1
-            // 
-            this.nasClientSetting1.DataSource = null;
-            this.nasClientSetting1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nasClientSetting1.Location = new System.Drawing.Point(3, 3);
-            this.nasClientSetting1.Name = "nasClientSetting1";
-            this.nasClientSetting1.Size = new System.Drawing.Size(784, 384);
-            this.nasClientSetting1.TabIndex = 1;
-            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.groupBox4);
@@ -330,7 +321,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
-            this.tabPage3.Size = new System.Drawing.Size(790, 424);
+            this.tabPage3.Size = new System.Drawing.Size(790, 390);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "验证";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -429,6 +420,7 @@
             this.buttonTestConnection.TabIndex = 6;
             this.buttonTestConnection.Text = "Test";
             this.buttonTestConnection.UseVisualStyleBackColor = true;
+            this.buttonTestConnection.Click += new System.EventHandler(this.TestConnection);
             // 
             // label8
             // 
@@ -491,7 +483,7 @@
             this.tabPage4.Controls.Add(this.label11);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(790, 424);
+            this.tabPage4.Size = new System.Drawing.Size(790, 390);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "帮助";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -522,6 +514,15 @@
             this.label11.Size = new System.Drawing.Size(77, 12);
             this.label11.TabIndex = 0;
             this.label11.Text = "电话:3333601";
+            // 
+            // nasClientSetting1
+            // 
+            this.nasClientSetting1.DataSource = null;
+            this.nasClientSetting1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nasClientSetting1.Location = new System.Drawing.Point(3, 3);
+            this.nasClientSetting1.Name = "nasClientSetting1";
+            this.nasClientSetting1.Size = new System.Drawing.Size(784, 384);
+            this.nasClientSetting1.TabIndex = 1;
             // 
             // MainForm
             // 
