@@ -20,20 +20,19 @@ namespace TinyRadiusService
 
         public override string GetUserPassword(string userName)
         {
-            return "123456";
-            if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
+            using (var conn = new SqlConnection("Data Source=SKY\\SQLEXPRESS;Initial Catalog=YiDong;Persist Security Info=True;User ID=hiee23;Password=hiee23"))
             {
-                using (var conn = new SqlConnection(ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection))
-                {
-                    conn.Open();
-                    SqlCommand comm = conn.CreateCommand();
-                    comm.CommandText = ServiceCfg.Instance.TinyConfig.DatabaseSetting.PasswordSql;
-                    SqlParameter param = comm.CreateParameter();
-                    param.ParameterName = "@userName";
-                    param.Value = userName;
-                    comm.Parameters.Add(param);
-                    comm.ExecuteScalar().ToString();
-                }
+                conn.Open();
+                SqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "select password from users where phone=@username";
+                SqlParameter param = comm.CreateParameter();
+                param.ParameterName = "@userName";
+                param.Value = userName.Trim();
+                comm.Parameters.Add(param);
+                var result = comm.ExecuteScalar();
+                if (result == null)
+                    return "__Error__Password";
+                return result.ToString();
             }
             throw new ApplicationException("Please enable LDAP validation or database validation");
         }
@@ -62,7 +61,19 @@ namespace TinyRadiusService
                     return answer;
                 }
             }*/
-            return base.AccessRequestReceived(accessRequest, client);
+            string struser = accessRequest.UserName;
+            string strpwd = accessRequest.Password;
+            if (!LdapAuthentication.IsAuthenticated(struser, strpwd))
+            {
+                return base.AccessRequestReceived(accessRequest, client);
+            }
+            else
+            {
+                const int type = RadiusPacket.AccessAccept;
+                var answer = new RadiusPacket(type, accessRequest.Identifier);
+                CopyProxyState(accessRequest, answer);
+                return answer;
+            }
         }
     }
 }
