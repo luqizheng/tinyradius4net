@@ -24,7 +24,7 @@ namespace TinyRadius.Net.Util
         /// @param client IP address and port number of client
         /// @return shared secret or null
         /// </summary>
-        protected static readonly ILog Logger = LogManager.GetLogger(typeof (RadiusServer));
+        protected readonly ILog Logger;
 
         private readonly List<ReceivedPacket> _receivedPackets = new List<ReceivedPacket>();
         private int _acctPort = 1813;
@@ -34,6 +34,10 @@ namespace TinyRadius.Net.Util
         private int _duplicateInterval = 30000; // 30 s
         private int _socketTimeout = 3000;
 
+        protected RadiusServer()
+        {
+            this.Logger = LogManager.GetLogger(this.GetType());
+        }
         /// <summary>
         /// Returns the auth port the server will listen on.
         /// @return auth port
@@ -215,7 +219,6 @@ namespace TinyRadius.Net.Util
                                                      catch (Exception e)
                                                      {
                                                          Logger.Fatal("acct thread stopped by exception", e);
-                                                         
                                                      }
                                                      finally
                                                      {
@@ -329,7 +332,7 @@ namespace TinyRadius.Net.Util
 
             // handle packet
             Logger.Debug("about to call RadiusServer.handlePacket()");
-            RadiusPacket response = HandlePacket((IPEndPoint) localAddress, remoteAddress, request, secret);
+            RadiusPacket response = HandlePacket((IPEndPoint)localAddress, remoteAddress, request, secret);
 
             // send response
             if (response != null)
@@ -362,16 +365,16 @@ namespace TinyRadius.Net.Util
                 if (localAddress.Port == AuthPort)
                 {
                     // handle packets on auth port
-                    if (typeof (AccessRequest).IsInstanceOfType(request))
-                        response = AccessRequestReceived((AccessRequest) request, remoteAddress);
+                    if (typeof(AccessRequest).IsInstanceOfType(request))
+                        response = AccessRequestReceived((AccessRequest)request, remoteAddress);
                     else
                         Logger.Error("unknown Radius packet type: " + request.Type);
                 }
                 else if (localAddress.Port == AcctPort)
                 {
                     // handle packets on acct port
-                    if (typeof (AccountingRequest).IsInstanceOfType(request))
-                        response = AccountingRequestReceived((AccountingRequest) request, remoteAddress);
+                    if (typeof(AccountingRequest).IsInstanceOfType(request))
+                        response = AccountingRequestReceived((AccountingRequest)request, remoteAddress);
                     else
                         Logger.Error("unknown Radius packet type: " + request.Type);
                 }
@@ -398,7 +401,7 @@ namespace TinyRadius.Net.Util
                 IPEndPoint ep = ListenAuthIp == null
                                     ? new IPEndPoint(IPAddress.Any, AuthPort)
                                     : new IPEndPoint(ListenAuthIp, AuthPort);
-                Logger.Info("Create AuthSocket UdpClient with " + ep.Address.ToString() + ":" + ep.Port);
+                Logger.Info("Create AuthSocket UdpClient with " + ep.Address + ":" + ep.Port);
                 _authSocket = new UdpClient(ep);
             }
             return _authSocket;
@@ -416,7 +419,7 @@ namespace TinyRadius.Net.Util
                 IPEndPoint ep = ListenAccountIp == null
                                     ? new IPEndPoint(IPAddress.Any, AcctPort)
                                     : new IPEndPoint(ListenAccountIp, AcctPort);
-                Logger.Info("Create AcctSocket UdpClient with" + ep.Address.ToString() + ":" + ep.Port);
+                Logger.Info("Create AcctSocket UdpClient with" + ep.Address + ":" + ep.Port);
                 _acctSocket = new UdpClient(ep);
             }
             return _acctSocket;

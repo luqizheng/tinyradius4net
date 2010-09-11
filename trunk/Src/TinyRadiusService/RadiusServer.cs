@@ -30,7 +30,14 @@ namespace TinyRadiusService
                     param.ParameterName = "@userName";
                     param.Value = userName;
                     comm.Parameters.Add(param);
-                    comm.ExecuteScalar().ToString();
+                    var result = comm.ExecuteScalar();
+                    if (result == null)
+                    {
+                        this.Logger.InfoFormat("Fialed to find {0} in local database.", userName);
+                        return null;
+                    }
+                    this.Logger.InfoFormat("Find {0} in local database success.", userName);
+                    return result.ToString();
                 }
             }
             throw new ApplicationException("Please enable LDAP validation or database validation");
@@ -44,6 +51,7 @@ namespace TinyRadiusService
 
                 if (ServiceCfg.Instance.TinyConfig.LdapSetting.IsAuthenticated(accessRequest.UserName, accessRequest.Password))
                 {
+                    this.Logger.InfoFormat("{0} login by Ldap success.", accessRequest.UserName);
                     type = RadiusPacket.AccessAccept;
                 }
 
@@ -54,6 +62,7 @@ namespace TinyRadiusService
                     return answer;
                 }
             }
+            this.Logger.InfoFormat("{0} login by Ldap fail.", accessRequest.UserName);
             return base.AccessRequestReceived(accessRequest, client);
         }
     }
