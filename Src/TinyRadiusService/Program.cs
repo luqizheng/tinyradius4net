@@ -1,6 +1,4 @@
 ﻿using System.ServiceProcess;
-using log4net.Config;
-
 
 namespace TinyRadiusService
 {

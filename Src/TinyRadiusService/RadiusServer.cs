@@ -9,7 +9,6 @@ namespace TinyRadiusService
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
-            return "123";
             if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
             {
                 return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
@@ -20,7 +19,6 @@ namespace TinyRadiusService
 
         public override string GetUserPassword(string userName)
         {
-            return "123456";
             if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
             {
                 using (var conn = new SqlConnection(ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection))
@@ -40,20 +38,14 @@ namespace TinyRadiusService
 
         public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
         {
-            /*if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
+            if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
             {
-                string struser = accessRequest.UserName;
-                string strpwd = accessRequest.Password;
-                string path = ServiceCfg.Instance.TinyConfig.LdapSetting.Path;
-
                 int type = RadiusPacket.AccessReject;
 
-                var auth = new LdapAuthentication(path);
-                if (auth.IsAuthenticated(ServiceCfg.Instance.TinyConfig.LdapSetting.DomainName, struser, strpwd))
+                if (ServiceCfg.Instance.TinyConfig.LdapSetting.IsAuthenticated(accessRequest.UserName, accessRequest.Password))
                 {
                     type = RadiusPacket.AccessAccept;
                 }
-
 
                 if (type == RadiusPacket.AccessAccept)
                 {
@@ -61,7 +53,7 @@ namespace TinyRadiusService
                     CopyProxyState(accessRequest, answer);
                     return answer;
                 }
-            }*/
+            }
             return base.AccessRequestReceived(accessRequest, client);
         }
     }
