@@ -51,9 +51,17 @@
             this.AuthPortTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.textBoxDomain = new System.Windows.Forms.TextBox();
+            this.checkBoxAnonymous = new System.Windows.Forms.CheckBox();
+            this.CheckBoxSSL = new System.Windows.Forms.CheckBox();
+            this.GroupBoxCredential = new System.Windows.Forms.GroupBox();
+            this.TextBoxCredentialPassword = new System.Windows.Forms.TextBox();
+            this.TextBoxCredentialUserName = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.TextBoxServer = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.TextBoxLdapPath = new System.Windows.Forms.TextBox();
@@ -71,7 +79,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -80,6 +87,7 @@
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.GroupBoxCredential.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.SuspendLayout();
@@ -151,9 +159,9 @@
             this.panel1.Controls.Add(this.button4);
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 416);
+            this.panel1.Location = new System.Drawing.Point(0, 467);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(798, 34);
+            this.panel1.Size = new System.Drawing.Size(861, 34);
             this.panel1.TabIndex = 3;
             // 
             // tabControl1
@@ -166,7 +174,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(798, 416);
+            this.tabControl1.Size = new System.Drawing.Size(861, 467);
             this.tabControl1.TabIndex = 4;
             // 
             // tabPage1
@@ -176,7 +184,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(790, 390);
+            this.tabPage1.Size = new System.Drawing.Size(853, 441);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "监听设定";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -191,7 +199,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox2.Location = new System.Drawing.Point(3, 117);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(784, 139);
+            this.groupBox2.Size = new System.Drawing.Size(847, 139);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "计费";
@@ -252,7 +260,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(784, 114);
+            this.groupBox1.Size = new System.Drawing.Size(847, 114);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "用户验证";
@@ -309,10 +317,19 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(790, 390);
+            this.tabPage2.Size = new System.Drawing.Size(853, 441);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "客户端设定";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // nasClientSetting1
+            // 
+            this.nasClientSetting1.DataSource = null;
+            this.nasClientSetting1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nasClientSetting1.Location = new System.Drawing.Point(3, 3);
+            this.nasClientSetting1.Name = "nasClientSetting1";
+            this.nasClientSetting1.Size = new System.Drawing.Size(847, 435);
+            this.nasClientSetting1.TabIndex = 1;
             // 
             // tabPage3
             // 
@@ -321,14 +338,17 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
-            this.tabPage3.Size = new System.Drawing.Size(790, 390);
+            this.tabPage3.Size = new System.Drawing.Size(853, 441);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "验证";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.textBoxDomain);
+            this.groupBox4.Controls.Add(this.checkBoxAnonymous);
+            this.groupBox4.Controls.Add(this.CheckBoxSSL);
+            this.groupBox4.Controls.Add(this.GroupBoxCredential);
+            this.groupBox4.Controls.Add(this.TextBoxServer);
             this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Controls.Add(this.label9);
             this.groupBox4.Controls.Add(this.TextBoxLdapPath);
@@ -337,35 +357,102 @@
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox4.Location = new System.Drawing.Point(0, 136);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(790, 136);
+            this.groupBox4.Size = new System.Drawing.Size(853, 259);
             this.groupBox4.TabIndex = 1;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "LDAP";
             // 
+            // checkBoxAnonymous
+            // 
+            this.checkBoxAnonymous.AutoSize = true;
+            this.checkBoxAnonymous.Location = new System.Drawing.Point(7, 136);
+            this.checkBoxAnonymous.Name = "checkBoxAnonymous";
+            this.checkBoxAnonymous.Size = new System.Drawing.Size(48, 16);
+            this.checkBoxAnonymous.TabIndex = 12;
+            this.checkBoxAnonymous.Text = "匿名";
+            this.checkBoxAnonymous.UseVisualStyleBackColor = true;
+            this.checkBoxAnonymous.CheckedChanged += new System.EventHandler(this.checkBoxAnonymous_CheckedChanged);
+            // 
+            // CheckBoxSSL
+            // 
+            this.CheckBoxSSL.AutoSize = true;
+            this.CheckBoxSSL.Location = new System.Drawing.Point(7, 114);
+            this.CheckBoxSSL.Name = "CheckBoxSSL";
+            this.CheckBoxSSL.Size = new System.Drawing.Size(90, 16);
+            this.CheckBoxSSL.TabIndex = 11;
+            this.CheckBoxSSL.Text = "Support SSL";
+            this.CheckBoxSSL.UseVisualStyleBackColor = true;
+            // 
+            // GroupBoxCredential
+            // 
+            this.GroupBoxCredential.Controls.Add(this.TextBoxCredentialPassword);
+            this.GroupBoxCredential.Controls.Add(this.TextBoxCredentialUserName);
+            this.GroupBoxCredential.Controls.Add(this.label3);
+            this.GroupBoxCredential.Controls.Add(this.label2);
+            this.GroupBoxCredential.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.GroupBoxCredential.Location = new System.Drawing.Point(3, 169);
+            this.GroupBoxCredential.Name = "GroupBoxCredential";
+            this.GroupBoxCredential.Size = new System.Drawing.Size(847, 87);
+            this.GroupBoxCredential.TabIndex = 10;
+            this.GroupBoxCredential.TabStop = false;
+            this.GroupBoxCredential.Text = "Credential Network Login";
+            // 
+            // TextBoxCredentialPassword
+            // 
+            this.TextBoxCredentialPassword.Location = new System.Drawing.Point(148, 53);
+            this.TextBoxCredentialPassword.Name = "TextBoxCredentialPassword";
+            this.TextBoxCredentialPassword.Size = new System.Drawing.Size(339, 21);
+            this.TextBoxCredentialPassword.TabIndex = 13;
+            // 
+            // TextBoxCredentialUserName
+            // 
+            this.TextBoxCredentialUserName.Location = new System.Drawing.Point(148, 24);
+            this.TextBoxCredentialUserName.Name = "TextBoxCredentialUserName";
+            this.TextBoxCredentialUserName.Size = new System.Drawing.Size(339, 21);
+            this.TextBoxCredentialUserName.TabIndex = 12;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 59);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(119, 12);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "Credential Password";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 30);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(119, 12);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Credential UserName";
+            // 
             // textBoxDomain
             // 
-            this.textBoxDomain.Location = new System.Drawing.Point(85, 42);
-            this.textBoxDomain.Name = "textBoxDomain";
-            this.textBoxDomain.Size = new System.Drawing.Size(100, 21);
-            this.textBoxDomain.TabIndex = 5;
+            this.TextBoxServer.Location = new System.Drawing.Point(85, 42);
+            this.TextBoxServer.Name = "TextBoxServer";
+            this.TextBoxServer.Size = new System.Drawing.Size(100, 21);
+            this.TextBoxServer.TabIndex = 5;
             // 
             // label10
             // 
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(8, 45);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(65, 12);
+            this.label10.Size = new System.Drawing.Size(41, 12);
             this.label10.TabIndex = 4;
-            this.label10.Text = "DomainName";
+            this.label10.Text = "Server";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(85, 95);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(395, 12);
+            this.label9.Size = new System.Drawing.Size(131, 12);
             this.label9.TabIndex = 3;
-            this.label9.Text = "例子:LDAP://yourserver/CN=username,CN=users,DC=yourdnsname,DC=CN ";
+            this.label9.Text = "例子:DC=domain,DC=Net";
             // 
             // TextBoxLdapPath
             // 
@@ -379,9 +466,9 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(8, 77);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(65, 12);
+            this.label7.Size = new System.Drawing.Size(53, 12);
             this.label7.TabIndex = 1;
-            this.label7.Text = "LDAP服务器";
+            this.label7.Text = "LdapPath";
             // 
             // enableLDAP
             // 
@@ -407,7 +494,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 10);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(790, 126);
+            this.groupBox3.Size = new System.Drawing.Size(853, 126);
             this.groupBox3.TabIndex = 0;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "数据库验证";
@@ -483,7 +570,7 @@
             this.tabPage4.Controls.Add(this.label11);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(790, 390);
+            this.tabPage4.Size = new System.Drawing.Size(853, 441);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "帮助";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -515,20 +602,11 @@
             this.label11.TabIndex = 0;
             this.label11.Text = "电话:3333601";
             // 
-            // nasClientSetting1
-            // 
-            this.nasClientSetting1.DataSource = null;
-            this.nasClientSetting1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nasClientSetting1.Location = new System.Drawing.Point(3, 3);
-            this.nasClientSetting1.Name = "nasClientSetting1";
-            this.nasClientSetting1.Size = new System.Drawing.Size(784, 384);
-            this.nasClientSetting1.TabIndex = 1;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(798, 450);
+            this.ClientSize = new System.Drawing.Size(861, 501);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -548,6 +626,8 @@
             this.tabPage3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.GroupBoxCredential.ResumeLayout(false);
+            this.GroupBoxCredential.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.tabPage4.ResumeLayout(false);
@@ -583,7 +663,7 @@
         private TinyRadiusAdmin.FormSetting.NasClientSetting nasClientSetting1;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.TextBox textBoxDomain;
+        private System.Windows.Forms.TextBox TextBoxServer;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox TextBoxLdapPath;
@@ -601,6 +681,13 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.CheckBox CheckBoxSSL;
+        private System.Windows.Forms.GroupBox GroupBoxCredential;
+        private System.Windows.Forms.TextBox TextBoxCredentialPassword;
+        private System.Windows.Forms.TextBox TextBoxCredentialUserName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox checkBoxAnonymous;
 
     }
 }

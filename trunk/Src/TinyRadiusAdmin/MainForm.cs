@@ -50,7 +50,7 @@ namespace TinyRadiusAdmin
             enableDataBase.Checked = Cfg.Instance.TinyConfig.ValidateByDatabase;
             //ldap
             TextBoxLdapPath.Text = Cfg.Instance.TinyConfig.LdapSetting.Path;
-            textBoxDomain.Text = Cfg.Instance.TinyConfig.LdapSetting.DomainName;
+            TextBoxServer.Text = Cfg.Instance.TinyConfig.LdapSetting.Server;
             enableLDAP.Checked = Cfg.Instance.TinyConfig.ValidateByLdap;
             TinyRadiusService.StatusChangingEvent += TinyRadiusServiceStatusChangingEvent;
         }
@@ -131,7 +131,14 @@ namespace TinyRadiusAdmin
 
                 Cfg.Instance.TinyConfig.ValidateByLdap = enableLDAP.Checked;
                 Cfg.Instance.TinyConfig.LdapSetting.Path = TextBoxLdapPath.Text;
-                Cfg.Instance.TinyConfig.LdapSetting.DomainName = textBoxDomain.Text;
+                Cfg.Instance.TinyConfig.LdapSetting.Server = TextBoxServer.Text;
+
+                if (this.checkBoxAnonymous.Checked)
+                {
+                    Cfg.Instance.TinyConfig.LdapSetting.CredentialUserName = TextBoxCredentialUserName.Text;
+                    Cfg.Instance.TinyConfig.LdapSetting.CredentialPassword = TextBoxCredentialPassword.Text;
+                }
+                Cfg.Instance.TinyConfig.LdapSetting.IsSsl = this.CheckBoxSSL.Checked;
 
                 Cfg.Instance.TinyConfig.Save();
                 return autoRestart;
@@ -252,6 +259,11 @@ namespace TinyRadiusAdmin
                                                  this.Invoke(
                                                      new Action<Button>(delegate(Button btn1) { btn1.Enabled = true; }), (Button)state);
                                              }, sender);
+        }
+
+        private void checkBoxAnonymous_CheckedChanged(object sender, EventArgs e)
+        {
+            GroupBoxCredential.Enabled = !this.checkBoxAnonymous.Checked;
         }
 
 
