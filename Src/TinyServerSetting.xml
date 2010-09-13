@@ -1,0 +1,23 @@
+<Config xmlns="http://schemas.datacontract.org/2004/07/TinyRadius.Net.Cfg" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <AccountListentIp>10.169.1.26</AccountListentIp>
+  <AcctPort>1811</AcctPort>
+  <AuthListentIp>10.169.1.26</AuthListentIp>
+  <AuthPort>1812</AuthPort>
+  <DatabaseSetting>
+    <Connection>server=.\sqlexpress;database=nhibernateDemo;uid=sa;pwd=sa</Connection>
+    <PasswordSql>select password from users where userid=@username</PasswordSql>
+  </DatabaseSetting>
+  <EnableAccount>true</EnableAccount>
+  <EnableAuthentication>true</EnableAuthentication>
+  <LdapSetting>
+    <AnonymousLogin>false</AnonymousLogin>
+    <CredentialPassword i:nil="true"/>
+    <CredentialUserName i:nil="true"/>
+    <IsSsl>false</IsSsl>
+    <Path/>
+    <Server/>
+  </LdapSetting>
+  <NasSettings xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"/>
+  <ValidateByDatabase>true</ValidateByDatabase>
+  <ValidateByLdap>false</ValidateByLdap>
+</Config>

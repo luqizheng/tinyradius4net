@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 		TinyRadius.Net.vsmdi = TinyRadius.Net.vsmdi
+		TinyServerSetting.xml = TinyServerSetting.xml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Console", "TinyRadius.Console\TinyRadius.Console.csproj", "{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}"
