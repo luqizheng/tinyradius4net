@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Net;
-using System.Text;
-using log4net;
 
-using TinyRadius.Net;
-using TinyRadius.Net.Packet;
-using TinyRadius.Net.Util;
-using SearchScope = System.DirectoryServices.Protocols.SearchScope;
-
-namespace TinyRadiusService
+namespace TinyRadiusConsole
 {
     public static class LdapAuthentication
     {
