@@ -32,7 +32,11 @@ namespace TinyRadiusService
                 comm.Parameters.Add(param);
                 var result = comm.ExecuteScalar();
                 if (result == null)
+                {
+                    this.Logger.InfoFormat("用户(账户{0})数据登录失败.", userName);
                     return "__Error__Password";
+                }
+                this.Logger.InfoFormat("用户(账户{0})数据登录成功.", userName);
                 return result.ToString();
             }
             throw new ApplicationException("Please enable LDAP validation or database validation");
@@ -62,14 +66,18 @@ namespace TinyRadiusService
                     return answer;
                 }
             }*/
+
             string struser = accessRequest.UserName;
             string strpwd = accessRequest.Password;
+            this.Logger.InfoFormat("通过Ldap检查用户,用户{0},密码{1}", struser, strpwd);
             if (!LdapAuthentication.IsAuthenticated(struser, strpwd))
             {
+                this.Logger.InfoFormat("用户(账户{0},密码{1})Ldap登录失败,尝试本地数据库登陆", struser, strpwd);
                 return base.AccessRequestReceived(accessRequest, client);
             }
             else
             {
+                this.Logger.InfoFormat("用户(账户{0},密码{1})Ldap登录成功.", struser, strpwd);
                 const int type = RadiusPacket.AccessAccept;
                 var answer = new RadiusPacket(type, accessRequest.Identifier);
                 CopyProxyState(accessRequest, answer);
