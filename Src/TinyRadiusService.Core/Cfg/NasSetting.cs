@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 
-namespace TinyRadius.Net.Cfg
+namespace TinyRadiusService.Cfg
 {
     public class NasSetting
     {

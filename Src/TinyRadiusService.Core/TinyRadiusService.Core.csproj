@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E3577C9B-AA09-4448-9601-F3E240110F52}</ProjectGuid>
+    <ProjectGuid>{9503C499-024C-4DB9-B722-934B0D1A967A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TinyRadius.Net</RootNamespace>
-    <AssemblyName>TinyRadius.Net.Core</AssemblyName>
+    <RootNamespace>TinyRadiusService</RootNamespace>
+    <AssemblyName>TinyRadiusService.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -35,10 +35,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Qi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\Qi.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.DirectoryServices.Protocols" />
     <Reference Include="System.Runtime.Serialization">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
@@ -52,40 +57,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cfg\Config.cs" />
+    <Compile Include="Cfg\DatabaseSetting.cs" />
+    <Compile Include="Cfg\LdapSetting.cs" />
+    <Compile Include="Cfg\NasSetting.cs" />
+    <Compile Include="Cfg\ServiceCfg.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RadiusServer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\IntegerAttribute.cs" />
-    <Compile Include="Attributes\IpAttribute.cs" />
-    <Content Include="Attributes\package.html" />
-    <Compile Include="Attributes\RadiusAttribute.cs" />
-    <Compile Include="Attributes\StringAttribute.cs" />
-    <Compile Include="Attributes\VendorSpecificAttribute.cs" />
-    <Compile Include="AuthenticationType.cs" />
-    <Compile Include="Dictionaries\AttributeType.cs" />
-    <Compile Include="Dictionaries\DefaultDictionary.cs" />
-    <Compile Include="Dictionaries\IDictionary.cs" />
-    <Compile Include="Dictionaries\DictionaryParser.cs" />
-    <Compile Include="Dictionaries\MemoryDictionary.cs" />
-    <Content Include="Dictionaries\package.html" />
-    <Compile Include="Dictionaries\WritableDictionary.cs" />
-    <Compile Include="Packet\AccessRequest.cs" />
-    <Compile Include="Packet\AccountingRequest.cs" />
-    <Compile Include="Packet\CoaRequest.cs" />
-    <Content Include="Packet\package.html" />
-    <Compile Include="Packet\RadiusPacket.cs" />
-    <Content Include="Proxy\package.html" />
-    <Compile Include="Proxy\RadiusProxy.cs" />
-    <Compile Include="Proxy\RadiusProxyConnection.cs" />
-    <Content Include="Util\package.html" />
-    <Compile Include="Util\RadiusClient.cs" />
-    <Compile Include="Util\RadiusEndpoint.cs" />
-    <Compile Include="Util\RadiusException.cs" />
-    <Compile Include="Util\RadiusServer.cs" />
-    <Compile Include="Util\RadiusUtil.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Dictionaries\default_dictionary" />
+    <ProjectReference Include="..\TinyRadius.Net.Core\TinyRadius.Net.Core.csproj">
+      <Project>{E3577C9B-AA09-4448-9601-F3E240110F52}</Project>
+      <Name>TinyRadius.Net.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

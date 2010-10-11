@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using log4net;
 
-namespace TinyRadius.Net.Cfg
+namespace TinyRadiusService.Cfg
 {
     [DataContract]
     public class Config
@@ -119,7 +119,7 @@ namespace TinyRadius.Net.Cfg
             if (String.IsNullOrEmpty(DatabaseSetting.PasswordSql) && ValidateByDatabase)
                 throw new ArgumentException("使用Database验证用户，但是获取密码的SQL为空");
 
-            if (String.IsNullOrEmpty(LdapSetting.Path) && ValidateByLdap)
+            if (String.IsNullOrEmpty(LdapSetting.SearchUserPath) && ValidateByLdap)
                 throw new ArgumentException("使用Ldap验证用户，但是Ldap路径为空");
 
             if (!File.Exists(_filePath))

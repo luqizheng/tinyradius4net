@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
-using TinyRadius.Net.Cfg;
+using TinyRadiusService.Cfg;
 
 namespace TinyRadiusAdmin.FormSetting
 {

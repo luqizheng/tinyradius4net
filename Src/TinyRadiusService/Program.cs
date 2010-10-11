@@ -1,5 +1,7 @@
 ﻿using System.ServiceProcess;
+using log4net.Config;
 
+[assembly: XmlConfigurator(Watch = true)]
 namespace TinyRadiusService
 {
     internal static class Program

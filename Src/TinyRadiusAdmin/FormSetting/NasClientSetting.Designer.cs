@@ -1,4 +1,6 @@
-﻿namespace TinyRadiusAdmin.FormSetting
+﻿using TinyRadiusService.Cfg;
+
+namespace TinyRadiusAdmin.FormSetting
 {
     partial class NasClientSetting
     {
@@ -149,11 +151,11 @@
             // 
             // nasSettingBindingSource
             // 
-            this.nasSettingBindingSource.DataSource = typeof(TinyRadius.Net.Cfg.NasSetting);
+            this.nasSettingBindingSource.DataSource = typeof(NasSetting);
             // 
             // configBindingSource
             // 
-            this.configBindingSource.DataSource = typeof(TinyRadius.Net.Cfg.Config);
+            this.configBindingSource.DataSource = typeof(Config);
             // 
             // contextMenuStrip1
             // 

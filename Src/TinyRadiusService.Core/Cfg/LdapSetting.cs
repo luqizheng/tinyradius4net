@@ -3,16 +3,24 @@ using System.DirectoryServices.Protocols;
 using System.Net;
 using System.Runtime.Serialization;
 
-namespace TinyRadius.Net.Cfg
+namespace TinyRadiusService.Cfg
 {
     [DataContract]
     public class LdapSetting
     {
+        public LdapSetting()
+        {
+            this.Server = "10.243.1.123";
+            CredentialUserName = "cn=Directory Manager";
+            SearchUserPath = "dc=gmcc,dc=net";
+            CredentialPassword = "";
+
+        }
         [DataMember]
         public string Server { get; set; }
 
         [DataMember]
-        public string Path { get; set; }
+        public string SearchUserPath { get; set; }
 
         [DataMember]
         public string CredentialUserName { get; set; }
@@ -34,7 +42,7 @@ namespace TinyRadius.Net.Cfg
                 connection.Credential = new NetworkCredential(CredentialUserName, CredentialPassword);
             }
 
-            var searchRequestion = new SearchRequest(Path, "uid=" + username, SearchScope.Subtree);
+            var searchRequestion = new SearchRequest(SearchUserPath, "uid=" + username, SearchScope.Subtree);
             connection.SessionOptions.ProtocolVersion = 3;
 
             if (IsSsl)
