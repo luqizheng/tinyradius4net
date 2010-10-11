@@ -1,6 +1,7 @@
 using System;
 using System.Data.SqlClient;
 using System.Net;
+using TinyRadius.Net.Cfg;
 using TinyRadius.Net.Packet;
 using TinyRadiusConsole;
 

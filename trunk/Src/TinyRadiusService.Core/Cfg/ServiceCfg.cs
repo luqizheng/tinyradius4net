@@ -1,12 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.ServiceModel.Channels;
 using log4net;
 using log4net.Config;
 using Microsoft.Win32;
-using TinyRadius.Net.Cfg;
-[assembly: XmlConfigurator(Watch = true)]
-namespace TinyRadiusService
+
+namespace TinyRadiusService.Cfg
 {
     public class ServiceCfg
     {

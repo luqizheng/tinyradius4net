@@ -5,8 +5,8 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Windows.Forms;
 using log4net;
-using TinyRadius.Net.Cfg;
-using TinyRadiusAdmin.Configurations;
+
+using TinyRadiusService.Cfg;
 
 namespace TinyRadiusAdmin
 {
@@ -31,28 +31,32 @@ namespace TinyRadiusAdmin
             AccountListentIPTextBox.Items.AddRange(ipHost.AddressList);
 
             //Service Setting;
-            AccountListentIPTextBox.Text = Cfg.Instance.TinyConfig.AccountListentIp;
-            AccountListentPort.Text = Cfg.Instance.TinyConfig.AcctPort.ToString();
-            EnableAccountCheckBox.Checked = Cfg.Instance.TinyConfig.EnableAccount;
+            AccountListentIPTextBox.Text = ServiceCfg.Instance.TinyConfig.AccountListentIp;
+            AccountListentPort.Text = ServiceCfg.Instance.TinyConfig.AcctPort.ToString();
+            EnableAccountCheckBox.Checked = ServiceCfg.Instance.TinyConfig.EnableAccount;
 
-            AuthPortTextBox.Text = Cfg.Instance.TinyConfig.AuthPort.ToString();
-            AuthListentIPTextBox.Text = Cfg.Instance.TinyConfig.AuthListentIp;
-            enableAuthenticationCheckBox.Checked = Cfg.Instance.TinyConfig.EnableAuthentication;
+            AuthPortTextBox.Text = ServiceCfg.Instance.TinyConfig.AuthPort.ToString();
+            AuthListentIPTextBox.Text = ServiceCfg.Instance.TinyConfig.AuthListentIp;
+            enableAuthenticationCheckBox.Checked = ServiceCfg.Instance.TinyConfig.EnableAuthentication;
 
             //Client Settings
-            this.nasClientSetting1.DataSource = Cfg.Instance.TinyConfig.NasSettings;
+            this.nasClientSetting1.DataSource = ServiceCfg.Instance.TinyConfig.NasSettings;
             labelStatus.Text = TinyRadiusService.Status.ToString();
             SetServiceStatus(TinyRadiusService.Status == ServiceControllerStatus.Running);
             //Validation
             //databaseSetting
-            TextBoxSQL.Text = Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql;
-            TextBoxConnectionString.Text = Cfg.Instance.TinyConfig.DatabaseSetting.Connection;
-            enableDataBase.Checked = Cfg.Instance.TinyConfig.ValidateByDatabase;
+            TextBoxSQL.Text = ServiceCfg.Instance.TinyConfig.DatabaseSetting.PasswordSql;
+            TextBoxConnectionString.Text = ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection;
+            TextBoxCheckMac.Text = ServiceCfg.Instance.TinyConfig.DatabaseSetting.MacSql;
+            enableDataBase.Checked = ServiceCfg.Instance.TinyConfig.ValidateByDatabase;
+
             //ldap
-            TextBoxLdapPath.Text = Cfg.Instance.TinyConfig.LdapSetting.Path;
-            TextBoxServer.Text = Cfg.Instance.TinyConfig.LdapSetting.Server;
-            enableLDAP.Checked = Cfg.Instance.TinyConfig.ValidateByLdap;
+            TextBoxLdapPath.Text = ServiceCfg.Instance.TinyConfig.LdapSetting.SearchUserPath;
+            TextBoxServer.Text = ServiceCfg.Instance.TinyConfig.LdapSetting.Server;
+            enableLDAP.Checked = ServiceCfg.Instance.TinyConfig.ValidateByLdap;
             TinyRadiusService.StatusChangingEvent += TinyRadiusServiceStatusChangingEvent;
+            TextBoxCredentialUserName.Text = ServiceCfg.Instance.TinyConfig.LdapSetting.CredentialUserName;
+            TextBoxCredentialPassword.Text = ServiceCfg.Instance.TinyConfig.LdapSetting.CredentialPassword;
         }
 
         private void TinyRadiusServiceStatusChangingEvent(object sender, EventArgs e)
@@ -125,22 +129,23 @@ namespace TinyRadiusAdmin
 
                 SaveAccountSetting(ref autoRestart);
 
-                Cfg.Instance.TinyConfig.ValidateByDatabase = enableDataBase.Checked;
-                Cfg.Instance.TinyConfig.DatabaseSetting.Connection = TextBoxConnectionString.Text;
-                Cfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = TextBoxSQL.Text;
+                ServiceCfg.Instance.TinyConfig.ValidateByDatabase = enableDataBase.Checked;
+                ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection = TextBoxConnectionString.Text;
+                ServiceCfg.Instance.TinyConfig.DatabaseSetting.PasswordSql = TextBoxSQL.Text;
+                ServiceCfg.Instance.TinyConfig.DatabaseSetting.MacSql = TextBoxCheckMac.Text;
 
-                Cfg.Instance.TinyConfig.ValidateByLdap = enableLDAP.Checked;
-                Cfg.Instance.TinyConfig.LdapSetting.Path = TextBoxLdapPath.Text;
-                Cfg.Instance.TinyConfig.LdapSetting.Server = TextBoxServer.Text;
+                ServiceCfg.Instance.TinyConfig.ValidateByLdap = enableLDAP.Checked;
+                ServiceCfg.Instance.TinyConfig.LdapSetting.SearchUserPath = TextBoxLdapPath.Text;
+                ServiceCfg.Instance.TinyConfig.LdapSetting.Server = TextBoxServer.Text;
 
-                if (this.checkBoxAnonymous.Checked)
+                if (!this.checkBoxAnonymous.Checked)
                 {
-                    Cfg.Instance.TinyConfig.LdapSetting.CredentialUserName = TextBoxCredentialUserName.Text;
-                    Cfg.Instance.TinyConfig.LdapSetting.CredentialPassword = TextBoxCredentialPassword.Text;
+                    ServiceCfg.Instance.TinyConfig.LdapSetting.CredentialUserName = TextBoxCredentialUserName.Text;
+                    ServiceCfg.Instance.TinyConfig.LdapSetting.CredentialPassword = TextBoxCredentialPassword.Text;
                 }
-                Cfg.Instance.TinyConfig.LdapSetting.IsSsl = this.CheckBoxSSL.Checked;
+                ServiceCfg.Instance.TinyConfig.LdapSetting.IsSsl = this.CheckBoxSSL.Checked;
 
-                Cfg.Instance.TinyConfig.Save();
+                ServiceCfg.Instance.TinyConfig.Save();
                 return autoRestart;
             }
             catch (ArgumentException ex)
@@ -156,9 +161,9 @@ namespace TinyRadiusAdmin
             {
                 if (!autoRestart)
                 {
-                    autoRestart = Cfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
+                    autoRestart = ServiceCfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
                 }
-                Cfg.Instance.TinyConfig.AccountListentIp = AccountListentIPTextBox.Text;
+                ServiceCfg.Instance.TinyConfig.AccountListentIp = AccountListentIPTextBox.Text;
             }
             else
             {
@@ -167,14 +172,14 @@ namespace TinyRadiusAdmin
             }
             if (!autoRestart)
             {
-                autoRestart = Cfg.Instance.TinyConfig.AcctPort != Convert.ToInt32(AccountListentPort.Text);
+                autoRestart = ServiceCfg.Instance.TinyConfig.AcctPort != Convert.ToInt32(AccountListentPort.Text);
             }
-            Cfg.Instance.TinyConfig.AcctPort = Convert.ToInt32(AccountListentPort.Text);
+            ServiceCfg.Instance.TinyConfig.AcctPort = Convert.ToInt32(AccountListentPort.Text);
             if (!autoRestart)
             {
-                autoRestart = Cfg.Instance.TinyConfig.EnableAccount != EnableAccountCheckBox.Checked;
+                autoRestart = ServiceCfg.Instance.TinyConfig.EnableAccount != EnableAccountCheckBox.Checked;
             }
-            Cfg.Instance.TinyConfig.EnableAccount = EnableAccountCheckBox.Checked;
+            ServiceCfg.Instance.TinyConfig.EnableAccount = EnableAccountCheckBox.Checked;
             return autoRestart;
         }
 
@@ -184,8 +189,8 @@ namespace TinyRadiusAdmin
             IPAddress ip1;
             if (AuthListentIPTextBox.SelectedIndex != -1)
             {
-                autoRestart = Cfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
-                Cfg.Instance.TinyConfig.AuthListentIp = AuthListentIPTextBox.Text;
+                autoRestart = ServiceCfg.Instance.TinyConfig.AuthListentIp != AuthListentIPTextBox.Text;
+                ServiceCfg.Instance.TinyConfig.AuthListentIp = AuthListentIPTextBox.Text;
             }
             else
             {
@@ -195,15 +200,15 @@ namespace TinyRadiusAdmin
 
             if (!autoRestart)
             {
-                autoRestart = Cfg.Instance.TinyConfig.AuthPort != Convert.ToInt32(AuthPortTextBox.Text);
+                autoRestart = ServiceCfg.Instance.TinyConfig.AuthPort != Convert.ToInt32(AuthPortTextBox.Text);
             }
-            Cfg.Instance.TinyConfig.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
+            ServiceCfg.Instance.TinyConfig.AuthPort = Convert.ToInt32(AuthPortTextBox.Text);
 
             if (!autoRestart)
             {
-                autoRestart = Cfg.Instance.TinyConfig.EnableAuthentication != enableAuthenticationCheckBox.Checked;
+                autoRestart = ServiceCfg.Instance.TinyConfig.EnableAuthentication != enableAuthenticationCheckBox.Checked;
             }
-            Cfg.Instance.TinyConfig.EnableAuthentication = enableAuthenticationCheckBox.Checked;
+            ServiceCfg.Instance.TinyConfig.EnableAuthentication = enableAuthenticationCheckBox.Checked;
             return autoRestart;
         }
 

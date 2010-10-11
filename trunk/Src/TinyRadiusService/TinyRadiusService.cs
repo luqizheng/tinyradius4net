@@ -2,7 +2,7 @@
 using System.Net;
 using System.ServiceProcess;
 using log4net;
-using TinyRadius.Net.Cfg;
+using TinyRadiusService.Cfg;
 
 namespace TinyRadiusService
 {

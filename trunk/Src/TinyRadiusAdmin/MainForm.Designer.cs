@@ -54,7 +54,6 @@
             this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.checkBoxAnonymous = new System.Windows.Forms.CheckBox();
             this.CheckBoxSSL = new System.Windows.Forms.CheckBox();
             this.GroupBoxCredential = new System.Windows.Forms.GroupBox();
             this.TextBoxCredentialPassword = new System.Windows.Forms.TextBox();
@@ -79,6 +78,9 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
+            this.checkBoxAnonymous = new System.Windows.Forms.CheckBox();
+            this.TextBoxCheckMac = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -159,9 +161,9 @@
             this.panel1.Controls.Add(this.button4);
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 467);
+            this.panel1.Location = new System.Drawing.Point(0, 507);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(861, 34);
+            this.panel1.Size = new System.Drawing.Size(903, 34);
             this.panel1.TabIndex = 3;
             // 
             // tabControl1
@@ -174,7 +176,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(861, 467);
+            this.tabControl1.Size = new System.Drawing.Size(903, 507);
             this.tabControl1.TabIndex = 4;
             // 
             // tabPage1
@@ -338,7 +340,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
-            this.tabPage3.Size = new System.Drawing.Size(853, 441);
+            this.tabPage3.Size = new System.Drawing.Size(895, 481);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "验证";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -355,23 +357,12 @@
             this.groupBox4.Controls.Add(this.label7);
             this.groupBox4.Controls.Add(this.enableLDAP);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox4.Location = new System.Drawing.Point(0, 136);
+            this.groupBox4.Location = new System.Drawing.Point(0, 178);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(853, 259);
+            this.groupBox4.Size = new System.Drawing.Size(895, 259);
             this.groupBox4.TabIndex = 1;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "LDAP";
-            // 
-            // checkBoxAnonymous
-            // 
-            this.checkBoxAnonymous.AutoSize = true;
-            this.checkBoxAnonymous.Location = new System.Drawing.Point(7, 136);
-            this.checkBoxAnonymous.Name = "checkBoxAnonymous";
-            this.checkBoxAnonymous.Size = new System.Drawing.Size(48, 16);
-            this.checkBoxAnonymous.TabIndex = 12;
-            this.checkBoxAnonymous.Text = "匿名";
-            this.checkBoxAnonymous.UseVisualStyleBackColor = true;
-            this.checkBoxAnonymous.CheckedChanged += new System.EventHandler(this.checkBoxAnonymous_CheckedChanged);
             // 
             // CheckBoxSSL
             // 
@@ -392,7 +383,7 @@
             this.GroupBoxCredential.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.GroupBoxCredential.Location = new System.Drawing.Point(3, 169);
             this.GroupBoxCredential.Name = "GroupBoxCredential";
-            this.GroupBoxCredential.Size = new System.Drawing.Size(847, 87);
+            this.GroupBoxCredential.Size = new System.Drawing.Size(889, 87);
             this.GroupBoxCredential.TabIndex = 10;
             this.GroupBoxCredential.TabStop = false;
             this.GroupBoxCredential.Text = "Credential Network Login";
@@ -429,7 +420,7 @@
             this.label2.TabIndex = 10;
             this.label2.Text = "Credential UserName";
             // 
-            // textBoxDomain
+            // TextBoxServer
             // 
             this.TextBoxServer.Location = new System.Drawing.Point(85, 42);
             this.TextBoxServer.Name = "TextBoxServer";
@@ -484,6 +475,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.TextBoxCheckMac);
+            this.groupBox3.Controls.Add(this.label15);
             this.groupBox3.Controls.Add(this.buttonTestConnection);
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.TextBoxSQL);
@@ -494,7 +487,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox3.Location = new System.Drawing.Point(0, 10);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(853, 126);
+            this.groupBox3.Size = new System.Drawing.Size(895, 168);
             this.groupBox3.TabIndex = 0;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "数据库验证";
@@ -531,9 +524,9 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(8, 68);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(23, 12);
+            this.label6.Size = new System.Drawing.Size(71, 12);
             this.label6.TabIndex = 3;
-            this.label6.Text = "SQL";
+            this.label6.Text = "获取密码SQL";
             // 
             // label5
             // 
@@ -602,11 +595,38 @@
             this.label11.TabIndex = 0;
             this.label11.Text = "电话:3333601";
             // 
+            // checkBoxAnonymous
+            // 
+            this.checkBoxAnonymous.AutoSize = true;
+            this.checkBoxAnonymous.Location = new System.Drawing.Point(7, 136);
+            this.checkBoxAnonymous.Name = "checkBoxAnonymous";
+            this.checkBoxAnonymous.Size = new System.Drawing.Size(48, 16);
+            this.checkBoxAnonymous.TabIndex = 12;
+            this.checkBoxAnonymous.Text = "匿名";
+            this.checkBoxAnonymous.UseVisualStyleBackColor = true;
+            this.checkBoxAnonymous.CheckedChanged += new System.EventHandler(this.checkBoxAnonymous_CheckedChanged);
+            // 
+            // TextBoxCheckMac
+            // 
+            this.TextBoxCheckMac.Location = new System.Drawing.Point(93, 123);
+            this.TextBoxCheckMac.Name = "TextBoxCheckMac";
+            this.TextBoxCheckMac.Size = new System.Drawing.Size(607, 21);
+            this.TextBoxCheckMac.TabIndex = 10;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(6, 123);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(65, 12);
+            this.label15.TabIndex = 9;
+            this.label15.Text = "检查MacSql";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(861, 501);
+            this.ClientSize = new System.Drawing.Size(903, 541);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -688,6 +708,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox checkBoxAnonymous;
+        private System.Windows.Forms.TextBox TextBoxCheckMac;
+        private System.Windows.Forms.Label label15;
 
     }
 }

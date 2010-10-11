@@ -68,7 +68,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configurations\Cfg.cs" />
     <Compile Include="FormSetting\NasClientSetting.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -116,6 +115,10 @@
     <ProjectReference Include="..\TinyRadius.Net.Core\TinyRadius.Net.Core.csproj">
       <Project>{E3577C9B-AA09-4448-9601-F3E240110F52}</Project>
       <Name>TinyRadius.Net.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TinyRadiusService.Core\TinyRadiusService.Core.csproj">
+      <Project>{9503C499-024C-4DB9-B722-934B0D1A967A}</Project>
+      <Name>TinyRadiusService.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
