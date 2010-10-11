@@ -33,38 +33,50 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_81BCB883014E9B8942839A1620337B57"
+        "MsmKey" = "8:_559CC925094663F74B84F1471BC785A0"
         "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_81BCB883014E9B8942839A1620337B57"
+        "MsmKey" = "8:_559CC925094663F74B84F1471BC785A0"
         "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_81BCB883014E9B8942839A1620337B57"
-        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_81BCB883014E9B8942839A1620337B57"
-        "OwnerKey" = "8:_9441B888E3BE7A90B09FF7C4184BC01A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_9441B888E3BE7A90B09FF7C4184BC01A"
+        "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
         "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_9441B888E3BE7A90B09FF7C4184BC01A"
+        "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
         "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
+        "OwnerKey" = "8:_559CC925094663F74B84F1471BC785A0"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7CD6C68332057D87514A5809D52CF6CB"
+        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7CD6C68332057D87514A5809D52CF6CB"
+        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7CD6C68332057D87514A5809D52CF6CB"
+        "OwnerKey" = "8:_559CC925094663F74B84F1471BC785A0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -81,6 +93,36 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_2602A5A98B804CBD964C5A6260CC7B78"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_EE129C02390B4200BD9D998ADE596B0C"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_559CC925094663F74B84F1471BC785A0"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
+        "OwnerKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_DD34DD6A14F34EC88C02FED0E76B7CE3"
         "MsmSig" = "8:_UNDEFINED"
@@ -100,13 +142,25 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_9441B888E3BE7A90B09FF7C4184BC01A"
+        "OwnerKey" = "8:_559CC925094663F74B84F1471BC785A0"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_81BCB883014E9B8942839A1620337B57"
+        "OwnerKey" = "8:_7CD6C68332057D87514A5809D52CF6CB"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_71FCD9BCDA8BD7B00B651D82B1AF5902"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_EFC2147773DCA0574489AB4D24AD578C"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -282,20 +336,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_81BCB883014E9B8942839A1620337B57"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_559CC925094663F74B84F1471BC785A0"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:TinyRadiusService.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_81BCB883014E9B8942839A1620337B57"
+                    "_559CC925094663F74B84F1471BC785A0"
                     {
-                    "Name" = "8:log4net.dll"
+                    "Name" = "8:TinyRadiusService.Core.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:log4net.dll"
+            "SourcePath" = "8:TinyRadiusService.Core.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
@@ -313,20 +367,82 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_9441B888E3BE7A90B09FF7C4184BC01A"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_71FCD9BCDA8BD7B00B651D82B1AF5902"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:TinyRadius.Net.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_9441B888E3BE7A90B09FF7C4184BC01A"
+                    "_71FCD9BCDA8BD7B00B651D82B1AF5902"
                     {
                     "Name" = "8:TinyRadius.Net.Core.dll"
                     "Attributes" = "3:512"
                     }
                 }
             "SourcePath" = "8:TinyRadius.Net.Core.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7CD6C68332057D87514A5809D52CF6CB"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Qi, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_7CD6C68332057D87514A5809D52CF6CB"
+                    {
+                    "Name" = "8:Qi.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Qi.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_EFC2147773DCA0574489AB4D24AD578C"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_EFC2147773DCA0574489AB4D24AD578C"
+                    {
+                    "Name" = "8:log4net.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:log4net.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_21F0669526F442DFAC30BC3524D937A3"
@@ -401,12 +517,12 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:RadiusServer"
         "ProductCode" = "8:{04C5AA5F-96F2-40B3-B540-4F021FE0836D}"
-        "PackageCode" = "8:{F47DD21C-FE32-4C5B-91F8-92F177F27E03}"
+        "PackageCode" = "8:{D822355D-7837-4872-8D85-9920A75AB6C5}"
         "UpgradeCode" = "8:{1AC0A99B-15E5-44F6-BDD9-446150BDF76A}"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
+        "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
-        "InstallAllUsers" = "11:FALSE"
+        "InstallAllUsers" = "11:TRUE"
         "ProductVersion" = "8:1.0.0"
         "Manufacturer" = "8:珠海科蓝电子有限公司"
         "ARPHELPTELEPHONE" = "8:"
