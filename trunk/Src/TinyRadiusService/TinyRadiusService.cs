@@ -18,16 +18,35 @@ namespace TinyRadiusService
 
         protected override void OnStart(string[] args)
         {
+            var config = ServiceCfg.Instance.TinyConfig;
+            IPAddress accountListentIp = IPAddress.Parse("127.0.0.1");
+            IPAddress authIp = IPAddress.Parse("127.0.0.1");
+
+            if (!String.IsNullOrEmpty(config.AccountListentIp))
+            {
+                if (!IPAddress.TryParse(config.AccountListentIp, out accountListentIp))
+                {
+                    Log.Error("accountList IP isn't validate, so auto set to 127.0.0.1");
+                }
+            }
+
+            if (!String.IsNullOrEmpty(config.AuthListentIp))
+            {
+                if (!IPAddress.TryParse(config.AuthListentIp, out authIp))
+                {
+                    Log.Error(("Auth Ip isn't validate, so auto set to 127.0.0.1"));
+                }
+            }
+
+
             try
             {
-                var config = ServiceCfg.Instance.TinyConfig;
-
                 _server = new RadiusServer
                               {
                                   AcctPort = config.AcctPort,
                                   AuthPort = config.AuthPort,
-                                  ListenAccountIp = IPAddress.Parse(config.AccountListentIp),
-                                  ListenAuthIp = IPAddress.Parse(config.AuthListentIp)
+                                  ListenAccountIp = accountListentIp,
+                                  ListenAuthIp = authIp
                               };
                 _server.Start(config.EnableAuthentication, config.EnableAccount);
             }
@@ -35,7 +54,6 @@ namespace TinyRadiusService
             {
                 Log.Error(ex);
                 throw;
-
             }
         }
 
