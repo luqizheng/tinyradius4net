@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Net.Core", "TinyRadius.Net.Core\TinyRadius.Net.Core.csproj", "{E3577C9B-AA09-4448-9601-F3E240110F52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyRadius.Net.Core.Test", "TinyRadius.Net.Core.Test\TinyRadius.Net.Core.Test.csproj", "{25765B77-60CB-4D7F-BF4C-57E3895A09EE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ACBA675B-69F2-4866-ADC9-F19265E51F3C}"
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
@@ -35,10 +33,6 @@ Global
 		{E3577C9B-AA09-4448-9601-F3E240110F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3577C9B-AA09-4448-9601-F3E240110F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3577C9B-AA09-4448-9601-F3E240110F52}.Release|Any CPU.Build.0 = Release|Any CPU
-		{25765B77-60CB-4D7F-BF4C-57E3895A09EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{25765B77-60CB-4D7F-BF4C-57E3895A09EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{25765B77-60CB-4D7F-BF4C-57E3895A09EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{25765B77-60CB-4D7F-BF4C-57E3895A09EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69DCBB92-2FC8-4DE4-BCF8-860AB5A93DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU

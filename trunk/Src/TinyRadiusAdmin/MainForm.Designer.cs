@@ -54,6 +54,7 @@
             this.nasClientSetting1 = new TinyRadiusAdmin.FormSetting.NasClientSetting();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.checkBoxAnonymous = new System.Windows.Forms.CheckBox();
             this.CheckBoxSSL = new System.Windows.Forms.CheckBox();
             this.GroupBoxCredential = new System.Windows.Forms.GroupBox();
             this.TextBoxCredentialPassword = new System.Windows.Forms.TextBox();
@@ -67,6 +68,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.enableLDAP = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.TextBoxCheckMac = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.buttonTestConnection = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.TextBoxSQL = new System.Windows.Forms.TextBox();
@@ -78,9 +81,6 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.checkBoxAnonymous = new System.Windows.Forms.CheckBox();
-            this.TextBoxCheckMac = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -98,7 +98,7 @@
             // 
             this.button1.Location = new System.Drawing.Point(711, 5);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 21);
+            this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
             this.button1.Tag = "Stoped";
             this.button1.Text = "启动";
@@ -109,7 +109,7 @@
             // 
             this.button4.Location = new System.Drawing.Point(533, 4);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
+            this.button4.Size = new System.Drawing.Size(75, 25);
             this.button4.TabIndex = 11;
             this.button4.Text = "保存";
             this.button4.UseVisualStyleBackColor = true;
@@ -119,7 +119,7 @@
             // 
             this.StatusLabel.AutoSize = true;
             this.StatusLabel.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.StatusLabel.Location = new System.Drawing.Point(481, 10);
+            this.StatusLabel.Location = new System.Drawing.Point(481, 11);
             this.StatusLabel.Name = "StatusLabel";
             this.StatusLabel.Size = new System.Drawing.Size(0, 12);
             this.StatusLabel.TabIndex = 12;
@@ -127,18 +127,18 @@
             // labelStatus
             // 
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(62, 10);
+            this.labelStatus.Location = new System.Drawing.Point(62, 11);
             this.labelStatus.Name = "labelStatus";
-            this.labelStatus.Size = new System.Drawing.Size(29, 12);
+            this.labelStatus.Size = new System.Drawing.Size(31, 13);
             this.labelStatus.TabIndex = 13;
             this.labelStatus.Text = "未知";
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(3, 10);
+            this.label14.Location = new System.Drawing.Point(3, 11);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(59, 12);
+            this.label14.Size = new System.Drawing.Size(58, 13);
             this.label14.TabIndex = 14;
             this.label14.Text = "服务状态:";
             // 
@@ -146,7 +146,7 @@
             // 
             this.button5.Location = new System.Drawing.Point(622, 5);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 21);
+            this.button5.Size = new System.Drawing.Size(75, 23);
             this.button5.TabIndex = 10;
             this.button5.Text = "重启";
             this.button5.UseVisualStyleBackColor = true;
@@ -161,9 +161,9 @@
             this.panel1.Controls.Add(this.button4);
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 507);
+            this.panel1.Location = new System.Drawing.Point(0, 549);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(903, 34);
+            this.panel1.Size = new System.Drawing.Size(903, 37);
             this.panel1.TabIndex = 3;
             // 
             // tabControl1
@@ -176,7 +176,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(903, 507);
+            this.tabControl1.Size = new System.Drawing.Size(903, 549);
             this.tabControl1.TabIndex = 4;
             // 
             // tabPage1
@@ -186,7 +186,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(853, 441);
+            this.tabPage1.Size = new System.Drawing.Size(895, 523);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "监听设定";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -199,9 +199,9 @@
             this.groupBox2.Controls.Add(this.AccountPortTextBox);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox2.Location = new System.Drawing.Point(3, 117);
+            this.groupBox2.Location = new System.Drawing.Point(3, 127);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(847, 139);
+            this.groupBox2.Size = new System.Drawing.Size(889, 151);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "计费";
@@ -210,9 +210,9 @@
             // 
             this.AccountListentIPTextBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.AccountListentIPTextBox.FormattingEnabled = true;
-            this.AccountListentIPTextBox.Location = new System.Drawing.Point(87, 27);
+            this.AccountListentIPTextBox.Location = new System.Drawing.Point(87, 29);
             this.AccountListentIPTextBox.Name = "AccountListentIPTextBox";
-            this.AccountListentIPTextBox.Size = new System.Drawing.Size(121, 20);
+            this.AccountListentIPTextBox.Size = new System.Drawing.Size(121, 21);
             this.AccountListentIPTextBox.TabIndex = 9;
             // 
             // EnableAccountCheckBox
@@ -220,35 +220,35 @@
             this.EnableAccountCheckBox.AutoSize = true;
             this.EnableAccountCheckBox.Checked = true;
             this.EnableAccountCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.EnableAccountCheckBox.Location = new System.Drawing.Point(87, 88);
+            this.EnableAccountCheckBox.Location = new System.Drawing.Point(87, 95);
             this.EnableAccountCheckBox.Name = "EnableAccountCheckBox";
-            this.EnableAccountCheckBox.Size = new System.Drawing.Size(48, 16);
+            this.EnableAccountCheckBox.Size = new System.Drawing.Size(50, 17);
             this.EnableAccountCheckBox.TabIndex = 8;
             this.EnableAccountCheckBox.Text = "启动";
             this.EnableAccountCheckBox.UseVisualStyleBackColor = true;
             // 
             // AccountListentPort
             // 
-            this.AccountListentPort.Location = new System.Drawing.Point(87, 50);
+            this.AccountListentPort.Location = new System.Drawing.Point(87, 54);
             this.AccountListentPort.Name = "AccountListentPort";
-            this.AccountListentPort.Size = new System.Drawing.Size(121, 21);
+            this.AccountListentPort.Size = new System.Drawing.Size(121, 20);
             this.AccountListentPort.TabIndex = 7;
             // 
             // AccountPortTextBox
             // 
             this.AccountPortTextBox.AutoSize = true;
-            this.AccountPortTextBox.Location = new System.Drawing.Point(13, 54);
+            this.AccountPortTextBox.Location = new System.Drawing.Point(13, 59);
             this.AccountPortTextBox.Name = "AccountPortTextBox";
-            this.AccountPortTextBox.Size = new System.Drawing.Size(35, 12);
+            this.AccountPortTextBox.Size = new System.Drawing.Size(34, 13);
             this.AccountPortTextBox.TabIndex = 1;
             this.AccountPortTextBox.Text = "端口:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(13, 27);
+            this.label4.Location = new System.Drawing.Point(13, 29);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 12);
+            this.label4.Size = new System.Drawing.Size(44, 13);
             this.label4.TabIndex = 0;
             this.label4.Text = "监听IP:";
             // 
@@ -262,7 +262,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(847, 114);
+            this.groupBox1.Size = new System.Drawing.Size(889, 124);
             this.groupBox1.TabIndex = 9;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "用户验证";
@@ -271,9 +271,9 @@
             // 
             this.AuthListentIPTextBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.AuthListentIPTextBox.FormattingEnabled = true;
-            this.AuthListentIPTextBox.Location = new System.Drawing.Point(87, 25);
+            this.AuthListentIPTextBox.Location = new System.Drawing.Point(87, 27);
             this.AuthListentIPTextBox.Name = "AuthListentIPTextBox";
-            this.AuthListentIPTextBox.Size = new System.Drawing.Size(121, 20);
+            this.AuthListentIPTextBox.Size = new System.Drawing.Size(121, 21);
             this.AuthListentIPTextBox.TabIndex = 9;
             // 
             // enableAuthenticationCheckBox
@@ -281,9 +281,9 @@
             this.enableAuthenticationCheckBox.AutoSize = true;
             this.enableAuthenticationCheckBox.Checked = true;
             this.enableAuthenticationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.enableAuthenticationCheckBox.Location = new System.Drawing.Point(87, 81);
+            this.enableAuthenticationCheckBox.Location = new System.Drawing.Point(87, 88);
             this.enableAuthenticationCheckBox.Name = "enableAuthenticationCheckBox";
-            this.enableAuthenticationCheckBox.Size = new System.Drawing.Size(48, 16);
+            this.enableAuthenticationCheckBox.Size = new System.Drawing.Size(50, 17);
             this.enableAuthenticationCheckBox.TabIndex = 4;
             this.enableAuthenticationCheckBox.Text = "启动";
             this.enableAuthenticationCheckBox.UseVisualStyleBackColor = true;
@@ -291,25 +291,25 @@
             // PortLabel
             // 
             this.PortLabel.AutoSize = true;
-            this.PortLabel.Location = new System.Drawing.Point(13, 54);
+            this.PortLabel.Location = new System.Drawing.Point(13, 59);
             this.PortLabel.Name = "PortLabel";
-            this.PortLabel.Size = new System.Drawing.Size(35, 12);
+            this.PortLabel.Size = new System.Drawing.Size(34, 13);
             this.PortLabel.TabIndex = 8;
             this.PortLabel.Text = "端口:";
             // 
             // AuthPortTextBox
             // 
-            this.AuthPortTextBox.Location = new System.Drawing.Point(87, 54);
+            this.AuthPortTextBox.Location = new System.Drawing.Point(87, 59);
             this.AuthPortTextBox.Name = "AuthPortTextBox";
-            this.AuthPortTextBox.Size = new System.Drawing.Size(121, 21);
+            this.AuthPortTextBox.Size = new System.Drawing.Size(121, 20);
             this.AuthPortTextBox.TabIndex = 3;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 28);
+            this.label1.Location = new System.Drawing.Point(13, 30);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(47, 12);
+            this.label1.Size = new System.Drawing.Size(44, 13);
             this.label1.TabIndex = 6;
             this.label1.Text = "监听IP:";
             // 
@@ -319,7 +319,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(853, 441);
+            this.tabPage2.Size = new System.Drawing.Size(895, 523);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "客户端设定";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -330,7 +330,7 @@
             this.nasClientSetting1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nasClientSetting1.Location = new System.Drawing.Point(3, 3);
             this.nasClientSetting1.Name = "nasClientSetting1";
-            this.nasClientSetting1.Size = new System.Drawing.Size(847, 435);
+            this.nasClientSetting1.Size = new System.Drawing.Size(889, 517);
             this.nasClientSetting1.TabIndex = 1;
             // 
             // tabPage3
@@ -339,8 +339,8 @@
             this.tabPage3.Controls.Add(this.groupBox3);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
-            this.tabPage3.Size = new System.Drawing.Size(895, 481);
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(0, 11, 0, 0);
+            this.tabPage3.Size = new System.Drawing.Size(895, 523);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "验证";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -357,19 +357,30 @@
             this.groupBox4.Controls.Add(this.label7);
             this.groupBox4.Controls.Add(this.enableLDAP);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox4.Location = new System.Drawing.Point(0, 178);
+            this.groupBox4.Location = new System.Drawing.Point(0, 193);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(895, 259);
+            this.groupBox4.Size = new System.Drawing.Size(895, 281);
             this.groupBox4.TabIndex = 1;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "LDAP";
             // 
+            // checkBoxAnonymous
+            // 
+            this.checkBoxAnonymous.AutoSize = true;
+            this.checkBoxAnonymous.Location = new System.Drawing.Point(7, 147);
+            this.checkBoxAnonymous.Name = "checkBoxAnonymous";
+            this.checkBoxAnonymous.Size = new System.Drawing.Size(50, 17);
+            this.checkBoxAnonymous.TabIndex = 12;
+            this.checkBoxAnonymous.Text = "匿名";
+            this.checkBoxAnonymous.UseVisualStyleBackColor = true;
+            this.checkBoxAnonymous.CheckedChanged += new System.EventHandler(this.checkBoxAnonymous_CheckedChanged);
+            // 
             // CheckBoxSSL
             // 
             this.CheckBoxSSL.AutoSize = true;
-            this.CheckBoxSSL.Location = new System.Drawing.Point(7, 114);
+            this.CheckBoxSSL.Location = new System.Drawing.Point(7, 124);
             this.CheckBoxSSL.Name = "CheckBoxSSL";
-            this.CheckBoxSSL.Size = new System.Drawing.Size(90, 16);
+            this.CheckBoxSSL.Size = new System.Drawing.Size(86, 17);
             this.CheckBoxSSL.TabIndex = 11;
             this.CheckBoxSSL.Text = "Support SSL";
             this.CheckBoxSSL.UseVisualStyleBackColor = true;
@@ -381,83 +392,83 @@
             this.GroupBoxCredential.Controls.Add(this.label3);
             this.GroupBoxCredential.Controls.Add(this.label2);
             this.GroupBoxCredential.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.GroupBoxCredential.Location = new System.Drawing.Point(3, 169);
+            this.GroupBoxCredential.Location = new System.Drawing.Point(3, 184);
             this.GroupBoxCredential.Name = "GroupBoxCredential";
-            this.GroupBoxCredential.Size = new System.Drawing.Size(889, 87);
+            this.GroupBoxCredential.Size = new System.Drawing.Size(889, 94);
             this.GroupBoxCredential.TabIndex = 10;
             this.GroupBoxCredential.TabStop = false;
             this.GroupBoxCredential.Text = "Credential Network Login";
             // 
             // TextBoxCredentialPassword
             // 
-            this.TextBoxCredentialPassword.Location = new System.Drawing.Point(148, 53);
+            this.TextBoxCredentialPassword.Location = new System.Drawing.Point(148, 57);
             this.TextBoxCredentialPassword.Name = "TextBoxCredentialPassword";
-            this.TextBoxCredentialPassword.Size = new System.Drawing.Size(339, 21);
+            this.TextBoxCredentialPassword.Size = new System.Drawing.Size(339, 20);
             this.TextBoxCredentialPassword.TabIndex = 13;
             // 
             // TextBoxCredentialUserName
             // 
-            this.TextBoxCredentialUserName.Location = new System.Drawing.Point(148, 24);
+            this.TextBoxCredentialUserName.Location = new System.Drawing.Point(148, 26);
             this.TextBoxCredentialUserName.Name = "TextBoxCredentialUserName";
-            this.TextBoxCredentialUserName.Size = new System.Drawing.Size(339, 21);
+            this.TextBoxCredentialUserName.Size = new System.Drawing.Size(339, 20);
             this.TextBoxCredentialUserName.TabIndex = 12;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 59);
+            this.label3.Location = new System.Drawing.Point(6, 64);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(119, 12);
+            this.label3.Size = new System.Drawing.Size(103, 13);
             this.label3.TabIndex = 11;
             this.label3.Text = "Credential Password";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 30);
+            this.label2.Location = new System.Drawing.Point(6, 33);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(119, 12);
+            this.label2.Size = new System.Drawing.Size(107, 13);
             this.label2.TabIndex = 10;
             this.label2.Text = "Credential UserName";
             // 
             // TextBoxServer
             // 
-            this.TextBoxServer.Location = new System.Drawing.Point(85, 42);
+            this.TextBoxServer.Location = new System.Drawing.Point(85, 46);
             this.TextBoxServer.Name = "TextBoxServer";
-            this.TextBoxServer.Size = new System.Drawing.Size(100, 21);
+            this.TextBoxServer.Size = new System.Drawing.Size(100, 20);
             this.TextBoxServer.TabIndex = 5;
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(8, 45);
+            this.label10.Location = new System.Drawing.Point(8, 49);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(41, 12);
+            this.label10.Size = new System.Drawing.Size(38, 13);
             this.label10.TabIndex = 4;
             this.label10.Text = "Server";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(85, 95);
+            this.label9.Location = new System.Drawing.Point(85, 103);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(131, 12);
+            this.label9.Size = new System.Drawing.Size(298, 13);
             this.label9.TabIndex = 3;
-            this.label9.Text = "例子:DC=domain,DC=Net";
+            this.label9.Text = "例子:LDAP://DC=domain,DC=Net,请注意LDAP必须是大写";
             // 
             // TextBoxLdapPath
             // 
-            this.TextBoxLdapPath.Location = new System.Drawing.Point(85, 70);
+            this.TextBoxLdapPath.Location = new System.Drawing.Point(85, 76);
             this.TextBoxLdapPath.Name = "TextBoxLdapPath";
-            this.TextBoxLdapPath.Size = new System.Drawing.Size(615, 21);
+            this.TextBoxLdapPath.Size = new System.Drawing.Size(615, 20);
             this.TextBoxLdapPath.TabIndex = 2;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(8, 77);
+            this.label7.Location = new System.Drawing.Point(8, 83);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(53, 12);
+            this.label7.Size = new System.Drawing.Size(53, 13);
             this.label7.TabIndex = 1;
             this.label7.Text = "LdapPath";
             // 
@@ -466,9 +477,9 @@
             this.enableLDAP.AutoSize = true;
             this.enableLDAP.Checked = true;
             this.enableLDAP.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.enableLDAP.Location = new System.Drawing.Point(8, 18);
+            this.enableLDAP.Location = new System.Drawing.Point(8, 20);
             this.enableLDAP.Name = "enableLDAP";
-            this.enableLDAP.Size = new System.Drawing.Size(48, 16);
+            this.enableLDAP.Size = new System.Drawing.Size(50, 17);
             this.enableLDAP.TabIndex = 0;
             this.enableLDAP.Text = "启动";
             this.enableLDAP.UseVisualStyleBackColor = true;
@@ -485,18 +496,34 @@
             this.groupBox3.Controls.Add(this.TextBoxConnectionString);
             this.groupBox3.Controls.Add(this.enableDataBase);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox3.Location = new System.Drawing.Point(0, 10);
+            this.groupBox3.Location = new System.Drawing.Point(0, 11);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(895, 168);
+            this.groupBox3.Size = new System.Drawing.Size(895, 182);
             this.groupBox3.TabIndex = 0;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "数据库验证";
             // 
+            // TextBoxCheckMac
+            // 
+            this.TextBoxCheckMac.Location = new System.Drawing.Point(93, 133);
+            this.TextBoxCheckMac.Name = "TextBoxCheckMac";
+            this.TextBoxCheckMac.Size = new System.Drawing.Size(607, 20);
+            this.TextBoxCheckMac.TabIndex = 10;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(6, 133);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(67, 13);
+            this.label15.TabIndex = 9;
+            this.label15.Text = "检查MacSql";
+            // 
             // buttonTestConnection
             // 
-            this.buttonTestConnection.Location = new System.Drawing.Point(709, 37);
+            this.buttonTestConnection.Location = new System.Drawing.Point(709, 40);
             this.buttonTestConnection.Name = "buttonTestConnection";
-            this.buttonTestConnection.Size = new System.Drawing.Size(75, 23);
+            this.buttonTestConnection.Size = new System.Drawing.Size(75, 25);
             this.buttonTestConnection.TabIndex = 6;
             this.buttonTestConnection.Text = "Test";
             this.buttonTestConnection.UseVisualStyleBackColor = true;
@@ -505,43 +532,43 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(91, 93);
+            this.label8.Location = new System.Drawing.Point(91, 101);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(641, 12);
+            this.label8.Size = new System.Drawing.Size(601, 13);
             this.label8.TabIndex = 5;
             this.label8.Text = "例子：select password from userTable where userTable.UserName=@userName,其中@userName是" +
                 "用户名参数,不能修改";
             // 
             // TextBoxSQL
             // 
-            this.TextBoxSQL.Location = new System.Drawing.Point(93, 64);
+            this.TextBoxSQL.Location = new System.Drawing.Point(93, 69);
             this.TextBoxSQL.Name = "TextBoxSQL";
-            this.TextBoxSQL.Size = new System.Drawing.Size(607, 21);
+            this.TextBoxSQL.Size = new System.Drawing.Size(607, 20);
             this.TextBoxSQL.TabIndex = 4;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(8, 68);
+            this.label6.Location = new System.Drawing.Point(8, 74);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 12);
+            this.label6.Size = new System.Drawing.Size(76, 13);
             this.label6.TabIndex = 3;
             this.label6.Text = "获取密码SQL";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 42);
+            this.label5.Location = new System.Drawing.Point(8, 46);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(77, 12);
+            this.label5.Size = new System.Drawing.Size(79, 13);
             this.label5.TabIndex = 2;
             this.label5.Text = "连接字符串：";
             // 
             // TextBoxConnectionString
             // 
-            this.TextBoxConnectionString.Location = new System.Drawing.Point(93, 38);
+            this.TextBoxConnectionString.Location = new System.Drawing.Point(93, 41);
             this.TextBoxConnectionString.Name = "TextBoxConnectionString";
-            this.TextBoxConnectionString.Size = new System.Drawing.Size(607, 21);
+            this.TextBoxConnectionString.Size = new System.Drawing.Size(607, 20);
             this.TextBoxConnectionString.TabIndex = 1;
             // 
             // enableDataBase
@@ -549,9 +576,9 @@
             this.enableDataBase.AutoSize = true;
             this.enableDataBase.Checked = true;
             this.enableDataBase.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.enableDataBase.Location = new System.Drawing.Point(8, 18);
+            this.enableDataBase.Location = new System.Drawing.Point(8, 20);
             this.enableDataBase.Name = "enableDataBase";
-            this.enableDataBase.Size = new System.Drawing.Size(48, 16);
+            this.enableDataBase.Size = new System.Drawing.Size(50, 17);
             this.enableDataBase.TabIndex = 0;
             this.enableDataBase.Text = "启动";
             this.enableDataBase.UseVisualStyleBackColor = true;
@@ -563,7 +590,7 @@
             this.tabPage4.Controls.Add(this.label11);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(853, 441);
+            this.tabPage4.Size = new System.Drawing.Size(895, 523);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "帮助";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -571,62 +598,35 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(20, 30);
+            this.label13.Location = new System.Drawing.Point(20, 33);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(125, 12);
+            this.label13.Size = new System.Drawing.Size(127, 13);
             this.label13.TabIndex = 2;
             this.label13.Text = "珠海科蓝电子有限公司";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(20, 56);
+            this.label12.Location = new System.Drawing.Point(20, 61);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(131, 12);
+            this.label12.Size = new System.Drawing.Size(129, 13);
             this.label12.TabIndex = 1;
             this.label12.Text = "Email:55960367@qq.com";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(20, 82);
+            this.label11.Location = new System.Drawing.Point(20, 89);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(77, 12);
+            this.label11.Size = new System.Drawing.Size(76, 13);
             this.label11.TabIndex = 0;
             this.label11.Text = "电话:3333601";
             // 
-            // checkBoxAnonymous
-            // 
-            this.checkBoxAnonymous.AutoSize = true;
-            this.checkBoxAnonymous.Location = new System.Drawing.Point(7, 136);
-            this.checkBoxAnonymous.Name = "checkBoxAnonymous";
-            this.checkBoxAnonymous.Size = new System.Drawing.Size(48, 16);
-            this.checkBoxAnonymous.TabIndex = 12;
-            this.checkBoxAnonymous.Text = "匿名";
-            this.checkBoxAnonymous.UseVisualStyleBackColor = true;
-            this.checkBoxAnonymous.CheckedChanged += new System.EventHandler(this.checkBoxAnonymous_CheckedChanged);
-            // 
-            // TextBoxCheckMac
-            // 
-            this.TextBoxCheckMac.Location = new System.Drawing.Point(93, 123);
-            this.TextBoxCheckMac.Name = "TextBoxCheckMac";
-            this.TextBoxCheckMac.Size = new System.Drawing.Size(607, 21);
-            this.TextBoxCheckMac.TabIndex = 10;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(6, 123);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(65, 12);
-            this.label15.TabIndex = 9;
-            this.label15.Text = "检查MacSql";
-            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(903, 541);
+            this.ClientSize = new System.Drawing.Size(903, 586);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

@@ -1,1 +1,47 @@
-<Config xmlns="http://schemas.datacontract.org/2004/07/TinyRadiusService.Cfg" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><AccountListentIp>10.169.1.128</AccountListentIp><AcctPort>1813</AcctPort><AuthListentIp>10.169.1.128</AuthListentIp><AuthPort>1812</AuthPort><DatabaseSetting><Connection>Data Source=.\\SQLEXPRESS;Initial Catalog=YiDong;Persist Security Info=True;User ID=sa;Password=sa</Connection><MacSql>SELECT count(*) FROM TrustMAC where MacAddress like @mac and userphone=@userName and TrustDelete='存在'</MacSql><PasswordSql>select password from users where phone=@username</PasswordSql></DatabaseSetting><EnableAccount>false</EnableAccount><EnableAuthentication>true</EnableAuthentication><LdapSetting><AnonymousLogin>false</AnonymousLogin><CredentialPassword/><CredentialUserName>cn=Directory Manager</CredentialUserName><IsSsl>false</IsSsl><SearchUserPath>dc=gmcc,dc=net</SearchUserPath><Server>10.243.1.123</Server></LdapSetting><NasSettings xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays"><a:KeyValueOfstringNasSettingwbxkRi2F><a:Key>10.169.1.190</a:Key><a:Value><Ip xmlns:b="http://schemas.datacontract.org/2004/07/System.Net"><b:m_Address>3187779850</b:m_Address><b:m_Family>InterNetwork</b:m_Family><b:m_HashCode>0</b:m_HashCode><b:m_Numbers><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort><a:unsignedShort>0</a:unsignedShort></b:m_Numbers><b:m_ScopeId>0</b:m_ScopeId></Ip><SecretKey>123456</SecretKey></a:Value></a:KeyValueOfstringNasSettingwbxkRi2F></NasSettings><ValidateByDatabase>true</ValidateByDatabase><ValidateByLdap>true</ValidateByLdap></Config>
+<Config xmlns="http://schemas.datacontract.org/2004/07/TinyRadiusService.Cfg" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <AccountListentIp>10.169.1.128</AccountListentIp>
+  <AcctPort>1813</AcctPort>
+  <AuthListentIp>10.169.1.128</AuthListentIp>
+  <AuthPort>1812</AuthPort>
+  <DatabaseSetting>
+    <Connection>Data Source=.\\SQLEXPRESS;Initial Catalog=YiDong;Persist Security Info=True;User ID=sa;Password=sa</Connection>
+    <MacSql>SELECT count(*) FROM TrustMAC where MacAddress like @mac and userphone=@userName and TrustDelete='存在'</MacSql>
+    <PasswordSql>select password from users where phone=@username</PasswordSql>
+  </DatabaseSetting>
+  <EnableAccount>false</EnableAccount>
+  <EnableAuthentication>true</EnableAuthentication>
+  <LdapSetting>
+    <AnonymousLogin>false</AnonymousLogin>
+    <CredentialPassword/>
+    <CredentialUserName>cn=Directory Manager</CredentialUserName>
+    <IsSsl>false</IsSsl>
+    <SearchUserPath>LDAP://dc=gmcc,dc=net</SearchUserPath>
+    <Server>10.243.1.123</Server>
+  </LdapSetting>
+  <NasSettings xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+    <a:KeyValueOfstringNasSettingwbxkRi2F>
+      <a:Key>10.169.1.190</a:Key>
+      <a:Value>
+        <Ip xmlns:b="http://schemas.datacontract.org/2004/07/System.Net">
+          <b:m_Address>3187779850</b:m_Address>
+          <b:m_Family>InterNetwork</b:m_Family>
+          <b:m_HashCode>0</b:m_HashCode>
+          <b:m_Numbers>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+            <a:unsignedShort>0</a:unsignedShort>
+          </b:m_Numbers>
+          <b:m_ScopeId>0</b:m_ScopeId>
+        </Ip>
+        <SecretKey>123456</SecretKey>
+      </a:Value>
+    </a:KeyValueOfstringNasSettingwbxkRi2F>
+  </NasSettings>
+  <ValidateByDatabase>true</ValidateByDatabase>
+  <ValidateByLdap>true</ValidateByLdap>
+</Config>
