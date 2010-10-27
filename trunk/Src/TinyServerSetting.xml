@@ -15,7 +15,7 @@
     <CredentialPassword/>
     <CredentialUserName>cn=Directory Manager</CredentialUserName>
     <IsSsl>false</IsSsl>
-    <SearchUserPath>LDAP://dc=gmcc,dc=net</SearchUserPath>
+    <SearchUserPath>dc=gmcc,dc=net</SearchUserPath>
     <Server>10.243.1.123</Server>
   </LdapSetting>
   <NasSettings xmlns:a="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
