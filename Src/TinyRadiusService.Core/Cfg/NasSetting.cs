@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using System.Runtime.Serialization;
 
 namespace TinyRadiusService.Cfg
 {
+    [DataContract]
     public class NasSetting
     {
         public NasSetting(string ip, string secretKey)
@@ -14,8 +16,9 @@ namespace TinyRadiusService.Cfg
         {
             
         }
-
+        [DataMember]
         public IPAddress Ip { get; set; }
+        [DataMember]
         public string SecretKey { get; set; }
     }
 }
