@@ -15,12 +15,14 @@ namespace TinyRadiusService
     {
         public override string GetSharedSecret(IPEndPoint client)
         {
-            if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
-            {
-                return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
-            }
-            Logger.Error("Can't find shareKey with " + client.Address);
-            return " ";
+            Logger.Debug("Client IP is " + client.Address.ToString());
+
+            //if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
+            //{
+            //    return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
+            //}
+            //Logger.Error("Can't find shareKey with " + client.Address);
+            return "123";
         }
 
         public override string GetUserPassword(string userName)
@@ -65,7 +67,7 @@ namespace TinyRadiusService
                     CopyProxyState(accessRequest, answer);
                     return answer;
                 }
-                Logger.InfoFormat("Ldap登录失败,账户:{0},密码:{1},Mac:{2},IP{3}", accessRequest.UserName, accessRequest.Password,
+                Logger.InfoFormat("Ldap登录失败,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password,
                                   macAddr, ip);
             }
 

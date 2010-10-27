@@ -452,9 +452,9 @@
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(85, 103);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(298, 13);
+            this.label9.Size = new System.Drawing.Size(133, 13);
             this.label9.TabIndex = 3;
-            this.label9.Text = "例子:LDAP://DC=domain,DC=Net,请注意LDAP必须是大写";
+            this.label9.Text = "例子:DC=domain,DC=Net,";
             // 
             // TextBoxLdapPath
             // 
