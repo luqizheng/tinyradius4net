@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace TinyRadiusService.Cfg
 {
@@ -8,9 +7,11 @@ namespace TinyRadiusService.Cfg
     {
         public DatabaseSetting()
         {
-            Connection = @"Data Source=.\\SQLEXPRESS;Initial Catalog=YiDong;Persist Security Info=True;User ID=sa;Password=sa";
+            Connection =
+                @"Data Source=.\\SQLEXPRESS;Initial Catalog=YiDong;Persist Security Info=True;User ID=sa;Password=sa";
             PasswordSql = "select password from users where phone=@username";
-            MacSql = "SELECT count(*) FROM TrustMAC where MacAddress like @mac and userphone=@userName and TrustDelete='存在'";
+            MacSql =
+                "SELECT count(*) FROM TrustMAC where MacAddress like @mac and userphone=@userName and TrustDelete='存在'";
         }
 
         [DataMember]
@@ -18,10 +19,8 @@ namespace TinyRadiusService.Cfg
 
         [DataMember]
         public string PasswordSql { get; set; }
+
         [DataMember]
-        public string MacSql
-        {
-            get; set;
-        }
+        public string MacSql { get; set; }
     }
 }
