@@ -198,7 +198,10 @@ namespace TinyRadius.Net.Util
                                                      }
                                                      finally
                                                      {
-                                                         _authSocket.Close();
+                                                         if (_authSocket != null)
+                                                         {
+                                                             _authSocket.Close();
+                                                         }
                                                          Logger.Debug("auth socket closed");
                                                      }
                                                  });
@@ -222,7 +225,10 @@ namespace TinyRadius.Net.Util
                                                      }
                                                      finally
                                                      {
-                                                         _acctSocket.Close();
+                                                         if (_acctSocket != null)
+                                                         {
+                                                             _acctSocket.Close();
+                                                         }
                                                          Logger.Debug("acct socket closed");
                                                      }
                                                  });
