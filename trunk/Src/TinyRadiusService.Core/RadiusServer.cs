@@ -61,7 +61,7 @@ namespace TinyRadiusService
                 if (ServiceCfg.Instance.TinyConfig.LdapSetting.IsAuthenticated(accessRequest.UserName,
                                                                                accessRequest.Password))
                 {
-                    Logger.InfoFormat("Ldap登录成功,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, macAddr, ip);
+                    Logger.InfoFormat("Ldap登录成功,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password, macAddr, ip);
                     Logger.InfoFormat("{0} login by Ldap success.", accessRequest.UserName);
                     answer = new RadiusPacket(RadiusPacket.AccessAccept, accessRequest.Identifier);
                     CopyProxyState(accessRequest, answer);
@@ -73,13 +73,13 @@ namespace TinyRadiusService
 
             if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
             {
-                Logger.InfoFormat("通过本地数据库检查Mac地址,账户:{0},密码:{1},Mac:{2},IP{3}", accessRequest.UserName,
+                Logger.InfoFormat("通过本地数据库检查Mac地址,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
                                   accessRequest.Password,
                                   macAddr, ip);
-                ;
+                Logger.Debug("检查Mac地址");
                 if (!IsMacCorrect(accessRequest.UserName, macAddr))
                 {
-                    Logger.InfoFormat("Mac地址不正确,账户:{0},密码:{1},Mac:{2},IP{3}", accessRequest.UserName,
+                    Logger.InfoFormat("Mac地址不正确,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
                                       accessRequest.Password, macAddr, ip);
                     answer = new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
                     CopyProxyState(accessRequest, answer);
@@ -92,15 +92,17 @@ namespace TinyRadiusService
             return answer;
         }
 
-        private static bool IsMacCorrect(string userName, string mac)
+        private bool IsMacCorrect(string userName, string mac)
         {
+            Logger.DebugFormat("Connect db with {0} ", ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection);
             using (var conn = new SqlConnection(ServiceCfg.Instance.TinyConfig.DatabaseSetting.Connection))
             {
                 conn.Open();
-                SqlCommand comm = conn.CreateCommand();
+                var comm = conn.CreateCommand();
                 comm.CommandText = ServiceCfg.Instance.TinyConfig.DatabaseSetting.MacSql;
+                Logger.DebugFormat("通过SQL查找Mac,sql是{0}，用户{1},mac:{2}", comm.CommandText, userName, mac);
 
-                SqlParameter param = comm.CreateParameter();
+                var param = comm.CreateParameter();
                 param.ParameterName = "@userName";
                 param.Value = userName.Trim();
                 comm.Parameters.Add(param);
@@ -109,10 +111,7 @@ namespace TinyRadiusService
                 param.ParameterName = "@mac";
                 param.Value = string.Format("%{0}%", mac);
                 comm.Parameters.Add(param);
-
                 //  param.Value = mac;
-
-
                 int result = Convert.ToInt32(comm.ExecuteScalar());
                 return result != 0;
             }

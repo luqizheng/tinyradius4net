@@ -13,6 +13,7 @@ namespace TinyRadiusService.Cfg
         private Config _tinyConfig;
         private DateTime _fileModifyTime;
         private readonly static ILog Log = LogManager.GetLogger(typeof(ServiceCfg));
+        private string servicePath;
         private ServiceCfg()
         {
         }
@@ -20,8 +21,7 @@ namespace TinyRadiusService.Cfg
         public string GetServicePath()
         {
             Log.Debug("Found TinyRadius.net server's ImagePath in Registry by path " + RegistryPath);
-            RegistryKey registry =
-                Registry.LocalMachine.OpenSubKey(RegistryPath);
+            RegistryKey registry = Registry.LocalMachine.OpenSubKey(RegistryPath);
             try
             {
                 if (registry == null)
@@ -54,7 +54,10 @@ namespace TinyRadiusService.Cfg
         {
             get
             {
-                string servicePath = GetServicePath();
+                if (servicePath == null)
+                {
+                    servicePath = GetServicePath();
+                }
                 Log.Debug("Setting filePath is " + servicePath);
                 var time = File.GetLastWriteTime(servicePath);
                 if (_tinyConfig == null || _fileModifyTime != time)
