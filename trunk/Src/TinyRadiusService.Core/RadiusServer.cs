@@ -17,12 +17,12 @@ namespace TinyRadiusService
         {
             Logger.Debug("Client IP is " + client.Address.ToString());
 
-            //if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
-            //{
-            //    return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
-            //}
-            //Logger.Error("Can't find shareKey with " + client.Address);
-            return "123";
+            if (ServiceCfg.Instance.TinyConfig.NasSettings.ContainsKey(client.Address.ToString()))
+            {
+                return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
+            }
+            Logger.Error("Can't find shareKey with " + client.Address);
+            return null;
         }
 
         public override string GetUserPassword(string userName)
