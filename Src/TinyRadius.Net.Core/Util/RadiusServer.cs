@@ -336,6 +336,17 @@ namespace TinyRadius.Net.Util
                 Logger.Info("received packet from " + remoteAddress + " on local address " + localAddress + ": " +
                             request);
 
+            if (secret == null)
+            {
+                IPAddress ip;
+                if (IPAddress.TryParse(request.Attributes[30].Value, out ip))
+                {
+                    secret = GetSharedSecret(new IPEndPoint(ip, 123));
+                    request = MakeRadiusPacket(data, secret);
+                }
+                
+            }
+
             // handle packet
             Logger.Debug("about to call RadiusServer.handlePacket()");
             RadiusPacket response = HandlePacket((IPEndPoint)localAddress, remoteAddress, request, secret);

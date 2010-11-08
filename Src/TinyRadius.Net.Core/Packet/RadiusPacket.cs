@@ -22,6 +22,7 @@ namespace TinyRadius.Net.Packet
         public const int AccountingRequest = 4;
         public const int AccountingResponse = 5;
         public const int CoaRequest = 43;
+        
 
         /// <summary>
         /// Maximum packet Length.
