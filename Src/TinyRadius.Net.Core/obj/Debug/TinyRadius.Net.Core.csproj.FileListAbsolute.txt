@@ -13,3 +13,10 @@ E:\TinyRadius.Net\Src\TinyRadius.Net.Core\bin\Debug\log4net.xml
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.dll
 E:\TinyRadius.Net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.pdb
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.dll
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\bin\Debug\TinyRadius.Net.Core.pdb
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\bin\Debug\log4net.dll
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\bin\Debug\log4net.xml
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\obj\Debug\ResolveAssemblyReference.cache
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.dll
+E:\源码\tinyradius4net\Src\TinyRadius.Net.Core\obj\Debug\TinyRadius.Net.Core.pdb
