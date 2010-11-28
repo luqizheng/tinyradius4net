@@ -22,7 +22,7 @@ namespace TinyRadiusService
                 return ServiceCfg.Instance.TinyConfig.NasSettings[client.Address.ToString()].SecretKey;
             }
             Logger.Error("Can't find shareKey with " + client.Address);
-            return null;
+            return "zhgmcc@123";
         }
 
         public override string GetUserPassword(string userName)
@@ -50,46 +50,54 @@ namespace TinyRadiusService
 
         public override RadiusPacket AccessRequestReceived(AccessRequest accessRequest, IPEndPoint client)
         {
-            string ip = GetIP(accessRequest);
-            string macAddr = GetMacAddress(ip);
-            RadiusPacket answer;
-            if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
+            try
             {
-                Logger.InfoFormat("尝试通过Ldap检查用户,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
-                                  accessRequest.Password,
-                                  macAddr, ip);
-                if (ServiceCfg.Instance.TinyConfig.LdapSetting.IsAuthenticated(accessRequest.UserName,
-                                                                               accessRequest.Password))
+                string ip = GetIP(accessRequest);
+                string macAddr = GetMacAddress(ip);
+                RadiusPacket answer;
+                if (ServiceCfg.Instance.TinyConfig.ValidateByLdap)
                 {
-                    Logger.InfoFormat("Ldap登录成功,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password, macAddr, ip);
-                    Logger.InfoFormat("{0} login by Ldap success.", accessRequest.UserName);
-                    answer = new RadiusPacket(RadiusPacket.AccessAccept, accessRequest.Identifier);
-                    CopyProxyState(accessRequest, answer);
-                    return answer;
+                    Logger.InfoFormat("尝试通过Ldap检查用户,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
+                                      accessRequest.Password,
+                                      macAddr, ip);
+                    if (ServiceCfg.Instance.TinyConfig.LdapSetting.IsAuthenticated(accessRequest.UserName,
+                                                                                   accessRequest.Password))
+                    {
+                        Logger.InfoFormat("Ldap登录成功,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password, macAddr, ip);
+                        Logger.InfoFormat("{0} login by Ldap success.", accessRequest.UserName);
+                        answer = new RadiusPacket(RadiusPacket.AccessAccept, accessRequest.Identifier);
+                        CopyProxyState(accessRequest, answer);
+                        return answer;
+                    }
+                    Logger.InfoFormat("Ldap登录失败,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password,
+                                      macAddr, ip);
                 }
-                Logger.InfoFormat("Ldap登录失败,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName, accessRequest.Password,
-                                  macAddr, ip);
-            }
 
-            if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
-            {
-                Logger.InfoFormat("通过本地数据库检查Mac地址,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
-                                  accessRequest.Password,
-                                  macAddr, ip);
-                Logger.Debug("检查Mac地址");
-                if (!IsMacCorrect(accessRequest.UserName, macAddr))
+                if (ServiceCfg.Instance.TinyConfig.ValidateByDatabase)
                 {
-                    Logger.InfoFormat("Mac地址不正确,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
-                                      accessRequest.Password, macAddr, ip);
-                    answer = new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
-                    CopyProxyState(accessRequest, answer);
-                    return answer;
+                    Logger.InfoFormat("通过本地数据库检查Mac地址,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
+                                      accessRequest.Password,
+                                      macAddr, ip);
+                    Logger.Debug("检查Mac地址");
+                    if (!IsMacCorrect(accessRequest.UserName, macAddr))
+                    {
+                        Logger.InfoFormat("Mac地址不正确,账户:{0},密码:{1},Mac:{2},IP:{3}", accessRequest.UserName,
+                                          accessRequest.Password, macAddr, ip);
+                        answer = new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
+                        CopyProxyState(accessRequest, answer);
+                        return answer;
+                    }
+                    return base.AccessRequestReceived(accessRequest, client);
                 }
-                return base.AccessRequestReceived(accessRequest, client);
+                answer = new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
+                CopyProxyState(accessRequest, answer);
+                return answer;
             }
-            answer = new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
-            CopyProxyState(accessRequest, answer);
-            return answer;
+            catch (Exception ex)
+            {
+                Logger.Error("some error happend.", ex);
+                return new RadiusPacket(RadiusPacket.AccessReject, accessRequest.Identifier);
+            }
         }
 
         private bool IsMacCorrect(string userName, string mac)
@@ -131,7 +139,15 @@ namespace TinyRadiusService
 
         protected string GetMacAddress(string ip)
         {
-            return IPAddress.Parse(ip).GetMac().Replace("-", ":");
+            try
+            {
+                return IPAddress.Parse(ip).GetMac().Replace("-", ":");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ip + " IP is Error", ex);
+                throw ex;
+            }
         }
     }
 }
