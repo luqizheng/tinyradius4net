@@ -79,7 +79,8 @@ namespace TinyRadius.Net.Attributes
                 var data = new byte[4];
                 for (int i = 0; i < 4; i++)
                 {
-                    int num = Convert.ToInt32(ips[0]);
+                    //Patch form natanabolafya@gmail.com
+                    int num = Convert.ToInt32(ips[i]);
                     if (num < 0 || num > 255)
                         throw new ArgumentException("bad IP number: num out of bounds");
                     data[i] = (byte) num;
