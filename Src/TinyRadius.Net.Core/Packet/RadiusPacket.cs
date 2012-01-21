@@ -820,6 +820,7 @@ namespace TinyRadius.Net.Packet
                                 Convert.ToByte(packetLength & 0x0ff)
                             };
             bytes.AddRange(requestAuthenticator);
+            bytes.AddRange(attributes); //bug fix from natanabolafya@gmail.com
             bytes.AddRange(RadiusUtil.GetUtf8Bytes(sharedSecret));
 
             return MD5.Create().ComputeHash(bytes.ToArray());
