@@ -332,7 +332,8 @@ namespace TinyRadius.Net.Packet
             var aryList = new List<byte>();
             aryList.Add(chapIdentifier);
             aryList.AddRange(RadiusUtil.GetUtf8Bytes(plaintext));
-            byte[] chapHash = md5.ComputeHash(chapChallenge);
+            aryList.AddRange(chapChallenge); 
+            byte[] chapHash = md5.ComputeHash(aryList.ToArray());
 
             Array.Copy(chapHash, 0, chapPassword, 1, 16);
             return chapPassword;
